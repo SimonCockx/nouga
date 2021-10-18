@@ -1,0 +1,33 @@
+Manifest-Version: 1.0
+Automatic-Module-Name: be.kuleuven.simoncockx.nouga
+Bundle-ManifestVersion: 2
+Bundle-Name: be.kuleuven.simoncockx.nouga
+Bundle-Vendor: My Company
+Bundle-Version: 1.0.0.qualifier
+Bundle-SymbolicName: be.kuleuven.simoncockx.nouga; singleton:=true
+Bundle-ActivationPolicy: lazy
+Require-Bundle: org.eclipse.xtext,
+ org.eclipse.xtext.xbase,
+ org.eclipse.equinox.common;bundle-version="3.5.0",
+ org.eclipse.emf.ecore,
+ org.eclipse.xtext.xbase.lib;bundle-version="2.14.0",
+ org.eclipse.xtext.util,
+ org.antlr.runtime;bundle-version="[3.2.0,3.2.1)",
+ org.eclipse.xsemantics.runtime;bundle-version="1.20.0",
+ org.eclipse.emf.codegen.ecore;bundle-version="2.25.0",
+ org.eclipse.xtext.ecore;bundle-version="2.25.0",
+ org.eclipse.emf.common
+Bundle-RequiredExecutionEnvironment: JavaSE-11
+Export-Package: be.kuleuven.simoncockx.nouga,
+ be.kuleuven.simoncockx.nouga.generator,
+ be.kuleuven.simoncockx.nouga.nouga,
+ be.kuleuven.simoncockx.nouga.nouga.impl,
+ be.kuleuven.simoncockx.nouga.nouga.util,
+ be.kuleuven.simoncockx.nouga.parser.antlr,
+ be.kuleuven.simoncockx.nouga.parser.antlr.internal,
+ be.kuleuven.simoncockx.nouga.scoping,
+ be.kuleuven.simoncockx.nouga.serializer,
+ be.kuleuven.simoncockx.nouga.services,
+ be.kuleuven.simoncockx.nouga.typing,
+ be.kuleuven.simoncockx.nouga.validation
+Import-Package: org.apache.log4j

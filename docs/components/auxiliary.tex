@@ -1,0 +1,20 @@
+Data table $\DT(D)$ is a mapping from data type names to data declarations. Function table $\FT(F)$ is a mapping from function names to function declarations.
+\begin{defbox}
+\begin{align*}
+\intertext{Attribute lookup}
+\ruledef{}{\DT(D) = \<type> D: a_1\ T_1\ C_1 \dots a_n\ T_n\ C_n}{\attrs(D) = a_1\ T_1\ C_1, \dots , a_n\ T_n\ C_n}
+\\
+\ruledef{}{\DT(D) = \<type> D \<extends> C: a_1\ T_1\ C_1 \dots a_n\ T_n\ C_n}{\attrs(D) = \attrs(C), a_1\ T_1\ C_1, \dots , a_n\ T_n\ C_n}
+\intertext{Supertypes}
+\ruledef{}{\DT(D) = \<type> D \<extends> E: \dots}{E \in \supertypes(D)}
+\\
+\ruledef{}{A \in \supertypes(D) \\ \DT(A) = \<type> A \<extends> B: \dots}{B \in \supertypes(D)}
+\intertext{Function lookups}
+\ruledef{}{\FT(F) = \<func> F: \<inputs>: a_1\ T_1\ C_1 \dots a_n\ T_n\ C_n \<output>: \dots}{\inp(F) = a_1\ T_1\ C_1, \dots, a_n\ T_n\ C_n}
+\\
+\ruledef{}{\FT(F) = \<func> F: \<inputs>: \dots \<output>: a\ T\ C \dots}{\outp(F) = a\ T\ C}
+\\
+\ruledef{}{\FT(F) = \<func> F: \dots \<assign-output>: e}{\op(F) = e}
+\intertext{Supertypes}
+\end{align*}
+\end{defbox}

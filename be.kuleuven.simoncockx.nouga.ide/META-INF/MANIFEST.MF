@@ -1,0 +1,15 @@
+Manifest-Version: 1.0
+Automatic-Module-Name: be.kuleuven.simoncockx.nouga.ide
+Bundle-ManifestVersion: 2
+Bundle-Name: be.kuleuven.simoncockx.nouga.ide
+Bundle-Vendor: My Company
+Bundle-Version: 1.0.0.qualifier
+Bundle-SymbolicName: be.kuleuven.simoncockx.nouga.ide; singleton:=true
+Bundle-ActivationPolicy: lazy
+Require-Bundle: be.kuleuven.simoncockx.nouga,
+ org.eclipse.xtext.ide,
+ org.eclipse.xtext.xbase.ide,
+ org.antlr.runtime;bundle-version="[3.2.0,3.2.1)"
+Bundle-RequiredExecutionEnvironment: JavaSE-11
+Export-Package: be.kuleuven.simoncockx.nouga.ide.contentassist.antlr.internal,
+ be.kuleuven.simoncockx.nouga.ide.contentassist.antlr

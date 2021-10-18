@@ -1,0 +1,153 @@
+system be.kuleuven.simoncockx.nouga.typing.NougaTyping
+
+validatorExtends be.kuleuven.simoncockx.nouga.validation.AbstractNougaValidator
+
+import be.kuleuven.simoncockx.nouga.nouga.Expression
+import be.kuleuven.simoncockx.nouga.nouga.Type
+import be.kuleuven.simoncockx.nouga.nouga.BooleanLiteral
+import be.kuleuven.simoncockx.nouga.nouga.NumberLiteral
+import be.kuleuven.simoncockx.nouga.nouga.IntLiteral
+import be.kuleuven.simoncockx.nouga.nouga.BasicType
+import be.kuleuven.simoncockx.nouga.nouga.BuiltInType
+import be.kuleuven.simoncockx.nouga.nouga.BuiltInTypeEnum
+import java.util.List
+import be.kuleuven.simoncockx.nouga.nouga.NougaPackage
+import be.kuleuven.simoncockx.nouga.nouga.DataType
+import be.kuleuven.simoncockx.nouga.nouga.Data
+import be.kuleuven.simoncockx.nouga.nouga.BinaryOperation
+import be.kuleuven.simoncockx.nouga.nouga.OrExpression
+import be.kuleuven.simoncockx.nouga.nouga.BooleanOperation
+import be.kuleuven.simoncockx.nouga.nouga.ExistsExpression
+import be.kuleuven.simoncockx.nouga.nouga.ContainsExpression
+import be.kuleuven.simoncockx.nouga.nouga.DisjointExpression
+import be.kuleuven.simoncockx.nouga.nouga.ComparisonOperation
+import be.kuleuven.simoncockx.nouga.nouga.ArithmeticOperation
+
+inject extension TypeFactory typeFactory
+inject extension TypeUtil typeUtil
+
+auxiliary {
+	supertypes(DataType t) : List<Data>
+	comparable(BasicType t1, BasicType t2)
+}
+
+judgments {
+	type |- Expression expression : output Type
+		error "cannot type " + stringRep(expression)
+		source expression
+	basicSubtype |- BasicType subtype <: BasicType supertype
+	subtype |- Type subtype <| Type supertype
+}
+
+auxiliary supertypes(DataType t) {
+	getAll(t.^data,
+		NougaPackage::eINSTANCE.data_SuperType,
+		NougaPackage::eINSTANCE.data_SuperType,
+		typeof(Data)
+	)
+}
+auxiliary comparable(BasicType t1, BasicType t2) {
+	empty |- t1 <: t2 or empty |- t2 <: t1
+}
+
+/*** BASIC SUBTYPING **/
+rule SNum
+	G |- BuiltInType t1 <: BuiltInType t2
+from {
+	t1.type == BuiltInTypeEnum.INT
+	t2.type == BuiltInTypeEnum.NUMBER
+}
+
+rule SSuper
+	G |- DataType t1 <: DataType t2
+from {
+	supertypes(t1).contains(t2.^data)
+}
+
+/*** SUBTYPING ***/
+rule SCard
+	G |- Type s <| Type t
+from {
+	G |- s.basicType <: t.basicType
+	s.cardinality.isSubcardinality(t.cardinality)
+}
+
+
+/*** TYPING ***/
+rule TBooleanOperation // TA-Or, TA-And
+	G |- BooleanOperation e : singleBoolean
+from {
+	var Type t1
+	G |- e.left : t1
+	t1.typesAreEqual(singleBoolean)
+	var Type t2
+	G |- e.right : t2
+	t2.typesAreEqual(singleBoolean)
+}
+rule TExists // TA-Exists, TA-SingleExists, TA-MultipleExists
+	G |- ExistsExpression e : singleBoolean
+from {
+	var Type t
+	G |- e.argument : t
+}
+rule TContains // TA-Contains
+	G |- ContainsExpression e : singleBoolean
+from {
+	var Type t1
+	G |- e.container : t1
+	var Type t2
+	G |- e.contained : t2
+	comparable(t1.basicType, t2.basicType)
+}
+rule TDisjoint // TA-Disjoint
+	G |- DisjointExpression e : singleBoolean
+from {
+	var Type t1
+	G |- e.container : t1
+	var Type t2
+	G |- e.disjoint : t2
+	comparable(t1.basicType, t2.basicType)
+}
+rule TEquality // TA-Equals, TA-NotEquals, TA-AllEquals, TA-AllNotEquals, TA-AnyEquals, TA-AnyNotEquals 
+	G |- ComparisonOperation e : singleBoolean
+from {
+	var Type t1
+	G |- e.left : t1
+	var Type t2
+	G |- e.right : t2
+	comparable(t1.basicType, t2.basicType)
+	if (e.cardOp == 'all' || e.cardOp == 'any') {
+		t2.cardinality.cardinalitiesAreEqual(single)
+	} else {
+		t1.cardinality.cardinalitiesAreEqual(t2.cardinality)
+	}
+}
+rule TArithmetic // TA-PlusInt, TA-PlusNumber, TA-MultInt, TA-MultNumber, TA-SubsInt, TA-SubsNumber, TA-Division
+	G |- ArithmeticOperation e : Type t
+from {
+	var Type t1
+	G |- e.left : t1
+	t1.cardinality.cardinalitiesAreEqual(single)
+	var Type t2
+	G |- e.right : t2
+	t2.cardinality.cardinalitiesAreEqual(single)
+	if (e.operator == '/') {
+		G |- t1.basicType <: number
+		G |- t2.basicType <: number
+		t = singleNumber
+	} else {
+		if (t1.basicType.basicTypesAreEqual(int_) && t2.basicType.basicTypesAreEqual(int_)) {
+			t = singleInt
+		} else {
+			G |- t1.basicType <: number
+			G |- t2.basicType <: number
+			t = singleNumber
+		}
+	}
+}
+axiom BooleanLiteral
+	G |- BooleanLiteral bool : singleBoolean
+axiom NumberLiteral
+	G |- NumberLiteral num : singleNumber
+axiom IntLiteral
+	G |- IntLiteral n : singleInt

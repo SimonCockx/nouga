@@ -1,0 +1,17 @@
+Manifest-Version: 1.0
+Automatic-Module-Name: be.kuleuven.simoncockx.nouga.tests
+Bundle-ManifestVersion: 2
+Bundle-Name: be.kuleuven.simoncockx.nouga.tests
+Bundle-Vendor: My Company
+Bundle-Version: 1.0.0.qualifier
+Bundle-SymbolicName: be.kuleuven.simoncockx.nouga.tests; singleton:=true
+Bundle-ActivationPolicy: lazy
+Require-Bundle: be.kuleuven.simoncockx.nouga,
+ org.junit.jupiter.api;bundle-version="[5.1.0,6.0.0)",
+ org.eclipse.xtext.testing,
+ org.eclipse.xtext.xbase.testing,
+ org.eclipse.xtext.xbase.lib;bundle-version="2.14.0",
+ org.eclipse.xsemantics.runtime;bundle-version="1.20.0",
+ org.eclipse.emf;bundle-version="2.8.0"
+Bundle-RequiredExecutionEnvironment: JavaSE-11
+Export-Package: be.kuleuven.simoncockx.nouga.tests;x-internal=true

@@ -1,0 +1,81 @@
+\begin{defbox}
+Some denotations depend on the type derivation of an expression. For this reason, I will evaluate typing derivations instead of expressions. However, because I only need this in a few cases, I will often omit the derivation, i.e. I will write $|[e|]$ instead of $|[\derivation{D} :: \emptyset |- e : T\ C|]$ if the type $T\ C$ and the derivation $\derivation{D}$ are unimportant.
+
+Values $|[v|]$.
+\begin{align*}
+\axiomdef{E-True}{|[True|] = (true, ())}
+\\
+\axiomdef{E-False}{|[False|] = (false, ())}
+\\
+\axiomdef{E-Int}{|[i|] = (i, ())}
+\\
+\axiomdef{E-Number}{|[r|] = (r, ())}
+\end{align*}
+
+Expressions $|[e|]$.
+\begin{align*}
+\axiomdef{E-List}{|[\derivation{D} :: \emptyset |- [e_1, \dots, e_n] : T\ C|] = \sflatten{|[T|]}{n}{|[e_1|], \dots, |[e_n|]}}
+\\
+\axiomdef{E-Or}{|[e_1 \<or> e_2|] = \shor{|[e_1|]}{|[e_2|]}}
+\\
+\axiomdef{E-And}{|[e_1 \<and> e_2|] = \shand{|[e_1|]}{|[e_2|]}}
+\\
+\axiomdef{E-Not}{|[\<not> e|] = \shnot{|[e|]}}
+\\
+\axiomdef{E-Exists}{|[e \<exists>|] = 
+\begin{cases}
+false, & |[e|] = () \\
+true, & \text{otherwise}
+\end{cases}}
+\\
+\axiomdef{E-SingleExists}{|[e \<single> \<exists>|] = 
+\begin{cases}
+true, & \shcount{|[e|]} = (1, ()) \\
+false, & \text{otherwise}
+\end{cases}}
+\\
+\axiomdef{E-MultipleExists}{|[e \<multiple> \<exists>|] = 
+\begin{cases}
+true, & \shcount{|[e|]} = (k, ()) \land k \geq 2 \\
+false, & \text{otherwise}
+\end{cases}}
+\\
+\axiomdef{E-Contains}{|[e_1 \<contains> e_2|] = \shcontains{|[e_1|]}{|[e_2|]}}
+\\
+\axiomdef{E-Disjoint}{|[e_1 \<disjoint> e_2|] = \shdisjoint{|[e_1|]}{|[e_2|]}}
+\\
+\axiomdef{E-Equals}{|[e_1 \<eq> e_2|] = \sheq{|[e_1|]}{|[e_2|]}}
+\\
+\axiomdef{E-NotEquals}{|[e_1 \<neq> e_2|] = \shneq{|[e_1|]}{|[e_2|]}}
+\\
+\axiomdef{E-AllEquals}{|[e_1 \<all> \<eq> e_2|] = \shalleq{|[e_1|]}{|[e_2|]}}
+\\
+\axiomdef{E-AllNotEquals}{|[e_1 \<all> \<neq> e_2|] = \shallneq{|[e_1|]}{|[e_2|]}}
+\\
+\axiomdef{E-AnyEquals}{|[e_1 \<any> \<eq> e_2|] = \shanyeq{|[e_1|]}{|[e_2|]}}
+\\
+\axiomdef{E-AnyNotEquals}{|[e_1 \<any> \<neq> e_2|] = \shanyneq{|[e_1|]}{|[e_2|]}}
+\\
+\axiomdef{E-Plus}{|[\inferrule{\derivation{D}_1 :: \emptyset |- e_1 : T\ (1..1) \\ \derivation{D}_2 :: \emptyset |- e_2 : T\ (1..1)}{\emptyset |- e_1 \<+> e_2 : T\ (1..1)}|] = \shplus{|[T|]}{|[e_1|]}{|[e_2|]}}
+\\
+\axiomdef{E-Subs}{|[\inferrule{\derivation{D}_1 :: \emptyset |- e_1 : T\ (1..1) \\ \derivation{D}_2 :: \emptyset |- e_2 : T\ (1..1)}{\emptyset |- e_1 \<-> e_2 : T\ (1..1)}|] = \shsubs{|[T|]}{|[e_1|]}{|[e_2|]}}
+\\
+\axiomdef{E-Mult}{|[\inferrule{\derivation{D}_1 :: \emptyset |- e_1 : T\ (1..1) \\ \derivation{D}_2 :: \emptyset |- e_2 : T\ (1..1)}{\emptyset |- e_1 \<*> e_2 : T\ (1..1)}|] = \shmult{|[T|]}{|[e_1|]}{|[e_2|]}}
+\\
+\axiomdef{E-Div}{|[e_1 \</> e_2|] = \shdiv{|[e_1|]}{|[e_2|]}}
+\\
+\axiomdef{E-Count}{|[e \<count>|] = \shcount{|[e|]}}
+\\
+\axiomdef{E-Project}{|[\inferrule{\derivation{D} :: \emptyset |- e : D\ C}{\emptyset |- e \<proj> a : T\ C_a}|] = \shproject{|[D|]}{a}{|[e|]}}
+\\
+\axiomdef{E-If}{|[\<if> e_1 \<then> e_2 \<else> e_3|] = \shchoice{|[e_1|]}{|[e_2|]}{|[e_3|]}}
+\\
+\ruledef{E-Func}{\inp(F) = a_1\ T_1\ C_1, \dots, a_n\ T_n\ C_n}{|[F(e_1, \dots, e_n)|] = |[\;\left[\; a_1 \mapsto e_1, \dots, a_n \mapsto e_n \;\right]\op(F)|]}
+\\
+\ruledef{E-Construct}{\attrs(D) = a_1\ T_1\ C_1, \dots, a_n\ T_n\ C_n}{|[D \set{a_1: e_1, \dots, a_n: e_n}|] = \set{a_1 = |[e_1|], \dots, a_n = |[e_n|]}}
+\\
+\axiomdef{E-OnlyExists}{|[\inferrule{\emptyset |- e : D\ (1..1)}{\emptyset |- e \<proj> a \<only> \<exists> : \<boolean>\ (1..1)}|] = \shonlyexists{|[D|]}{a}{|[e|]}}
+\\
+\axiomdef{E-OnlyElement}{|[e \<only-element>|] = \shonlyelement{|[e|]}}
+\end{align*}
+\end{defbox}

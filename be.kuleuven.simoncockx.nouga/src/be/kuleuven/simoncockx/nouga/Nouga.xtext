@@ -1,0 +1,208 @@
+grammar be.kuleuven.simoncockx.nouga.Nouga with org.eclipse.xtext.common.Terminals
+
+generate nouga "http://www.kuleuven.be/simoncockx/nouga/Nouga"
+
+import "http://www.eclipse.org/emf/2002/Ecore" as ecore
+
+
+Model:
+	'namespace' name=QualifiedName
+	('version' version=STRING)?
+	elements+=RootElement*
+;
+
+ValidID:
+	(ID | 'key' // used in Lib: annotations.rosetta
+	| 'condition' | 'source' | 'value' | 'version' // used in CDM model
+	| 'workflow' // used in the namespace
+	);
+
+QualifiedName:
+	ValidID ('.' ValidID)*
+;
+
+RootElement:
+	Data | Function
+;
+
+Data:
+	'type' name=ValidID ('extends' superType=[Data])? ':'
+		attributes+=Attribute*
+;
+
+Attribute:
+	name=ValidID type=Type
+;
+
+Function:
+	'func' name=ValidID	':'
+		( 'inputs:' inputs+=Attribute*
+		& 'output:' output=Attribute
+		& 'assign-output:' operation=Expression
+		)
+;
+
+
+/**********************************************************************
+ * Typing
+ */
+Type:
+	basicType=BasicType cardinality=Cardinality
+;
+
+BasicType:
+	BuiltInType | DataType
+;
+
+BuiltInType:
+	type=BuiltInTypeEnum
+;
+
+enum BuiltInTypeEnum:
+	BOOLEAN = 'boolean' | NUMBER = 'number' | INT = 'int'
+;
+
+DataType:
+	data=[Data]
+;
+
+Cardinality:
+	'(' (inf=INT '..' sup=INT | inf=INT '..' unbounded?='*') ')'
+;
+
+
+
+
+
+/**********************************************************************
+ * Expressions 
+ */
+
+Expression:
+	OrExpression
+;
+
+
+// Artificial rules to create class hierarchy for binary operations.
+BinaryExpressionOperation returns Expression: {BinaryOperation};
+// Make ComparisonOperation and ArithmeticOperation a subclass of BinaryOperation
+BinaryOperation: {ComparisonOperation} | {ArithmeticOperation} | {BooleanOperation};
+// Make ComparisonOperation a subclass of BinaryBooleanOperation
+BooleanOperation: {OrExpression} | {AndExpression};
+
+OrExpression returns Expression:
+	AndExpression (=>({OrExpression.left=current} 'or') right=AndExpression)*
+;
+
+AndExpression returns Expression:
+	ContainsExpression (=>({AndExpression.left=current} 'and') right=ContainsExpression)*;
+
+ContainsExpression returns Expression:
+	EqualityExpression (->
+		( {ContainsExpression.container=current} 'contains' contained=EqualityExpression
+		| {DisjointExpression.container=current} 'disjoint' disjoint=EqualityExpression)
+	)?
+;
+
+EqualityExpression returns Expression:
+	AdditiveExpression (=>({ComparisonOperation.left=current} (cardOp=('all' | 'any'))? operator=('=' | '<>')) right=AdditiveExpression)*
+;
+
+AdditiveExpression returns Expression:
+	MultiplicativeExpression (=>({ArithmeticOperation.left=current} operator=('+' | '-')) right=MultiplicativeExpression)*
+;
+
+MultiplicativeExpression returns Expression:
+	NotExpression (=>({ArithmeticOperation.left=current} operator=('*' | '/')) right=NotExpression)*
+;
+
+NotExpression returns Expression:
+	ExistsExpression
+	| {NotExpression} => 'not' expression=ExistsExpression
+;
+
+ExistsExpression returns Expression:
+	OnlyElementExpression (->
+		( {ExistsExpression.argument=current} (single?='single' | multiple?='multiple')? 'exists'
+		| {AbsentExpression.argument=current} 'is' 'absent'
+		| {CountExpression.argument=current} 'count')
+	)?
+;
+
+OnlyElementExpression returns Expression:
+	ProjectionExpression (=>({OnlyElementExpression.argument=current} 'only-element'))?
+;
+
+ProjectionExpression returns Expression:
+	PrimaryExpression (=>({ProjectionExpression.receiver=current} '->' attribute=[Attribute] (onlyExists?='only' 'exists')?))?
+;
+
+PrimaryExpression returns Expression:
+	ConditionalExpression
+	| FunctionCallExpression
+	| VariableReference
+	| Literal
+	| DataConstructionExpression
+	| '(' Expression ')'
+;
+
+DataConstructionExpression returns Expression:
+	{DataConstructionExpression} type=[Data] '{' (values+=KeyValuePair (',' values+=KeyValuePair)*)? '}'
+;
+
+KeyValuePair:
+	key=[Attribute] ':' value=Expression
+;
+
+ConditionalExpression returns Expression:
+	{ConditionalExpression} 'if' if=Expression 'then' ifthen=Expression (=>full?='else' elsethen=Expression)?
+;
+
+FunctionCallExpression returns Expression:
+	{FunctionCallExpression} function=[Function] '(' (args+=Expression (',' args+=Expression))? ')'
+;
+
+VariableReference returns Expression:
+	{VariableReference} reference=[Attribute]
+;
+
+Literal returns Expression:
+	BooleanLiteral
+	| NumberLiteral
+	| IntLiteral
+	| EmptyLiteral
+	| ListLiteral
+;
+
+BooleanLiteral:
+	value?='True' | {BooleanLiteral} 'False'
+;
+
+NumberLiteral:
+	value=Number
+;
+
+IntLiteral:
+	value=Integer
+;
+
+EmptyLiteral returns Expression:
+	{ListLiteral} 'empty'
+;
+
+ListLiteral:
+	{ListLiteral} '[' (elements+=Expression (',' elements+=Expression)*)? ']'
+;
+
+Number:
+	'-'? ('.' INT | INT '.' | INT '.' INT) SCIENTIFIC?
+;
+
+terminal SCIENTIFIC:
+    ('e' | 'E') ('+' | '-')? ('0'..'9')+
+;
+
+Integer:
+	'-'? INT
+;
+

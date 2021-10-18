@@ -1,0 +1,124 @@
+\documentclass[english,11pt,a4paper]{article}
+
+\usepackage[english]{babel}
+\usepackage{graphicx}
+\graphicspath{{./}{../}{images/}{../images/}}
+
+\usepackage{amsmath,amssymb,amsthm,bm,gensymb}
+\usepackage{mathrsfs}
+\usepackage{mathtools}
+
+% ---Simons shizzle: afblijven!---
+\usepackage[dvipsnames]{xcolor} % maakt het mogelijk zelf kleuren te definiëren
+\definecolor{darkPurple}{RGB}{80,0,80} % definieer donkerpaars
+\definecolor{lightGray}{RGB}{150, 150, 150}
+\usepackage{hyperref} % maakt links en cross-references interactief
+\usepackage[all]{hypcap} % zorgt dat hyperref beter naar captions kan refereren
+\hypersetup{colorlinks=true,urlcolor=blue,citecolor=darkPurple,linkcolor=darkPurple} % bepaalt kleuren van de links
+\newcommand{\cref}[2]{\hyperref[#2]{#1~\ref*{#2}}} % voeg woord aan link toe
+
+\usepackage[labelfont=bf,margin=0.5cm]{caption} % interface voor captions
+\usepackage{subcaption}
+
+\usepackage{microtype} % mierenneukerij
+\usepackage{xfrac} % mooie breuken
+
+\usepackage[utf8]{inputenc} % maakt onder andere accenten mogelijk (¨´` ...)
+\usepackage[T1]{fontenc} % zorgt dat utf8-characters goed getoond worden
+\usepackage{lmodern} % maakt type-setting compatibel met utf8
+
+\usepackage{parskip} % voegt enters tussen paragrafen toe
+
+\usepackage{siunitx}
+% geef fysische grootheden op een consistente manier weer
+\sisetup{retain-explicit-plus, list-final-separator={\,en\,}, list-pair-separator={\,en\,}, range-phrase={\,tot\,}, separate-uncertainty, per-mode=fraction, table-align-uncertainty=true}
+\usepackage{textcomp} % vermijd conflicten tussen microtype en siunitx
+
+\usepackage[backend=biber]{biblatex}
+\usepackage{url}
+\setcounter{biburllcpenalty}{7000}
+\setcounter{biburlucpenalty}{8000}
+\usepackage{csquotes}
+\usepackage{float}
+\addbibresource{biblio.bib}
+% ---Einde Simons shizzle---
+
+\usepackage{geometry}
+\geometry{
+ a4paper,
+ vmargin={2.3cm, 3cm}
+}
+
+\input{components/preamble}
+
+
+
+\title{Specification of the Nouga DSL}
+\author{Simon Cockx}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+
+\url{} % hack to resolve error
+
+
+
+The goal of this work is two-fold. On the one hand it aims to eliminate flaws from the Rosetta language by formalizing its grammar and typing system. On the other hand it seeks to give solid ground for developers of code generators, giving a single source of truth about the intended semantics of generated code. Note that these goals also constitute two different audiences; one the developers of Rosetta, the other parties interested in translating Rosetta to a new language.
+
+Throughout this document, $T$ and $S$ represent basic types and $C$ represents a cardinality.
+
+\section{Syntax}
+
+\input{components/syntax}
+
+Note: Nouga has a couple of differences compared to Rosetta.
+\begin{enumerate}
+\item Nouga replaces the multiple \lit{assign-output} statements with a single statement that fully defines the output of a function. Instead of defining one attribute of the output per \lit{assign-output} statement, you can use a record-like syntax to explicitely create an instance. (see the last option of expressions \synt{E})
+\item Empty list literals are allowed.
+\item In Nouga you can write \lit{not} expressions.
+\item The \lit{only-element} keyword can be written behind any expression.
+\item The \lit{only} \lit{exists} is restricted to expressions that end with a projection \lit{->} \lit*{a}. This simplifies the runtime model (i.e. code generators) as attributes in Nouga do not need to keep track of their parent.
+\end{enumerate}
+
+
+\section{Auxiliary definitions}
+
+\input{components/auxiliary}
+
+\section{Semantics}
+
+Semantic domain: $\sdom$.
+
+Single value: $\ssingledom$
+
+\subsection{Semantics of Types}
+\input{components/semantics-types}
+
+\subsection{Semantical Algebra}
+\input{components/semantics-algebra}
+
+\subsection{Semantics of Expressions}
+\input{components/semantics-expressions}
+
+Note: equality between two empty lists (i.e. true) is different than the usual equality with null (i.e. always false) in other programming languages (and the official Rosetta documentation).
+
+
+\section{Typing}
+
+\subsection{Declarative Typing}
+
+\input{components/typing-declarative}
+
+Note: for equality, there are two sensible choices as premises. Either $\Gamma |- e_1 : T\ C_1$ and $\Gamma |- e_2 : T\ C_2$ or $\Gamma |- e_1 : T\ C$ and $\Gamma |- e_2 : T\ C$. The second possibility eliminates equality checks that are always false because the operands can never have the same length.
+
+\subsection{Algorithmic Typing}
+
+These typing rules should be consistent with the declarative version, but they are defined in a way that is more straightforward to implement, because every rule is syntax-directed.
+
+\input{components/typing-algorithmic}
+
+
+\end{document}

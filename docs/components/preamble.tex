@@ -1,0 +1,208 @@
+%%%%%%% AUXILIARY FUNCTIONS %%%%%%%%
+\DeclareMathOperator{\DT}{DT} % data table
+\DeclareMathOperator{\FT}{FT} % function table
+\DeclareMathOperator{\attrs}{attrs} % attributes
+\DeclareMathOperator{\inp}{inputs} % inputs
+\DeclareMathOperator{\outp}{output} % output
+\DeclareMathOperator{\op}{op} % operation
+\DeclareMathOperator{\fexpr}{expr} % function expression
+\DeclareMathOperator{\pexpr}{expr*} % path segment expression
+\DeclareMathOperator{\supertypes}{supertypes} % set of supertypes
+\DeclareMathOperator{\comparable}{comparable} % check whether two basic types are comparable
+\DeclareMathOperator{\join}{join} % join of two types
+
+
+%%%%%%%% CODE LISTINGS %%%%%%%%%%
+\usepackage{listings}
+%\lstMakeShortInline[columns=fixed]|
+
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+\lstdefinestyle{mystyle}{
+    backgroundcolor=\color{backcolour},   
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{magenta},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily\small,
+    breakatwhitespace=false,         
+    breaklines=true,                 
+    captionpos=b,                    
+    keepspaces=true,                 
+    numbers=left,                    
+    numbersep=5pt,                  
+    showspaces=false,                
+    showstringspaces=false,
+    showtabs=false,                  
+    tabsize=2
+}
+\lstset{style=mystyle}
+\definecolor{eminence}{RGB}{108,48,130}
+\lstdefinelanguage{Rosetta}{%
+keywords={},
+otherkeywords={% Operators
++, -, *, /, ->, =, <>
+},
+morekeywords=[2]{boolean,int,number}, % types go here
+morekeywords=[3]{%
+type,extends,func,inputs,output,assign-output,not,or,and,only,single,multiple,exists,is,absent,contains,%
+disjoint,all,any,count,only-element,if,then,else,True,False,empty,%
+any,boolean,string,int,number,date,dateTime,zonedDateTime,time % keywords go here
+},%
+literate={% replace strings with symbols
+},
+basicstyle={\sffamily},
+keywordstyle=[2]{\itshape}, % style for types
+keywordstyle=[3]{\ttfamily\color{eminence}}, %style for keywords
+keepspaces,
+mathescape % optional
+}[keywords,comments,strings]%
+
+%%%%%%%%% SYNTAX DEFINITIONS %%%%%%%%%%%
+\usepackage{syntax}
+\setlength{\grammarindent}{4.5em}
+
+\renewcommand{\grammarlabel}[2]{\synt{#1}\hfill #2}
+
+\renewcommand{\syntleft}{$\langle$\normalfont\scshape}
+\renewcommand{\syntright}{$\rangle$}
+
+\renewcommand{\litleft}{\bgroup\normalfont\ttfamily\frenchspacing}
+\renewcommand{\litright}{\egroup}
+
+\renewcommand{\ulitleft}{\normalfont\itshape}
+\renewcommand{\ulitright}{}
+
+\newcommand{\explain}[1]{\hfill\textit{#1}\\}
+\newcommand{\ind}{\phantom{.}\hspace{1em}}
+
+%%%%%%%%% MATH LIGATURES %%%%%%%%%%
+\usepackage[ligature,reserved,shorthand]{semantic}
+\usepackage{stmaryrd}
+\mathlig{|[}{\left\llbracket}
+\mathlig{|]}{\right\rrbracket}
+\reservestyle[\lit]{\rosetta}{\mathinner}
+\rosetta{type,extends,func,inputs,output,assign-output,not,or,and,only,single,multiple,exists,is,absent,contains,%
+disjoint,all,any,count,only-element,if,then,else,True,False,empty,%
+any,boolean,string,int,number,date,dateTime,zonedDateTime,time,eq[=],%
+neq[<>],+,-,*,/,proj[->]}
+
+%%%%%%%% INFERENCE RULES %%%%%%%%%
+\usepackage{mathpartir}
+\let\oldrule\rule
+\renewcommand{\rule}[1]{\textnormal{\textsc{#1}}}
+
+\newcommand{\derivation}[1]{\mathcal{#1}}
+\newcommand{\OK}{\mathinner{\text{OK}}}
+
+\newcommand{\ruledef}[3]{\inferrule*[narrower=0.7]{#2}{#3} && \text{\small{\textsc{#1}}}}
+%\newcommand{\axiomdef}[2]{\inferrule*[Right=#1]{ }{#2}}
+\newcommand{\axiomdef}[2]{#2 \ && \text{\small{\textsc{#1}}}}
+
+%%%%%%%%% SEMANTIC DEFINITION %%%%%%%%%%%
+\let\oldvec\vec
+\renewcommand{\vec}[1]{\boldsymbol{\mathbf{#1}}} % vector
+\DeclareMathOperator{\dom}{Dom}
+
+\newcommand{\set}[1]{\left\{\,#1\,\right\}}
+\newcommand{\sboolean}{\mathbb{B}}
+\newcommand{\sint}{\mathbb{Z}}
+\newcommand{\snumber}{\mathbb{R}}
+\newcommand{\sdom}{\mathbb{D}}
+\newcommand{\ssingledom}{\mathbb{D}_1}
+
+\newcommand{\sor}[2]{#1\,or\,#2}
+\newcommand{\shor}[2]{#1\,\widehat{or}\,#2}
+\newcommand{\sand}[2]{#1\,and\,#2}
+\newcommand{\shand}[2]{#1\,\widehat{and}\,#2}
+\newcommand{\snot}[1]{not\left(#1\right)}
+\newcommand{\shnot}[1]{\widehat{not}\left(#1\right)}
+
+\newcommand{\schoice}[3]{(#1) \rightarrow #2\,[]\,#3}
+\newcommand{\shchoice}[3]{(#1) \widehat{\rightarrow} #2\,[]\,#3}
+\newcommand{\scount}[1]{count\left(#1\right)}
+\newcommand{\shcount}[1]{\widehat{count}\left(#1\right)}
+\newcommand{\sflatten}[3]{flatten_{#1, #2}\left(#3\right)}
+\newcommand{\shflatten}[3]{\widehat{flatten}_{#1, #2}\left(#3\right)}
+\newcommand{\sproject}[3]{project_{#1, #2}\left(#3\right)}
+\newcommand{\shproject}[3]{\widehat{project}_{#1, #2}\left(#3\right)}
+\newcommand{\scontains}[2]{contains\left(#1, #2\right)}
+\newcommand{\shcontains}[2]{\widehat{contains}\left(#1, #2\right)}
+\newcommand{\sdisjoint}[2]{disjoint\left(#1, #2\right)}
+\newcommand{\shdisjoint}[2]{\widehat{disjoint}\left(#1, #2\right)}
+\newcommand{\sonlyexists}[3]{onlyexists_{#1, #2}\left(#3\right)}
+\newcommand{\shonlyexists}[3]{\widehat{onlyexists}_{#1, #2}\left(#3\right)}
+\newcommand{\sonlyelement}[1]{onlyelement\left(#1\right)}
+\newcommand{\shonlyelement}[1]{\widehat{onlyelement}\left(#1\right)}
+
+\newcommand{\seq}[2]{#1\,eq\,#2}
+\newcommand{\sheq}[2]{#1\,\widehat{eq}\,#2}
+\newcommand{\sneq}[2]{#1\,neq\,#2}
+\newcommand{\shneq}[2]{#1\,\widehat{neq}\,#2}
+\newcommand{\sanyeq}[2]{#1\,anyeq\,#2}
+\newcommand{\shanyeq}[2]{#1\,\widehat{anyeq}\,#2}
+\newcommand{\sanyneq}[2]{#1\,anyneq\,#2}
+\newcommand{\shanyneq}[2]{#1\,\widehat{anyneq}\,#2}
+\newcommand{\salleq}[2]{#1\,alleq\,#2}
+\newcommand{\shalleq}[2]{#1\,\widehat{alleq}\,#2}
+\newcommand{\sallneq}[2]{#1\,allneq\,#2}
+\newcommand{\shallneq}[2]{#1\,\widehat{allneq}\,#2}
+
+\newcommand{\splus}[3]{#2\,plus_{#1}\,#3}
+\newcommand{\shplus}[3]{#2\,\widehat{plus}_{#1}\,#3}
+\newcommand{\ssubs}[3]{#2\,substract_{#1}\,#3}
+\newcommand{\shsubs}[3]{#2\,\widehat{substract}_{#1}\,#3}
+\newcommand{\smult}[3]{#2\,mult_{#1}\,#3}
+\newcommand{\shmult}[3]{#2\,\widehat{mult}_{#1}\,#3}
+\newcommand{\sdiv}[2]{#1\,div\,#2}
+\newcommand{\shdiv}[2]{#1\,\widehat{div}\,#2}
+
+
+%%%%%%%%%% DEFINITION BOXES %%%%%%%%%
+\usepackage[many]{tcolorbox}
+\usepackage{multicol}
+% Enable single column multicols
+\let\multicolmulticols\multicols
+\let\endmulticolmulticols\endmulticols
+\RenewDocumentEnvironment{multicols}{mO{}}
+ {%
+  \ifnum#1=1
+    #2%
+  \else % More than 1 column
+    \multicolmulticols{#1}[#2]
+  \fi
+ }
+ {%
+  \ifnum#1=1
+  \else % More than 1 column
+    \endmulticolmulticols
+  \fi
+ }
+
+\setlength{\columnseprule}{1pt}
+\newenvironment{defbox}[1][1]{%
+\begin{center}
+\begin{tcolorbox}[
+enhanced,
+breakable,
+sharp corners=all,
+colback=black!4!white,
+toprule=1.5pt,bottomrule=1.5pt,
+leftrule=0pt,rightrule=0pt,
+left=1pt,right=1pt,
+width=0.85\paperwidth,
+center
+]
+\begin{multicols}{#1}
+\begingroup
+\allowdisplaybreaks
+\addtolength{\jot}{0.5em}
+}
+{%
+\endgroup
+\end{multicols}
+\end{tcolorbox} 
+\end{center}
+}
