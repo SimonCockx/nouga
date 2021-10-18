@@ -4,6 +4,7 @@ xsemantics-gen/
 ### XTEND
 /.m2/
 build/
+!docs/build/
 !**/src/**/build
 !**/xtend-gen/**/build
 bin/
