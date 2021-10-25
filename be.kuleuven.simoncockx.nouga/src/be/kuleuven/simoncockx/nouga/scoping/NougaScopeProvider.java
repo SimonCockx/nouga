@@ -11,10 +11,17 @@ import org.eclipse.xtext.EcoreUtil2;
 import org.eclipse.xtext.scoping.IScope;
 import org.eclipse.xtext.scoping.Scopes;
 
+import com.google.inject.Inject;
+
+import be.kuleuven.simoncockx.nouga.nouga.BasicType;
 import be.kuleuven.simoncockx.nouga.nouga.Data;
+import be.kuleuven.simoncockx.nouga.nouga.DataConstructionExpression;
+import be.kuleuven.simoncockx.nouga.nouga.DataType;
 import be.kuleuven.simoncockx.nouga.nouga.Function;
+import be.kuleuven.simoncockx.nouga.nouga.KeyValuePair;
 import be.kuleuven.simoncockx.nouga.nouga.NougaPackage;
 import be.kuleuven.simoncockx.nouga.nouga.ProjectionExpression;
+import be.kuleuven.simoncockx.nouga.typing.NougaTyping;
 
 /**
  * This class contains custom scoping description.
@@ -23,6 +30,9 @@ import be.kuleuven.simoncockx.nouga.nouga.ProjectionExpression;
  * on how and when to use it.
  */
 public class NougaScopeProvider extends AbstractNougaScopeProvider {
+	@Inject
+	private NougaTyping typing;
+	
 	@Override
 	public IScope getScope(EObject context, EReference reference) {
 		if (context instanceof Data && reference == NougaPackage.Literals.DATA__SUPER_TYPE) {
@@ -31,13 +41,17 @@ public class NougaScopeProvider extends AbstractNougaScopeProvider {
 	        return Scopes.scopeFor(candidates);
 		} else if (context instanceof ProjectionExpression && reference == NougaPackage.Literals.PROJECTION_EXPRESSION__ATTRIBUTE) {
 			ProjectionExpression ctx = (ProjectionExpression)context;
-			// TODO
-			// typeProvider.getRType(context.receiver)
-			// val featureScope = receiverType.createFeatureScope
-			// return Scopes.scopeFor(ctx.getReceiver())
+			BasicType type = typing.type(ctx.getReceiver()).getValue().getBasicType();
+			if (type instanceof DataType) {
+				return Scopes.scopeFor(((DataType)type).getData().getAttributes());
+			}
+			return IScope.NULLSCOPE;
 		} else if (context instanceof Function && reference == NougaPackage.Literals.VARIABLE_REFERENCE__REFERENCE) {
 			Function function = (Function)context;
 			return Scopes.scopeFor(function.getInputs());
+		} else if (context instanceof KeyValuePair && reference == NougaPackage.Literals.KEY_VALUE_PAIR__KEY) {
+			DataConstructionExpression construct = EcoreUtil2.getContainerOfType(context, DataConstructionExpression.class);
+			return Scopes.scopeFor(construct.getType().getAttributes());
 		}
 		return super.getScope(context, reference);
 	}

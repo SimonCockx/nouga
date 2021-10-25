@@ -30,15 +30,22 @@ class NougaTestHelper {
 				output: result boolean (1..1)
 				assign-output: «expr»
 		'''.parse;
-		model.assertNoErrors;
 		return (model.elements.last as Function).operation;
 	}
 	
 	def Type getType(CharSequence expr) {
-		return expr.parseExpression.type.value
+		return getType(expr.parseExpression);
+	}
+	def Type getType(Expression expr) {
+		val res = expr.type();
+		assertFalse(res.failed);
+		return res.value;
 	}
 	
 	def void assertTypeEquals(Type a, Type b) {
 		typeUtil.typesAreEqual(a, b).assertTrue
+	}
+	def void assertSubtype(Type a, Type b) {
+		assertTrue(subtype(a, b).value)
 	}
 }

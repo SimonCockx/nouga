@@ -14,14 +14,22 @@ import java.util.List
 import be.kuleuven.simoncockx.nouga.nouga.NougaPackage
 import be.kuleuven.simoncockx.nouga.nouga.DataType
 import be.kuleuven.simoncockx.nouga.nouga.Data
-import be.kuleuven.simoncockx.nouga.nouga.BinaryOperation
-import be.kuleuven.simoncockx.nouga.nouga.OrExpression
 import be.kuleuven.simoncockx.nouga.nouga.BooleanOperation
 import be.kuleuven.simoncockx.nouga.nouga.ExistsExpression
 import be.kuleuven.simoncockx.nouga.nouga.ContainsExpression
 import be.kuleuven.simoncockx.nouga.nouga.DisjointExpression
 import be.kuleuven.simoncockx.nouga.nouga.ComparisonOperation
 import be.kuleuven.simoncockx.nouga.nouga.ArithmeticOperation
+import be.kuleuven.simoncockx.nouga.nouga.CountExpression
+import be.kuleuven.simoncockx.nouga.nouga.Cardinality
+import be.kuleuven.simoncockx.nouga.nouga.ProjectionExpression
+import be.kuleuven.simoncockx.nouga.nouga.ConditionalExpression
+import be.kuleuven.simoncockx.nouga.nouga.FunctionCallExpression
+import be.kuleuven.simoncockx.nouga.nouga.DataConstructionExpression
+import be.kuleuven.simoncockx.nouga.nouga.VariableReference
+import be.kuleuven.simoncockx.nouga.nouga.ListLiteral
+import be.kuleuven.simoncockx.nouga.nouga.OnlyElementExpression
+import be.kuleuven.simoncockx.nouga.nouga.Function
 
 inject extension TypeFactory typeFactory
 inject extension TypeUtil typeUtil
@@ -29,6 +37,11 @@ inject extension TypeUtil typeUtil
 auxiliary {
 	supertypes(DataType t) : List<Data>
 	comparable(BasicType t1, BasicType t2)
+	overlap(Cardinality c1, Cardinality c2)
+	listComparable(Type t1, Type t2)
+	join(BasicType t1, BasicType t2) : BasicType
+	union(Cardinality c1, Cardinality c2) : Cardinality
+	listJoin(Type t1, Type t2) : Type
 }
 
 judgments {
@@ -39,6 +52,7 @@ judgments {
 	subtype |- Type subtype <| Type supertype
 }
 
+/****** AUXILIARY DEFINITIONS *******/
 auxiliary supertypes(DataType t) {
 	getAll(t.^data,
 		NougaPackage::eINSTANCE.data_SuperType,
@@ -47,25 +61,90 @@ auxiliary supertypes(DataType t) {
 	)
 }
 auxiliary comparable(BasicType t1, BasicType t2) {
-	empty |- t1 <: t2 or empty |- t2 <: t1
+	empty |- t1 <: t2
+	or
+	empty |- t2 <: t1
+}
+auxiliary overlap(Cardinality c1, Cardinality c2) {
+	(c1.unbounded || c1.sup >= c2.inf) && (c2.unbounded || c2.sup >= c1.inf)
+}
+auxiliary listComparable(Type t1, Type t2) {
+	comparable(t1.basicType, t2.basicType)
+	overlap(t1.cardinality, t2.cardinality)
+}
+auxiliary join(BuiltInType t1, BuiltInType t2) {
+	if (t1.type == t2.type) {
+		return t1
+	} else if (t1.type == BuiltInTypeEnum.INT && t2.type == BuiltInTypeEnum.NUMBER) {
+		return t2
+	} else if (t1.type == BuiltInTypeEnum.NUMBER && t2.type == BuiltInTypeEnum.INT) {
+		return t1
+	} else if (t1.type == BuiltInTypeEnum.NOTHING) {
+		return t2
+	} else if (t2.type == BuiltInTypeEnum.NOTHING) {
+		return t1
+	}
+}
+auxiliary join(DataType t1, DataType t2) {
+	if (t1.^data == t2.^data) {
+		return t1
+	} else {
+		val st1 = supertypes(t1)
+		val result = supertypes(t2).findFirst[st1.contains(it)]
+		if (result !== null) {
+			return createDataType(result)
+		}
+	}
+}
+auxiliary join(BuiltInType t1, DataType t2) {
+	if (t1.type == BuiltInTypeEnum.NOTHING) {
+		return t2;
+	}
+}
+auxiliary join(DataType t1, BuiltInType t2) {
+	if (t2.type == BuiltInTypeEnum.NOTHING) {
+		return t1;
+	}
+}
+auxiliary union(Cardinality c1, Cardinality c2) {
+	if (c1.unbounded || c2.unbounded) {
+		return createUnboundedCardinality(Math.min(c1.inf, c2.inf))
+	} else {
+		return createCardinality(Math.min(c1.inf, c2.inf), Math.max(c1.sup, c2.sup))
+	}
+}
+auxiliary listJoin(Type t1, Type t2) {
+	return createType(join(t1.basicType, t2.basicType), union(t1.cardinality, t2.cardinality))
 }
 
 /*** BASIC SUBTYPING **/
-rule SNum
+rule SBuiltIn // SA-Refl, SA-Num, SA-Nothing
 	G |- BuiltInType t1 <: BuiltInType t2
 from {
-	t1.type == BuiltInTypeEnum.INT
-	t2.type == BuiltInTypeEnum.NUMBER
+	{
+		t1.type == t2.type
+	} or
+	{
+		t1.type == BuiltInTypeEnum.INT
+		t2.type == BuiltInTypeEnum.NUMBER
+	} or {
+		t1.type == BuiltInTypeEnum.NOTHING
+	}
 }
 
-rule SSuper
+rule SSuper // SA-Refl, SA-Super
 	G |- DataType t1 <: DataType t2
 from {
-	supertypes(t1).contains(t2.^data)
+	{
+		t1.^data == t2.^data
+	} or
+	{
+		supertypes(t1).contains(t2.^data)
+	}
 }
 
 /*** SUBTYPING ***/
-rule SCard
+rule SCard // SA-Card
 	G |- Type s <| Type t
 from {
 	G |- s.basicType <: t.basicType
@@ -77,11 +156,9 @@ from {
 rule TBooleanOperation // TA-Or, TA-And
 	G |- BooleanOperation e : singleBoolean
 from {
-	var Type t1
-	G |- e.left : t1
+	G |- e.left : var Type t1
 	t1.typesAreEqual(singleBoolean)
-	var Type t2
-	G |- e.right : t2
+	G |- e.right : var Type t2
 	t2.typesAreEqual(singleBoolean)
 }
 rule TExists // TA-Exists, TA-SingleExists, TA-MultipleExists
@@ -93,50 +170,42 @@ from {
 rule TContains // TA-Contains
 	G |- ContainsExpression e : singleBoolean
 from {
-	var Type t1
-	G |- e.container : t1
-	var Type t2
-	G |- e.contained : t2
+	G |- e.container : var Type t1
+	G |- e.contained : var Type t2
 	comparable(t1.basicType, t2.basicType)
 }
 rule TDisjoint // TA-Disjoint
 	G |- DisjointExpression e : singleBoolean
 from {
-	var Type t1
-	G |- e.container : t1
-	var Type t2
-	G |- e.disjoint : t2
+	G |- e.container : var Type t1
+	G |- e.disjoint : var Type t2
 	comparable(t1.basicType, t2.basicType)
 }
 rule TEquality // TA-Equals, TA-NotEquals, TA-AllEquals, TA-AllNotEquals, TA-AnyEquals, TA-AnyNotEquals 
 	G |- ComparisonOperation e : singleBoolean
 from {
-	var Type t1
-	G |- e.left : t1
-	var Type t2
-	G |- e.right : t2
-	comparable(t1.basicType, t2.basicType)
+	G |- e.left : var Type t1
+	G |- e.right : var Type t2
 	if (e.cardOp == 'all' || e.cardOp == 'any') {
+		comparable(t1.basicType, t2.basicType)
 		t2.cardinality.cardinalitiesAreEqual(single)
 	} else {
-		t1.cardinality.cardinalitiesAreEqual(t2.cardinality)
+		listComparable(t1, t2)
 	}
 }
 rule TArithmetic // TA-PlusInt, TA-PlusNumber, TA-MultInt, TA-MultNumber, TA-SubsInt, TA-SubsNumber, TA-Division
 	G |- ArithmeticOperation e : Type t
 from {
-	var Type t1
-	G |- e.left : t1
+	G |- e.left : var Type t1
 	t1.cardinality.cardinalitiesAreEqual(single)
-	var Type t2
-	G |- e.right : t2
+	G |- e.right : var Type t2
 	t2.cardinality.cardinalitiesAreEqual(single)
 	if (e.operator == '/') {
 		G |- t1.basicType <: number
 		G |- t2.basicType <: number
 		t = singleNumber
 	} else {
-		if (t1.basicType.basicTypesAreEqual(int_) && t2.basicType.basicTypesAreEqual(int_)) {
+		if (t1.basicType.basicTypesAreEqual(^int) && t2.basicType.basicTypesAreEqual(^int)) {
 			t = singleInt
 		} else {
 			G |- t1.basicType <: number
@@ -145,9 +214,86 @@ from {
 		}
 	}
 }
-axiom BooleanLiteral
+rule TCount // TA-Count
+	G |- CountExpression e : singleInt
+from {
+	G |- e.argument : var Type t
+}
+rule TProject // TA-Project, // TA-OnlyExists
+	G |- ProjectionExpression e : Type t
+from {
+	G |- e.receiver : var Type te
+	if (e.onlyExists) {
+		t = singleBoolean
+	} else {
+		t = createType(e.attribute.type.basicType.clone, te.cardinality.multiply(e.attribute.type.cardinality))
+	}
+}
+rule TIf // TA-If
+	G |- ConditionalExpression e : Type t
+from {
+	G |- e.^if : var Type ifType
+	ifType.typesAreEqual(singleBoolean)
+	
+	G |- e.ifthen : var Type t1
+	G |- e.elsethen : var Type t2
+	t = listJoin(t1, t2)
+}
+rule TFunc // TA-Func
+	G |- FunctionCallExpression e : e.function.^output.type.clone
+from {
+	e.function.inputs.size() == e.args.size()
+	(0..<e.args.size).forall[idx |
+		G |- e.args.get(idx) : var Type t
+		G |- t <| e.function.inputs.get(idx).type
+	]
+}
+rule TConstruct // TA-Construct
+	G |- DataConstructionExpression e : createType(createDataType(e.type), createCardinality(1, 1))
+from {
+	e.type.attributes.size() == e.values.size()
+	e.values.map[key].toSet().size() == e.values.size()
+	e.values.forall[
+		G |- value : var Type t
+		G |- t <| key.type
+	]
+}
+axiom TVar // TA-Var
+	G |- VariableReference e : e.reference.type.clone
+axiom BooleanLiteral // TA-True, TA-False
 	G |- BooleanLiteral bool : singleBoolean
-axiom NumberLiteral
+axiom NumberLiteral // TA-Number
 	G |- NumberLiteral num : singleNumber
-axiom IntLiteral
+axiom IntLiteral // TA-Int
 	G |- IntLiteral n : singleInt
+rule TList // TA-List
+	G |- ListLiteral e : Type t
+from {
+	t = e.elements.fold(emptyNothing, [ Type acc, Expression elem |
+		G |- elem : var Type t1
+		createType(join(t1.basicType, acc.basicType), t1.cardinality.add(acc.cardinality))
+	])
+}
+rule TOnlyElement // TA-OnlyElement
+	G |- OnlyElementExpression e : Type t
+from {
+	G |- e.argument : var Type te
+	t = createType(te.basicType, createCardinality(0, 1))
+}
+
+
+/****** CHECK RULES ********/
+checkrule CheckCardinality for
+	Cardinality c
+from {
+	c.unbounded
+	or
+	c.inf <= c.sup
+}
+
+checkrule TypecheckFunc for
+	Function f
+from {
+	empty |- f.operation : var Type t
+	empty |- t <| f.^output.type
+}

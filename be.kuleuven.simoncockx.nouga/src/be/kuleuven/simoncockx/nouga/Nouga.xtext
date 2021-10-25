@@ -59,7 +59,7 @@ BuiltInType:
 ;
 
 enum BuiltInTypeEnum:
-	BOOLEAN = 'boolean' | NUMBER = 'number' | INT = 'int'
+	BOOLEAN = 'boolean' | NUMBER = 'number' | INT = 'int' | NOTHING = 'nothing'
 ;
 
 DataType:

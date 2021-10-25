@@ -9,7 +9,11 @@
 \DeclareMathOperator{\pexpr}{expr*} % path segment expression
 \DeclareMathOperator{\supertypes}{supertypes} % set of supertypes
 \DeclareMathOperator{\comparable}{comparable} % check whether two basic types are comparable
+\DeclareMathOperator{\overlap}{overlap} % check whether cardinalities overlap
+\DeclareMathOperator{\union}{union} % union of cardinalities
 \DeclareMathOperator{\join}{join} % join of two types
+
+\newcommand{\lv}[1]{#1^{*}} % list version of an operator
 
 
 %%%%%%%% CODE LISTINGS %%%%%%%%%%
@@ -47,9 +51,9 @@ otherkeywords={% Operators
 },
 morekeywords=[2]{boolean,int,number}, % types go here
 morekeywords=[3]{%
-type,extends,func,inputs,output,assign-output,not,or,and,only,single,multiple,exists,is,absent,contains,%
+type,extends,func,enum,inputs,output,assign,output,not,or,and,only,single,multiple,exists,is,absent,contains,%
 disjoint,all,any,count,only-element,if,then,else,True,False,empty,%
-any,boolean,string,int,number,date,dateTime,zonedDateTime,time % keywords go here
+any,boolean,string,int,number,nothing,date,dateTime,zonedDateTime,time % keywords go here
 },%
 literate={% replace strings with symbols
 },
@@ -84,9 +88,9 @@ mathescape % optional
 \mathlig{|[}{\left\llbracket}
 \mathlig{|]}{\right\rrbracket}
 \reservestyle[\lit]{\rosetta}{\mathinner}
-\rosetta{type,extends,func,inputs,output,assign-output,not,or,and,only,single,multiple,exists,is,absent,contains,%
+\rosetta{type,extends,func,enum,inputs,output,assign-output,not,or,and,only,single,multiple,exists,is,absent,contains,%
 disjoint,all,any,count,only-element,if,then,else,True,False,empty,%
-any,boolean,string,int,number,date,dateTime,zonedDateTime,time,eq[=],%
+any,boolean,string,int,number,nothing,date,dateTime,zonedDateTime,time,eq[=],%
 neq[<>],+,-,*,/,proj[->]}
 
 %%%%%%%% INFERENCE RULES %%%%%%%%%

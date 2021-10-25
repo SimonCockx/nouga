@@ -11,6 +11,8 @@ import be.kuleuven.simoncockx.nouga.nouga.Type;
 public class TypeUtil {
 	@Inject
 	private EqualityHelper eqHelper;
+	@Inject
+	private TypeFactory fac;
 	
 	public boolean basicTypesAreEqual(BasicType a, BasicType b) {
 		return eqHelper.equals(a, b);
@@ -25,6 +27,18 @@ public class TypeUtil {
 	}
 	public boolean isSubcardinality(Cardinality sub, Cardinality sup) {
 		return sub.getInf() >= sup.getInf()
-			&& (sup.isUnbounded() || !sub.isUnbounded() && sub.getInf() <= sup.getInf());
+			&& (sup.isUnbounded() || !sub.isUnbounded() && sub.getSup() <= sup.getSup());
+	}
+	public Cardinality multiply(Cardinality c1, Cardinality c2) {
+		if (c1.isUnbounded() || c2.isUnbounded()) {
+			return fac.createUnboundedCardinality(c1.getInf() * c2.getInf());
+		}
+		return fac.createCardinality(c1.getInf() * c2.getInf(), c1.getSup() * c2.getSup());
+	}
+	public Cardinality add(Cardinality c1, Cardinality c2) {
+		if (c1.isUnbounded() || c2.isUnbounded()) {
+			return fac.createUnboundedCardinality(c1.getInf() + c2.getInf());
+		}
+		return fac.createCardinality(c1.getInf() + c2.getInf(), c1.getSup() + c2.getSup());
 	}
 }

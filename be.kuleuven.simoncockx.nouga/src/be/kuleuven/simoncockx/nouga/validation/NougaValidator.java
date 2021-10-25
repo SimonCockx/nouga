@@ -3,13 +3,14 @@
  */
 package be.kuleuven.simoncockx.nouga.validation;
 
+import be.kuleuven.simoncockx.nouga.typing.validation.NougaTypingValidator;
 
 /**
  * This class contains custom validation rules. 
  *
  * See https://www.eclipse.org/Xtext/documentation/303_runtime_concepts.html#validation
  */
-public class NougaValidator extends AbstractNougaValidator {
+public class NougaValidator extends NougaTypingValidator {
 	
 //	public static final String INVALID_NAME = "invalidName";
 //

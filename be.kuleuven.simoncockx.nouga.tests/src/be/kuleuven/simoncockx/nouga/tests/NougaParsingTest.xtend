@@ -11,11 +11,6 @@ import org.eclipse.xtext.testing.util.ParseHelper
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.^extension.ExtendWith
 import org.eclipse.xtext.testing.validation.ValidationTestHelper
-import be.kuleuven.simoncockx.nouga.nouga.Function
-import be.kuleuven.simoncockx.nouga.nouga.ProjectionExpression
-import be.kuleuven.simoncockx.nouga.nouga.Data
-import static extension org.junit.jupiter.api.Assertions.*
-import be.kuleuven.simoncockx.nouga.nouga.VariableReference
 
 @ExtendWith(InjectionExtension)
 @InjectWith(NougaInjectorProvider)
@@ -32,60 +27,5 @@ class NougaParsingTest {
 		'''.parse.assertNoErrors
 	}
 	
-	@Test
-	def void superTypeScopePositiveTest() {
-		val model = '''
-			namespace just.some.package
-			
-			type MyType:
-				val boolean (1..1)
-			
-			type MySubType extends MyType:
-				anotherVal int (1..1)
-		'''.parse;
-		model.assertNoErrors;
-		model => [
-			(elements.last as Data).superType.
-			assertSame(elements.head)
-		]
-	}
 	
-	@Test
-	def void projectionScopePositiveTest() {
-		val model = '''
-			namespace just.some.package
-			
-			type MyType:
-				val boolean (1..1)
-			
-			func Project:
-				inputs: inp MyType (1..1)
-				output: result boolean (1..1)
-				assign-output:
-					inp -> val
-		'''.parse;
-		model.assertNoErrors;
-		model => [
-			((elements.last as Function).operation as ProjectionExpression).attribute.
-			assertSame((elements.head as Data).attributes.head)
-		]
-	}
-	
-	@Test
-	def void variableScopePositiveTest() {
-		val model = '''
-			namespace just.some.package
-			
-			func Project:
-				inputs: inp int (1..1)
-				output: result int (1..1)
-				assign-output:
-					inp
-		'''.parse;
-		model.assertNoErrors;
-		model.elements.last as Function => [
-			(operation as VariableReference).reference.
-			assertSame(inputs.head)
-		]
-	}
 }

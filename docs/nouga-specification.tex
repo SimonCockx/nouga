@@ -21,6 +21,18 @@
 \usepackage{subcaption}
 
 \usepackage{microtype} % mierenneukerij
+%%% Fix bug in microtype (https://tex.stackexchange.com/q/619410/149123)
+\makeatletter
+\def\MT@is@opt@char#1\iffontchar#2\char#3\else#4\fi\relax{%
+  \MT@ifempty{#1}{%
+    \iffontchar#2%
+      \expandafter\chardef
+        \csname\MT@encoding\MT@detokenize@c\@tempa\endcsname=#3\relax
+    \fi
+  }\relax
+}
+\makeatother
+%%% Einde bug-fix
 \usepackage{xfrac} % mooie breuken
 
 \usepackage[utf8]{inputenc} % maakt onder andere accenten mogelijk (¨´` ...)
@@ -60,9 +72,6 @@
 \begin{document}
 
 \maketitle
-
-
-\url{} % hack to resolve error
 
 
 
