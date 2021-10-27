@@ -164,8 +164,15 @@ from {
 rule TExists // TA-Exists, TA-SingleExists, TA-MultipleExists
 	G |- ExistsExpression e : singleBoolean
 from {
-	var Type t
-	G |- e.argument : t
+	G |- e.argument : var Type t
+	if (e.single) {
+		single.isSubcardinality(t.cardinality)
+		!t.cardinality.cardinalitiesAreEqual(single)
+	} else if (e.multiple) {
+		createCardinality(1, 2).isSubcardinality(t.cardinality)
+	} else {
+		createCardinality(0, 1).isSubcardinality(t.cardinality)
+	}
 }
 rule TContains // TA-Contains
 	G |- ContainsExpression e : singleBoolean

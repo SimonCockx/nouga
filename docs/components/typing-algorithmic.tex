@@ -43,7 +43,7 @@ Basic subtyping $S <:: T$.
 
 Subtyping $T_1\ C_1 \lv{<::} T_2\ C_2$.
 \begin{align*}
-\ruledef{SA-Card}{T_1 <:: T_2 \\ l_1 \geq l_2 \\ u_1 \leq u_2}{T_1\ (l_1..u_1) \lv{<::} T_2\ (l_1..u_1)}
+\ruledef{SA-Card}{T_1 <:: T_2 \\ \subcardinality(C_1, C_2)}{T_1\ C_1 \lv{<::} T_2\ C_2}
 \end{align*}
 
 Typing rules $\Gamma |- e : T\ C$.
@@ -52,11 +52,11 @@ Typing rules $\Gamma |- e : T\ C$.
 \\
 \ruledef{TA-And}{\Gamma |- e_1 : \<boolean>\ (1..1) \\ \Gamma |- e_2 : \<boolean>\ (1..1)}{\Gamma |- e_1 \<and> e_2 : \<boolean>\ (1..1)}
 \\
-\ruledef{TA-Exists}{\Gamma |- e : T\ C}{\Gamma |- e \<exists> : \<boolean>\ (1..1)}
+\ruledef{TA-Exists}{\Gamma |- e : T\ C \\ \subcardinality((0..1), C)}{\Gamma |- e \<exists> : \<boolean>\ (1..1)}
 \\
-\ruledef{TA-SingleExists}{\Gamma |- e : T\ C}{\Gamma |- e \<single> \<exists> : \<boolean>\ (1..1)}
+\ruledef{TA-SingleExists}{\Gamma |- e : T\ C \\ \subcardinality((1..1), C) \\ C \neq (1..1)}{\Gamma |- e \<single> \<exists> : \<boolean>\ (1..1)}
 \\
-\ruledef{TA-MultipleExists}{\Gamma |- e : T\ C}{\Gamma |- e \<multiple> \<exists> : \<boolean>\ (1..1)}
+\ruledef{TA-MultipleExists}{\Gamma |- e : T\ C \\ \subcardinality((1..2), C)}{\Gamma |- e \<multiple> \<exists> : \<boolean>\ (1..1)}
 \\
 \ruledef{TA-Contains}{\Gamma |- e_1 : T_1\ C_1 \\ \Gamma |- e_2 : T_2\ C_2 \\ \comparable(T_1, T_2)}{\Gamma |- e_1 \<contains> e_2 : \<boolean>\ (1..1)}
 \\

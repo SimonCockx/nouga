@@ -53,9 +53,10 @@ class TypingTest {
 	
 	@Test
 	def void testTExists() {
-		'[] exists'.type.assertTypeEquals(singleBoolean);
-		'[] single exists'.type.assertTypeEquals(singleBoolean);
-		'[] multiple exists'.type.assertTypeEquals(singleBoolean);
+		'(if True then empty else 1) exists'.type.assertTypeEquals(singleBoolean);
+		'(if True then empty else 1) single exists'.type.assertTypeEquals(singleBoolean);
+		'(if True then 1 else [2, 3]) single exists'.type.assertTypeEquals(singleBoolean);
+		'(if True then 1 else [2, 3]) multiple exists'.type.assertTypeEquals(singleBoolean);
 	}
 	
 	@Test
