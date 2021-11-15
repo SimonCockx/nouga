@@ -21,21 +21,28 @@ QualifiedName:
 	ValidID ('.' ValidID)*
 ;
 
+fragment Named:
+	name=ValidID
+;
+
 RootElement:
 	Data | Function
 ;
 
+// Make sure that every RootElement has a name in the model.
+NamedRootElement returns RootElement: Named;
+
 Data:
-	'type' name=ValidID ('extends' superType=[Data])? ':'
+	'type' Named ('extends' superType=[Data])? ':'
 		attributes+=Attribute*
 ;
 
 Attribute:
-	name=ValidID type=Type
+	Named type=Type
 ;
 
 Function:
-	'func' name=ValidID	':'
+	'func' Named ':'
 		( 'inputs:' inputs+=Attribute*
 		& 'output:' output=Attribute
 		& 'assign-output:' operation=Expression

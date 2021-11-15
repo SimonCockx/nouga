@@ -24,20 +24,20 @@ Expressions $|[e|]$.
 \\
 \axiomdef{E-Exists}{|[e \<exists>|] = 
 \begin{cases}
-false, & |[e|] = () \\
-true, & \text{otherwise}
+(false, ()), & |[e|] = () \\
+(true, ()), & \text{otherwise}
 \end{cases}}
 \\
 \axiomdef{E-SingleExists}{|[e \<single> \<exists>|] = 
 \begin{cases}
-true, & \shcount{|[e|]} = (1, ()) \\
-false, & \text{otherwise}
+(true, ()), & \shcount{|[e|]} = (1, ()) \\
+(false, ()), & \text{otherwise}
 \end{cases}}
 \\
 \axiomdef{E-MultipleExists}{|[e \<multiple> \<exists>|] = 
 \begin{cases}
-true, & \shcount{|[e|]} = (k, ()) \land k \geq 2 \\
-false, & \text{otherwise}
+(true, ()), & \shcount{|[e|]} = (k, ()) \land k \geq 2 \\
+(false, ()), & \text{otherwise}
 \end{cases}}
 \\
 \axiomdef{E-Contains}{|[e_1 \<contains> e_2|] = \shcontains{|[e_1|]}{|[e_2|]}}
@@ -58,7 +58,7 @@ false, & \text{otherwise}
 \\
 \axiomdef{E-Plus}{|[\inferrule{\derivation{D}_1 :: \emptyset |- e_1 : T\ (1..1) \\ \derivation{D}_2 :: \emptyset |- e_2 : T\ (1..1)}{\emptyset |- e_1 \<+> e_2 : T\ (1..1)}|] = \shplus{|[T|]}{|[e_1|]}{|[e_2|]}}
 \\
-\axiomdef{E-Subs}{|[\inferrule{\derivation{D}_1 :: \emptyset |- e_1 : T\ (1..1) \\ \derivation{D}_2 :: \emptyset |- e_2 : T\ (1..1)}{\emptyset |- e_1 \<-> e_2 : T\ (1..1)}|] = \shsubs{|[T|]}{|[e_1|]}{|[e_2|]}}
+\axiomdef{E-Subt}{|[\inferrule{\derivation{D}_1 :: \emptyset |- e_1 : T\ (1..1) \\ \derivation{D}_2 :: \emptyset |- e_2 : T\ (1..1)}{\emptyset |- e_1 \<-> e_2 : T\ (1..1)}|] = \shsubt{|[T|]}{|[e_1|]}{|[e_2|]}}
 \\
 \axiomdef{E-Mult}{|[\inferrule{\derivation{D}_1 :: \emptyset |- e_1 : T\ (1..1) \\ \derivation{D}_2 :: \emptyset |- e_2 : T\ (1..1)}{\emptyset |- e_1 \<*> e_2 : T\ (1..1)}|] = \shmult{|[T|]}{|[e_1|]}{|[e_2|]}}
 \\
@@ -72,7 +72,7 @@ false, & \text{otherwise}
 \\
 \ruledef{E-Func}{\inp(F) = a_1\ T_1\ C_1, \dots, a_n\ T_n\ C_n}{|[F(e_1, \dots, e_n)|] = |[\;\left[\; a_1 \mapsto e_1, \dots, a_n \mapsto e_n \;\right]\op(F)|]}
 \\
-\ruledef{E-Construct}{\attrs(D) = a_1\ T_1\ C_1, \dots, a_n\ T_n\ C_n}{|[D \set{a_1: e_1, \dots, a_n: e_n}|] = \set{a_1 = |[e_1|], \dots, a_n = |[e_n|]}}
+\ruledef{E-Construct}{\attrs(D) = a_1\ T_1\ C_1, \dots, a_n\ T_n\ C_n}{|[D \set{a_1: e_1, \dots, a_n: e_n}|] = (\set{a_1 = |[e_1|], \dots, a_n = |[e_n|]}, ())}
 \\
 \axiomdef{E-OnlyExists}{|[\inferrule{\emptyset |- e : D\ (1..1)}{\emptyset |- e \<proj> a \<only> \<exists> : \<boolean>\ (1..1)}|] = \shonlyexists{|[D|]}{a}{|[e|]}}
 \\

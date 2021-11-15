@@ -82,9 +82,9 @@ Typing rules $\Gamma |- e : T\ C$.
 \\
 \ruledef{TA-MultNumber!}{\Gamma |- e_1 : T_1\ (1..1) \\ \Gamma |- e_2 : T_2\ (1..1) \\ T_1 <:: \<number> \\ T_2 <:: \<number> \\ T_1 \neq \<int> \lor T_2 \neq \<int>}{\Gamma |- e_1 \<*> e_2 : \<number>\ (1..1)}
 \\
-\ruledef{TA-SubsInt}{\Gamma |- e_1 : \<int>\ (1..1) \\ \Gamma |- e_2 : \<int>\ (1..1)}{\Gamma |- e_1 \<-> e_2 : \<int>\ (1..1)}
+\ruledef{TA-SubtInt}{\Gamma |- e_1 : \<int>\ (1..1) \\ \Gamma |- e_2 : \<int>\ (1..1)}{\Gamma |- e_1 \<-> e_2 : \<int>\ (1..1)}
 \\
-\ruledef{TA-SubsNumber!}{\Gamma |- e_1 : T_1\ (1..1) \\ \Gamma |- e_2 : T_2\ (1..1) \\ T_1 <:: \<number> \\ T_2 <:: \<number> \\ T_1 \neq \<int> \lor T_2 \neq \<int>}{\Gamma |- e_1 \<-> e_2 : \<number>\ (1..1)}
+\ruledef{TA-SubtNumber!}{\Gamma |- e_1 : T_1\ (1..1) \\ \Gamma |- e_2 : T_2\ (1..1) \\ T_1 <:: \<number> \\ T_2 <:: \<number> \\ T_1 \neq \<int> \lor T_2 \neq \<int>}{\Gamma |- e_1 \<-> e_2 : \<number>\ (1..1)}
 \\
 \ruledef{TA-Division!}{\Gamma |- e_1 : T_1\ (1..1) \\ \Gamma |- e_2 : T_2\ (1..1) \\ T_1 <:: \<number> \\ T_2 <:: \<number>}{\Gamma |- e_1 \</> e_2 : \<number>\ (1..1)}
 \\

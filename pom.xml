@@ -27,6 +27,7 @@
 		<module>be.kuleuven.simoncockx.nouga.target</module>
 		<module>be.kuleuven.simoncockx.nouga.tests</module>
 		<module>be.kuleuven.simoncockx.nouga.ui.tests</module>
+		<module>be.kuleuven.simoncockx.nouga.lib</module>
 	</modules>
 	<dependencyManagement>
 		<dependencies>

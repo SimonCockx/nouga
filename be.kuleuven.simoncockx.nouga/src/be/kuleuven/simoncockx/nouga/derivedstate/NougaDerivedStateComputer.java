@@ -3,8 +3,6 @@ package be.kuleuven.simoncockx.nouga.derivedstate;
 import org.eclipse.xtext.resource.DerivedStateAwareResource;
 import org.eclipse.xtext.resource.IDerivedStateComputer;
 
-import com.google.inject.Inject;
-
 import be.kuleuven.simoncockx.nouga.nouga.ConditionalExpression;
 import be.kuleuven.simoncockx.nouga.nouga.NougaFactory;
 

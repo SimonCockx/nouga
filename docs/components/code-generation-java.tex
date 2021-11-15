@@ -1,0 +1,102 @@
+\lstset{
+  language=java,
+  mathescape=true
+}
+
+Goals of target program.
+\begin{itemize}
+\item Formatting: it follows the naming conventions of the target language and is formatted in a readable, human-friendly manner.
+\item API: it follows the conventions of the target language for exposing an API (getters/setters, privacy, etc).
+\end{itemize}
+
+\begin{defbox}
+Generation of entity declarations. $|[\<type> D: a_1\ T_1\ C_1 \dots a_n\ T_n\ C_n|]_\java =$
+\begin{lstlisting}
+public class $\javaid(D)$ {
+    $\forall i \in 1..n:$
+      $|[a_i\ T_i\ C_i|]_\java$
+}
+\end{lstlisting}
+TODO: package declaration.
+
+Generation of extending entity declarations. $|[\<type> D \<extends> E: a_1\ T_1\ C_1 \dots a_n\ T_n\ C_n|]_\java =$
+\begin{lstlisting}
+public class $\javaid(D)$ extends $\javaid(E)$ {
+    $\forall i \in 1..n:$
+      $|[a_i\ T_i\ C_i|]_\java$
+}
+\end{lstlisting}
+
+Generation of attributes. $|[a\ T\ C|]_\java =$
+\begin{lstlisting}
+protected final $|[T\ C|]_\java$ $\javaid(a)$;
+\end{lstlisting}
+
+\paragraph{Simple version:} everything is a list.
+
+Generation of types. $|[T\ C|]_\java =$
+\begin{lstlisting}
+List<? extends $|[T|]_\java$>
+\end{lstlisting}
+
+Generation of basic types.
+\begin{align*}
+|[D|]_\java &= \javaid(D) \\
+|[\<boolean>|]_\java &= \lstinline|Boolean| \\
+|[\<int>|]_\java &= \lstinline|Integer| \\
+|[\<number>|]_\java &= \lstinline|BigDecimal| \\
+|[\<nothing>|]_\java &= \lstinline|Void| \\
+\end{align*}
+Note: given this translation, the rules \rule{SA-Num} and \rule{SA-Nothing} have no corresponding rules in Java, so this will bring a need for coercions!
+
+Generation of function declarations. \\ $|[\<func> F: \<inputs>: a_1\ T_1\ C_1 \dots a_n\ T_n\ C_n \<output>: a\ T\ C \<assign-output>: e|]_\java =$
+\begin{lstlisting}
+public class $\javaid(F)$ {
+  public $|[T\ C|]_\java$ evaluate($\forall i \in 1..n: |[a_i\ T_i\ C_i|]_\java$) {
+    return $|[e|]_\java$;
+  }
+}
+\end{lstlisting}
+
+% Challenges: arithmetic, E-Func, E-Construct, E-OnlyExists
+
+\newsavebox{\javalistbox}
+\setbox\javalistbox\hbox{\lstinline+Stream.of($|[e_1|]_\java$, $\dots$, $|[e_n|]_\java$).flatMap(Collection::stream).collect(Collectors.toList())+}
+
+\newsavebox{\javaorbox}
+\setbox\javaorbox\hbox{\lstinline+Streams.zip($|[e_1|]_\java$.stream(), $|[e_2|]_\java$.stream(), Boolean::logicalOr).collect(Collectors.toList())+}
+
+\newsavebox{\javaandbox}
+\setbox\javaandbox\hbox{\lstinline+Streams.zip($|[e_1|]_\java$.stream(), $|[e_2|]_\java$.stream(), Boolean::logicalAnd).collect(Collectors.toList())+}
+
+\newsavebox{\javanotbox}
+\setbox\javanotbox\hbox{\lstinline+$|[e_1|]_\java$.stream().map($\freeid(b)$ -> !$\freeid(b)$).collect(Collectors.toList())+}
+
+Generation of expressions. Implementation of most expressions is straight-forward. 
+\begin{align*}
+|[\<True>|]_\java &= \lstinline|Collections.singletonList(true)| \\
+|[\<False>|]_\java &= \lstinline|Collections.singletonList(false)| \\
+|[i|]_\java &= \lstinline|Collections.singletonList($i$)| \\
+|[r|]_\java &= \lstinline|Collections.singletonList(BigDecimal.valueOf($r$))| \\
+|[ [e_1, \dots, e_n] |]_\java &= \usebox{\javalistbox} \\
+|[e_1 \<or> e_2|]_\java &= \usebox{\javaorbox} \\
+|[e_1 \<and> e_2|]_\java &= \usebox{\javaandbox} \\  
+|[\<not> e|]_\java &= \usebox{\javanotbox} \\
+\end{align*}
+
+
+\end{defbox}
+
+
+Preamble:
+\begin{lstlisting}[language=java,mathescape=true]
+package dummypackage;
+
+import java.math.BigDecimal;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.stream.Stream;
+import java.util.stream.Collectors;
+import com.google.common.collect.Streams;
+
+\end{lstlisting}

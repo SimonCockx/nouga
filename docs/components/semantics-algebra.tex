@@ -24,7 +24,7 @@ c, & a = false
 &= (a_{11}, \dots, a_{1m_1}, \dots, a_{nm_n}, ()) \\
 \scontains{\_}{\_} &: \sdom \times \sdom \to \sboolean^1 : \scontains{(a_1, \dots, a_n, ())}{(b_1, \dots, b_m, ())} \\
 &= \begin{cases}
-(true, ()), & \forall i \in 1..n : \exists j \in 1..m : a_i = b_j\\
+(true, ()), & \forall i \in 1..n : \exists j \in 1..m : b_i = a_j\\
 (false, ()), & \text{otherwise}
 \end{cases} \\
 \sdisjoint{\_}{\_} &: \sdom \times \sdom \to \sboolean^1 : \sdisjoint{(a_1, \dots, a_n, ())}{(b_1, \dots, b_m, ())} \\
@@ -70,7 +70,7 @@ c, & a = false
 (false, ()), & \text{otherwise}
 \end{cases} \\
 \splus{A}{\_}{\_} &: A^1 \times A^1 \to A^1 : \splus{A}{(a, ())}{(b, ())} = (a + b, ()) \\
-\ssubs{A}{\_}{\_} &: A^1 \times A^1 \to A^1 : \ssubs{A}{(a, ())}{(b, ())} = (a - b, ()) \\
+\ssubt{A}{\_}{\_} &: A^1 \times A^1 \to A^1 : \ssubt{A}{(a, ())}{(b, ())} = (a - b, ()) \\
 \smult{A}{\_}{\_} &: A^1 \times A^1 \to A^1 : \smult{A}{(a, ())}{(b, ())} = (a * b, ()) \\
 \sdiv{\_}{\_} &: \snumber^1 \times \snumber^1 \to \snumber^1 : \sdiv{(a, ())}{(b, ())} = (a / b, ()) \\
 \sonlyelement{\_} &: \sdom \to \sdom : \sonlyelement{(a_1, \dots, a_n, ())} \\

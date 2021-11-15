@@ -5,7 +5,6 @@ import org.eclipse.xtext.testing.util.ParseHelper
 import com.google.inject.Inject
 import be.kuleuven.simoncockx.nouga.nouga.Function
 import be.kuleuven.simoncockx.nouga.nouga.Expression
-import org.eclipse.xtext.testing.validation.ValidationTestHelper
 import be.kuleuven.simoncockx.nouga.typing.NougaTyping
 import be.kuleuven.simoncockx.nouga.nouga.Type
 import static extension org.junit.jupiter.api.Assertions.*
@@ -14,8 +13,6 @@ import be.kuleuven.simoncockx.nouga.typing.TypeUtil
 class NougaTestHelper {
 	@Inject
 	extension ParseHelper<Model> parseHelper
-	@Inject
-	extension ValidationTestHelper
 	@Inject
 	extension NougaTyping
 	@Inject
