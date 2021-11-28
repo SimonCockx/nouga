@@ -52,6 +52,8 @@ Typing rules $\Gamma |- e : T\ C$.
 \\
 \ruledef{TA-And}{\Gamma |- e_1 : \<boolean>\ (1..1) \\ \Gamma |- e_2 : \<boolean>\ (1..1)}{\Gamma |- e_1 \<and> e_2 : \<boolean>\ (1..1)}
 \\
+\ruledef{TA-Not}{\Gamma |- e : \<boolean>\ (1..1)}{\Gamma |- \<not> e : \<boolean>\ (1..1)}
+\\
 \ruledef{TA-Exists}{\Gamma |- e : T\ C \\ \subcardinality((0..1), C)}{\Gamma |- e \<exists> : \<boolean>\ (1..1)}
 \\
 \ruledef{TA-SingleExists}{\Gamma |- e : T\ C \\ \subcardinality((1..1), C) \\ C \neq (1..1)}{\Gamma |- e \<single> \<exists> : \<boolean>\ (1..1)}

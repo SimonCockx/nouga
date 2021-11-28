@@ -30,6 +30,8 @@ import be.kuleuven.simoncockx.nouga.nouga.VariableReference
 import be.kuleuven.simoncockx.nouga.nouga.ListLiteral
 import be.kuleuven.simoncockx.nouga.nouga.OnlyElementExpression
 import be.kuleuven.simoncockx.nouga.nouga.Function
+import be.kuleuven.simoncockx.nouga.nouga.NotExpression
+import be.kuleuven.simoncockx.nouga.nouga.Attribute
 
 inject extension TypeFactory typeFactory
 inject extension TypeUtil typeUtil
@@ -42,6 +44,7 @@ auxiliary {
 	join(BasicType t1, BasicType t2) : BasicType
 	union(Cardinality c1, Cardinality c2) : Cardinality
 	listJoin(Type t1, Type t2) : Type
+	allAttributes(Data d) : Iterable<Attribute>
 }
 
 judgments {
@@ -116,6 +119,13 @@ auxiliary union(Cardinality c1, Cardinality c2) {
 auxiliary listJoin(Type t1, Type t2) {
 	return createType(join(t1.basicType, t2.basicType), union(t1.cardinality, t2.cardinality))
 }
+auxiliary allAttributes(Data d) {
+	if (d.superType === null) {
+		return d.attributes;
+	} else {
+		return allAttributes(d.superType) + d.attributes;
+	}
+}
 
 /*** BASIC SUBTYPING **/
 rule SBuiltIn // SA-Refl, SA-Num, SA-Nothing
@@ -160,6 +170,12 @@ from {
 	t1.typesAreEqual(singleBoolean)
 	G |- e.right : var Type t2
 	t2.typesAreEqual(singleBoolean)
+}
+rule TNot // TA-Not
+	G |- NotExpression e : singleBoolean
+from {
+	G |- e.expression : var Type t
+	t.typesAreEqual(singleBoolean)
 }
 rule TExists // TA-Exists, TA-SingleExists, TA-MultipleExists
 	G |- ExistsExpression e : singleBoolean
@@ -258,7 +274,7 @@ from {
 rule TConstruct // TA-Construct
 	G |- DataConstructionExpression e : createType(createDataType(e.type), createCardinality(1, 1))
 from {
-	e.type.attributes.size() == e.values.size()
+	allAttributes(e.type).size() == e.values.size()
 	e.values.map[key].toSet().size() == e.values.size()
 	e.values.forall[
 		G |- value : var Type t

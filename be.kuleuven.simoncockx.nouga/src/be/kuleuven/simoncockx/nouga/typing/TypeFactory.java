@@ -59,6 +59,9 @@ public class TypeFactory {
 	public Type createType(Data data, int inf) {
 		return createType(createDataType(data), createUnboundedCardinality(inf));
 	}
+	public Type createType(BasicType basicType, int inf) {
+		return createType(basicType, createUnboundedCardinality(inf));
+	}
 	
 	public Cardinality getSingle() {
 		return createCardinality(1, 1);

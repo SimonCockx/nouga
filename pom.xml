@@ -21,13 +21,13 @@
 		<additionalTestArguments></additionalTestArguments>
 	</properties>
 	<modules>
+		<module>be.kuleuven.simoncockx.nouga.lib</module>
 		<module>be.kuleuven.simoncockx.nouga</module>
 		<module>be.kuleuven.simoncockx.nouga.ide</module>
 		<module>be.kuleuven.simoncockx.nouga.ui</module>
 		<module>be.kuleuven.simoncockx.nouga.target</module>
 		<module>be.kuleuven.simoncockx.nouga.tests</module>
 		<module>be.kuleuven.simoncockx.nouga.ui.tests</module>
-		<module>be.kuleuven.simoncockx.nouga.lib</module>
 	</modules>
 	<dependencyManagement>
 		<dependencies>
@@ -53,6 +53,7 @@
 				<artifactId>target-platform-configuration</artifactId>
 				<version>${tycho-version}</version>
 				<configuration>
+					<pomDependencies>consider</pomDependencies>
 					<target>
 						<artifact>
 							<groupId>be.kuleuven.simoncockx.nouga</groupId>
@@ -99,6 +100,11 @@
 		</plugins>
 		<pluginManagement>
 			<plugins>
+				<plugin>
+					<groupId>org.eclipse.xtext</groupId>
+					<artifactId>xtext-maven-plugin</artifactId>
+					<version>${xtextVersion}</version>
+				</plugin>
 				<plugin>
 					<groupId>org.eclipse.xtend</groupId>
 					<artifactId>xtend-maven-plugin</artifactId>

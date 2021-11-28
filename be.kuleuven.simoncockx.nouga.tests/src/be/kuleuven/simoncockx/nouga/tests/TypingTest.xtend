@@ -38,6 +38,17 @@ class TypingTest {
 		val t1 = createType(BuiltInTypeEnum.INT, 1, 3);
 		val t2 = createType(BuiltInTypeEnum.NUMBER, 1, 5);
 		t1.assertSubtype(t2)
+		
+		val model = '''
+		namespace test
+		
+		type A:
+		type B extends A:
+		'''.parse
+		model.assertNoErrors;
+		val a = model.elements.head as Data
+		val b = model.elements.last as Data
+		createType(b, 1, 1).assertSubtype(createType(a, 1, 1))
 	}
 	
 	@Test
@@ -49,6 +60,11 @@ class TypingTest {
 	def void testTBooleanOperation() {
 		'True or False'.type.assertTypeEquals(singleBoolean);
 		'True and False'.type.assertTypeEquals(singleBoolean);
+	}
+	
+	@Test
+	def void testTNot() {
+		'not True'.type.assertTypeEquals(singleBoolean);
 	}
 	
 	@Test
@@ -154,17 +170,19 @@ class TypingTest {
 		val model = '''
 		namespace test
 		
-		type MyType:
+		type Super:
+			n int (1..1)
+		type MyType extends Super:
 			val int (2..7)
 			otherVal boolean (0..1)
 		func Test:
 			inputs:
 			output: result MyType (1..1)
 			assign-output:
-				MyType {val: [1, 2], otherVal: empty}
+				MyType {val: [1, 2], n: 42, otherVal: empty}
 		'''.parse
 		model.assertNoErrors;
-		val data = model.elements.head as Data
+		val data = model.elements.get(1) as Data
 		val expression = (model.elements.last as Function).operation;
 		expression.type.assertTypeEquals(createType(data, 1, 1));
 	}

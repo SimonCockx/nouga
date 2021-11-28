@@ -64,19 +64,25 @@ class ScopingTest {
 		val model = '''
 			namespace just.some.package
 			
-			type MyType:
+			type SuperType:
+				n int (1..1)
+			type MyType extends SuperType:
 				val boolean (1..1)
 			
 			func Create:
 				inputs:
 				output: result MyType (1..1)
 				assign-output:
-					MyType { val: True }
+					MyType { val: True, n: 1 }
 		'''.parse;
 		model.assertNoErrors;
+		val superType = model.elements.head as Data;
+		val myType = model.elements.get(1) as Data;
 		model.elements.last as Function => [
-			(operation as DataConstructionExpression).values.head.key.
-				assertSame((model.elements.head as Data).attributes.head)
+			(operation as DataConstructionExpression).values => [
+				head.key.assertSame(myType.attributes.head)
+				last.key.assertSame(superType.attributes.head)
+			]
 		]
 	}
 	
@@ -85,14 +91,16 @@ class ScopingTest {
 		val model = '''
 			namespace just.some.package
 			
-			type MyType:
+			type SuperType:
+				n int (1..1)
+			type MyType extends SuperType:
 				val boolean (1..1)
 			
 			func Project:
 				inputs:
-				output: result boolean (1..1)
+				output: result int (1..1)
 				assign-output:
-					MyType { val: True } -> val
+					MyType { val: True, n: 1 } -> n
 		'''.parse;
 		model.assertNoErrors;
 		model => [

@@ -18,23 +18,7 @@
 
 
 %%%%%%%% CODE LISTINGS %%%%%%%%%%
-\usepackage{listings}
-%\lstMakeShortInline[columns=fixed]|
-
-% Patch for lstinline inside math mode (see https://tex.stackexchange.com/a/127018/149123)
-\usepackage{letltxmacro}
-\newcommand*{\SavedLstInline}{}
-\LetLtxMacro\SavedLstInline\lstinline
-\DeclareRobustCommand*{\lstinline}{%
-  \ifmmode
-    \let\SavedBGroup\bgroup
-    \def\bgroup{%
-      \let\bgroup\SavedBGroup
-      \hbox\bgroup
-    }%
-  \fi
-  \SavedLstInline
-}
+\usepackage[final]{listings}
 
 \definecolor{codegreen}{rgb}{0,0.6,0}
 \definecolor{codegray}{rgb}{0.5,0.5,0.5}
@@ -58,6 +42,36 @@
     showtabs=false,                  
     tabsize=2
 }
+
+% Add background color to inline listings
+% See https://tex.stackexchange.com/a/357339/149123
+% and https://tex.stackexchange.com/a/408880/149123
+\usepackage{xpatch}
+\usepackage{realboxes}
+\makeatletter
+\xpretocmd\lstinline
+  {%
+   \bgroup\fboxsep=1.5pt
+   \Colorbox{backcolour}\bgroup\kern-\fboxsep\vphantom{\ttfamily\char`\\y}%
+   \appto\lst@DeInit{\kern-\fboxsep\egroup\egroup}%
+  }{}{}
+\makeatother
+
+% Patch for lstinline inside math mode (see https://tex.stackexchange.com/a/127018/149123)
+\usepackage{letltxmacro}
+\newcommand*{\SavedLstInline}{}
+\LetLtxMacro\SavedLstInline\lstinline
+\DeclareRobustCommand*{\lstinline}{%
+  \ifmmode
+    \let\SavedBGroup\bgroup
+    \def\bgroup{%
+      \let\bgroup\SavedBGroup
+      \hbox\bgroup
+    }%
+  \fi
+  \SavedLstInline
+}
+
 \lstset{style=mystyle}
 \definecolor{eminence}{RGB}{108,48,130}
 \lstdefinelanguage{Rosetta}{%

@@ -43,7 +43,7 @@ public class NougaScopeProvider extends AbstractNougaScopeProvider {
 			ProjectionExpression ctx = (ProjectionExpression)context;
 			BasicType type = typing.type(ctx.getReceiver()).getValue().getBasicType();
 			if (type instanceof DataType) {
-				return Scopes.scopeFor(((DataType)type).getData().getAttributes());
+				return Scopes.scopeFor(typing.allAttributes(((DataType)type).getData()));
 			}
 			return IScope.NULLSCOPE;
 		} else if (context instanceof Function && reference == NougaPackage.Literals.VARIABLE_REFERENCE__REFERENCE) {
@@ -51,7 +51,7 @@ public class NougaScopeProvider extends AbstractNougaScopeProvider {
 			return Scopes.scopeFor(function.getInputs());
 		} else if (context instanceof KeyValuePair && reference == NougaPackage.Literals.KEY_VALUE_PAIR__KEY) {
 			DataConstructionExpression construct = EcoreUtil2.getContainerOfType(context, DataConstructionExpression.class);
-			return Scopes.scopeFor(construct.getType().getAttributes());
+			return Scopes.scopeFor(typing.allAttributes(construct.getType()));
 		}
 		return super.getScope(context, reference);
 	}

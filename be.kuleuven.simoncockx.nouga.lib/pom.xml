@@ -7,4 +7,10 @@
   </parent>
   <artifactId>be.kuleuven.simoncockx.nouga.lib</artifactId>
   <name>nouga-lib</name>
+  
+  <build>
+	  <plugins>
+	  	
+	  </plugins>
+  </build>
 </project>

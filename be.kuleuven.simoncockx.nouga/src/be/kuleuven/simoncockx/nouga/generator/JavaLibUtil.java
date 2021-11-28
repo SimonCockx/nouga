@@ -39,11 +39,12 @@ public class JavaLibUtil {
 	public String divide;
 	public String count;
 	public String project;
+	public String flatProject;
 	public String ifThenElse;
-	public String onlyExists;
+	public String checkAll;
 	public String onlyElement;
 	public String coerceIntToNumber;
-	public String coerceNothingToAnything;
+	public String coerceToList;
 	
 	public JavaLibUtil() {
 		Field[] fields = JavaLibUtil.class.getDeclaredFields();

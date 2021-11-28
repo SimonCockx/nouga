@@ -8,25 +8,37 @@ import be.kuleuven.simoncockx.nouga.nouga.Function
 import java.math.BigDecimal
 import be.kuleuven.simoncockx.nouga.nouga.Attribute
 import be.kuleuven.simoncockx.nouga.nouga.Named
+import com.google.common.collect.ImmutableList
+import java.util.List
+import com.google.inject.Inject
+import com.google.inject.ImplementedBy
+import be.kuleuven.simoncockx.nouga.nouga.Model
 
 class JavaNameUtil {
-	public final String basePackage = "mydummypackage"
-	public final String functionsPackage = '''«basePackage».functions'''
 	public final String imports = '''
 	import «Nouga.canonicalName»;
 	import «BigDecimal.canonicalName»;
+	import «ImmutableList.canonicalName»;
+	import «List.canonicalName»;
+	import «Inject.canonicalName»;
+	import «ImplementedBy.canonicalName»;
 	'''
 	public final String evaluationName = "evaluate"
+	public final String functionsSubpackage = "functions"
 	
 	def packageToPath(String ^package) {
 		^package.replace(".", "/")
 	}
 	
-	def dispatch toQualifiedName(Data elem) {
-		'''«basePackage».«toClassName(elem)»'''
+	def toQualifiedName(RootElement elem) {
+		'''«toPackage(elem)».«toClassName(elem)»'''
 	}
-	def dispatch toQualifiedName(Function elem) {
-		'''«functionsPackage».«toClassName(elem)»'''
+	
+	def dispatch toPackage(Data elem) {
+		(elem.eContainer as Model).name
+	}
+	def dispatch toPackage(Function elem) {
+		'''«(elem.eContainer as Model).name».«functionsSubpackage»'''
 	}
 	
 	def toPath(RootElement elem) {

@@ -11,7 +11,6 @@ import be.kuleuven.simoncockx.nouga.nouga.Model
 import be.kuleuven.simoncockx.nouga.nouga.Data
 import be.kuleuven.simoncockx.nouga.nouga.Function
 import com.google.inject.Inject
-import be.kuleuven.simoncockx.nouga.nouga.FunctionCallExpression
 
 /**
  * Generates code from your model files on save.
@@ -22,9 +21,9 @@ class NougaGenerator extends AbstractGenerator {
 	@Inject
 	extension JavaNameUtil
 	@Inject
-	extension JavaTypeUtil
+	extension JavaEntityUtil
 	@Inject
-	extension JavaExpressionUtil
+	extension JavaFunctionUtil
 
 	override void doGenerate(Resource resource, IFileSystemAccess2 fsa, IGeneratorContext context) {
 		resource.contents.filter(Model).forEach [
@@ -36,44 +35,20 @@ class NougaGenerator extends AbstractGenerator {
 	
 	def dispatch void generateRootElement(Data data, IFileSystemAccess2 fsa) {
 		fsa.generateFile(data.toPath, '''
-			package «basePackage»;
+			package «data.toPackage»;
 			
 			«imports»
 			
-			public class «data.toClassName» {
-				«data.attributes.join(System.lineSeparator)['''private «type.toJavaType» «toVarName»;''']»
-				
-				public «data.toClassName»(«data.attributes.join(',')['''«type.toJavaType» «toVarName»''']») {
-					«data.attributes.join(System.lineSeparator)['''this.«toVarName» = «toVarName»;''']»
-				}
-				
-				«FOR attr: data.attributes»
-				public «attr.type.toJavaType» «attr.toGetterName»() {
-					return this.«attr.toVarName»;
-				}
-				«ENDFOR»
-			}
+			«data.toJavaClass»
 		''')
 	}
 	def dispatch void generateRootElement(Function func, IFileSystemAccess2 fsa) {
 		fsa.generateFile(func.toPath, '''
-			package «functionsPackage»;
+			package «func.toPackage»;
 			
 			«imports»
 			
-			public class «func.toClassName» {
-				«gatherDependencies(func).join(System.lineSeparator)[
-				'''@Inject «toClassName» «toVarName»;'''
-				]»
-				
-				public «func.output.type.toJavaType» «evaluationName»() {
-					return «func.operation.toJavaExpression»;
-				}
-			}
+			«func.toJavaFunction»
 		''')
-	}
-	
-	private def gatherDependencies(Function func) {
-		func.operation.eAllContents.filter(FunctionCallExpression).map[function]
 	}
 }

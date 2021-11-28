@@ -10,7 +10,9 @@ import org.eclipse.xtext.resource.IResourceDescription;
 import org.eclipse.xtext.resource.XtextResource;
 
 import be.kuleuven.simoncockx.nouga.derivedstate.NougaDerivedStateComputer;
+import be.kuleuven.simoncockx.nouga.generator.JavaEntityUtil;
 import be.kuleuven.simoncockx.nouga.generator.JavaExpressionUtil;
+import be.kuleuven.simoncockx.nouga.generator.JavaFunctionUtil;
 import be.kuleuven.simoncockx.nouga.generator.JavaLibUtil;
 import be.kuleuven.simoncockx.nouga.generator.JavaNameUtil;
 import be.kuleuven.simoncockx.nouga.generator.JavaTypeUtil;
@@ -50,5 +52,11 @@ public class NougaRuntimeModule extends AbstractNougaRuntimeModule {
 	}
 	public Class<? extends JavaLibUtil> bindJavaLibUtil() {
 		return JavaLibUtil.class;
+	}
+	public Class<? extends JavaEntityUtil> bindJavaEntityUtil() {
+		return JavaEntityUtil.class;
+	}
+	public Class<? extends JavaFunctionUtil> bindJavaFunctionUtil() {
+		return JavaFunctionUtil.class;
 	}
 }
