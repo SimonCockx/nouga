@@ -29,6 +29,7 @@ import be.kuleuven.simoncockx.nouga.nouga.DataConstructionExpression
 import be.kuleuven.simoncockx.nouga.nouga.OnlyElementExpression
 import java.math.BigDecimal
 import be.kuleuven.simoncockx.nouga.nouga.VariableReference
+import be.kuleuven.simoncockx.nouga.nouga.AbsentExpression
 
 class JavaExpressionUtil {
 	@Inject
@@ -127,6 +128,10 @@ class JavaExpressionUtil {
 		} else {
 			'''«lib.exists»(«arg»)'''
 		}
+	}
+	def dispatch CharSequence toUnsafeJavaExpression(AbsentExpression e, Type type) {
+		val arg = e.argument.toUnsafeJavaExpression(e.argument.type.value)
+		'''«lib.isAbsent»(«arg»)'''
 	}
 	def dispatch CharSequence toUnsafeJavaExpression(ContainsExpression e, Type type) {
 		toComparableBinaryJavaExpression(lib.contains, e.container, e.contained)

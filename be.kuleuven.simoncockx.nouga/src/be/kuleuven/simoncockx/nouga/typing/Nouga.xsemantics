@@ -32,6 +32,7 @@ import be.kuleuven.simoncockx.nouga.nouga.OnlyElementExpression
 import be.kuleuven.simoncockx.nouga.nouga.Function
 import be.kuleuven.simoncockx.nouga.nouga.NotExpression
 import be.kuleuven.simoncockx.nouga.nouga.Attribute
+import be.kuleuven.simoncockx.nouga.nouga.AbsentExpression
 
 inject extension TypeFactory typeFactory
 inject extension TypeUtil typeUtil
@@ -189,6 +190,12 @@ from {
 	} else {
 		createCardinality(0, 1).isSubcardinality(t.cardinality)
 	}
+}
+rule TAbsent // No corresponding rule. In the specification, this is treated as syntactic sugar.
+	G |- AbsentExpression e : singleBoolean
+from {
+	G |- e.argument : var Type t
+	createCardinality(0, 1).isSubcardinality(t.cardinality)
 }
 rule TContains // TA-Contains
 	G |- ContainsExpression e : singleBoolean

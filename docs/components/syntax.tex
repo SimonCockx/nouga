@@ -1,61 +1,6 @@
 Metavariables: \lit*{D} and \lit*{E} range over entity names, \lit*{F} ranges over function names, \lit*{a} and \lit*{b} range over attribute and parameter names, \lit*{i} and \lit*{j} range over signed integers, \lit*{k} and \lit*{l} range over positive integers, \lit*{r} ranges over signed decimals. Whitespace is ignored.
 
-\begin{defbox}[2]
-\begin{grammar}
-<DD> ::= \explain{entity declarations:}
-  `type' "D" (`extends' "E")? `:'\\
-\ind <AT>*
-
-<FD> ::= \explain{function declarations:}
-  `func' "F" `:'\\
-\ind `inputs' `:' <AT>*\\
-\ind `output' `:' <AT>\\
-\ind `assign-output' `:' <E>
-
-<AT> ::= \explain{attribute declarations:}
-  "a" <T> <CD>
-
-<CD> ::= \explain{cardinalities:}
-  | `(' "l" `..' "k" `)' \explain{bounded}
-  | `(' "l" `..' `*' `)' \explain{unbounded}
-
-<E> ::= \explain{expressions:}
-  | <E> `or' <E>\\
-  | <E> `and' <E>\\
-  | `not' <E>\\
-  | <E> (`single' | `multiple')? `exists'\\
-  | <E> `is' `absent'\\
-  | <E> `contains' <E>\\
-  | <E> `disjoint' <E>\\
-  | <E> (`all' | `any')? (`=' | `<>') <E>\\
-  | <E> (`+' | `-') <E>\\
-  | <E> (`*' | `/') <E>\\
-  | <E> `count'\\
-  | <E> `->' "a"\\
-  | `if' <E> `then' <E> (`else' <E>)?\\
-  | "F" `(' (<E> (`,' <E>)*)? `)'\\
-  | "a"\\
-  | <LIT>\\
-  | `(' <E> `)'\\
-  | <E> `->' "a" `only' `exists'\\
-  | <E> `only-element'\\
-  | "D" `\{' ("a" `=' <E> (`,' "b" `=' <E>)*)? `\}'
-
-<LIT> ::= \explain{literals:}
-  | `True' | `False' \explain{booleans}
-  | "i" \explain{signed integers}
-  | "r" \explain{signed decimals}
-  | `empty' \explain{empty literal}
-  | `[' (<E> (`,' <E>)*)? `]' \explain{list literals}
-
-<T> ::= \explain{basic types:}
-  | "D"
-  | `boolean'
-  | `int'
-  | `number'
-  | `nothing'
-\end{grammar}
-\end{defbox}
+\input{syntax-def}
 
 \paragraph{Operator precedence} (note: this differs from Rosetta. The precedence of operators common with the C language are based on \url{https://en.cppreference.com/w/c/language/operator_precedence}.)
 \begin{enumerate}

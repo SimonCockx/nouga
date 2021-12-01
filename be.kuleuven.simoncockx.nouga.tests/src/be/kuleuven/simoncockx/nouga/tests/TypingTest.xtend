@@ -73,6 +73,7 @@ class TypingTest {
 		'(if True then empty else 1) single exists'.type.assertTypeEquals(singleBoolean);
 		'(if True then 1 else [2, 3]) single exists'.type.assertTypeEquals(singleBoolean);
 		'(if True then 1 else [2, 3]) multiple exists'.type.assertTypeEquals(singleBoolean);
+		'(if True then empty else 1) is absent'.type.assertTypeEquals(singleBoolean);
 	}
 	
 	@Test

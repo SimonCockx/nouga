@@ -22,6 +22,7 @@ public class JavaLibUtil {
 	public String exists;
 	public String singleExists;
 	public String multipleExists;
+	public String isAbsent;
 	public String contains;
 	public String disjoint;
 	public String equals;

@@ -173,6 +173,8 @@ class GenerationTest {
 		evaluateExpression('boolean (1..1)', '(if False then [1, 2] else 0) single exists')[true.assertEquals(it)]
 		evaluateExpression('boolean (1..1)', '(if True then [1, 2] else empty) multiple exists')[true.assertEquals(it)]
 		evaluateExpression('boolean (1..1)', '(if False then [1, 2] else empty) multiple exists')[false.assertEquals(it)]
+		evaluateExpression('boolean (1..1)', '(if True then empty else 0) is absent')[true.assertEquals(it)]
+		evaluateExpression('boolean (1..1)', '(if False then empty else 0) is absent')[false.assertEquals(it)]
 	}
 	
 	@Test
