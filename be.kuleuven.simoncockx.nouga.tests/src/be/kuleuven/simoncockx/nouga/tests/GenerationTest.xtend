@@ -147,6 +147,11 @@ class GenerationTest {
 	def void testLiterals() {
 		evaluateExpression('boolean (1..1)', 'True')[true.assertEquals(it)];
 		evaluateExpression('number (1..1)', '42.0')[NougaNumber.valueOf(42).assertEquals(it)];
+		evaluateExpression('number (1..1)', '-.1')[NougaNumber.valueOf(-0.1).assertEquals(it)];
+		evaluateExpression('number (1..1)', '3.')[NougaNumber.valueOf(3.0).assertEquals(it)];
+		evaluateExpression('number (1..1)', '42.0e-3')[NougaNumber.valueOf(42.0e-3).assertEquals(it)];
+		evaluateExpression('number (1..1)', '42.0e+5')[NougaNumber.valueOf(42.0e+5).assertEquals(it)];
+		evaluateExpression('number (1..1)', '42.0E2')[NougaNumber.valueOf(42.0e2).assertEquals(it)];
 		<Integer>evaluateExpression('int (1..1)', '42')[42.assertEquals(it)];
 		evaluateExpression('nothing (0..0)', 'empty')[#[].assertListEquals(it)];
 	}
@@ -243,10 +248,10 @@ class GenerationTest {
 		<Integer>evaluateExpression('int (1..1)', '5 - 12')[(-7).assertEquals(it)];
 		<Integer>evaluateExpression('int (1..1)', '5 * 12')[60.assertEquals(it)];
 		
-		evaluateExpression('number (1..1)', '5.0 + 12.25')[NougaNumber.valueOf(17.25).assertEquals(it)];
-		evaluateExpression('number (1..1)', '5.0 - 12.25')[NougaNumber.valueOf(-7.25).assertEquals(it)];
+		evaluateExpression('number (1..1)', '5.0 + 12.250')[NougaNumber.valueOf(17.25).assertEquals(it)];
+		evaluateExpression('number (1..1)', '5.0 - 5.001')[NougaNumber.valueOf(-0.001).assertEquals(it)];
 		evaluateExpression('number (1..1)', '5.0 * 12.25')[NougaNumber.valueOf(61.250).assertEquals(it)];
-		evaluateExpression('number (1..1)', '3.5 / 5.0')[NougaNumber.valueOf(0.7).assertEquals(it)];
+		evaluateExpression('number (1..1)', '3.5 / 5.00')[NougaNumber.valueOf(0.7).assertEquals(it)];
 	}
 	
 	@Test
