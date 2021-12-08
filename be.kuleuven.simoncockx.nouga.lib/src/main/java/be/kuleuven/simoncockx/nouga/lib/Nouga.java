@@ -1,7 +1,5 @@
 package be.kuleuven.simoncockx.nouga.lib;
 
-import java.math.BigDecimal;
-import java.math.MathContext;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -9,9 +7,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class Nouga {
-	public static final MathContext DECIMAL_PRECISION = MathContext.DECIMAL128;
-	
+public class Nouga {	
 	public static <T> List<? extends T> single(T e) {
 		return Collections.singletonList(e);
 	}	
@@ -111,26 +107,26 @@ public class Nouga {
 	public static int addInt(int e1, int e2) {
 		return e1 + e2;
 	}
-	public static BigDecimal addNumber(BigDecimal e1, BigDecimal e2) {
+	public static NougaNumber addNumber(NougaNumber e1, NougaNumber e2) {
 		return e1.add(e2);
 	}
 	
 	public static int subtractInt(int e1, int e2) {
 		return e1 - e2;
 	}
-	public static BigDecimal subtractNumber(BigDecimal e1, BigDecimal e2) {
+	public static NougaNumber subtractNumber(NougaNumber e1, NougaNumber e2) {
 		return e1.subtract(e2);
 	}
 	
 	public static int multiplyInt(int e1, int e2) {
 		return e1 * e2;
 	}
-	public static BigDecimal multiplyNumber(BigDecimal e1, BigDecimal e2) {
+	public static NougaNumber multiplyNumber(NougaNumber e1, NougaNumber e2) {
 		return e1.multiply(e2);
 	}
 	
-	public static BigDecimal divide(BigDecimal e1, BigDecimal e2) {
-		return e1.divide(e2, DECIMAL_PRECISION);
+	public static NougaNumber divide(NougaNumber e1, NougaNumber e2) {
+		return e1.divide(e2);
 	}
 	
 	public static <T> int count(T e) {
@@ -170,10 +166,10 @@ public class Nouga {
 		return null;
 	}
 	
-	public static BigDecimal coerceIntToNumber(int e) {
-		return BigDecimal.valueOf(e);
+	public static NougaNumber coerceIntToNumber(int e) {
+		return NougaNumber.valueOf(e);
 	}
-	public static List<? extends BigDecimal> coerceIntToNumber(List<? extends Integer> e) {
+	public static List<? extends NougaNumber> coerceIntToNumber(List<? extends Integer> e) {
 		return e.stream().map(Nouga::coerceIntToNumber).collect(Collectors.toList());
 	}
 	public static <T> T coerceNothingToAnything(Void e) {

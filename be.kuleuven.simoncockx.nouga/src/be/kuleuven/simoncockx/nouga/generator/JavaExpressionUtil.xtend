@@ -27,9 +27,9 @@ import be.kuleuven.simoncockx.nouga.nouga.DataType
 import be.kuleuven.simoncockx.nouga.nouga.FunctionCallExpression
 import be.kuleuven.simoncockx.nouga.nouga.DataConstructionExpression
 import be.kuleuven.simoncockx.nouga.nouga.OnlyElementExpression
-import java.math.BigDecimal
 import be.kuleuven.simoncockx.nouga.nouga.VariableReference
 import be.kuleuven.simoncockx.nouga.nouga.AbsentExpression
+import be.kuleuven.simoncockx.nouga.lib.NougaNumber
 
 class JavaExpressionUtil {
 	@Inject
@@ -88,7 +88,7 @@ class JavaExpressionUtil {
 		e.value.toString
 	}
 	def dispatch CharSequence toUnsafeJavaExpression(NumberLiteral e, Type type) {
-		'''new «BigDecimal.simpleName»("«e.value»")'''
+		'''new «NougaNumber.simpleName»("«e.value»")'''
 	}
 	def dispatch CharSequence toUnsafeJavaExpression(IntLiteral e, Type type) {
 		e.value

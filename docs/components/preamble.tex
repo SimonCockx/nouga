@@ -1,7 +1,9 @@
 %%%%%%% AUXILIARY FUNCTIONS %%%%%%%%
-\DeclareMathOperator{\DT}{DT} % data table
+\usepackage{amsmath}
+\DeclareMathOperator{\ET}{ET} % entity table
 \DeclareMathOperator{\FT}{FT} % function table
 \DeclareMathOperator{\attrs}{attrs} % attributes
+\DeclareMathOperator{\allattrs}{allattrs} % attributes, including from its ancestors
 \DeclareMathOperator{\inp}{inputs} % inputs
 \DeclareMathOperator{\outp}{output} % output
 \DeclareMathOperator{\op}{op} % operation
@@ -20,6 +22,7 @@
 %%%%%%%% CODE LISTINGS %%%%%%%%%%
 \usepackage[final]{listings}
 
+\usepackage[pdftex,dvipsnames]{xcolor}
 \definecolor{codegreen}{rgb}{0,0.6,0}
 \definecolor{codegray}{rgb}{0.5,0.5,0.5}
 \definecolor{codepurple}{rgb}{0.58,0,0.82}
@@ -33,7 +36,7 @@
     basicstyle=\ttfamily\small,
     breakatwhitespace=false,         
     breaklines=true,                 
-    captionpos=b,                    
+    captionpos=b,     
     keepspaces=true,                 
     numbers=left,                    
     numbersep=5pt,                  
@@ -46,16 +49,16 @@
 % Add background color to inline listings
 % See https://tex.stackexchange.com/a/357339/149123
 % and https://tex.stackexchange.com/a/408880/149123
-\usepackage{xpatch}
-\usepackage{realboxes}
-\makeatletter
-\xpretocmd\lstinline
-  {%
-   \bgroup\fboxsep=1.5pt
-   \Colorbox{backcolour}\bgroup\kern-\fboxsep\vphantom{\ttfamily\char`\\y}%
-   \appto\lst@DeInit{\kern-\fboxsep\egroup\egroup}%
-  }{}{}
-\makeatother
+%\usepackage{xpatch}
+%\usepackage{realboxes}
+%\makeatletter
+%\xpretocmd\lstinline
+%  {%
+%   \bgroup\fboxsep=1.5pt
+%   \Colorbox{backcolour}\bgroup\kern-\fboxsep\vphantom{\ttfamily\char`\\y}%
+%   \appto\lst@DeInit{\kern-\fboxsep\egroup\egroup}%
+%  }{}{}
+%\makeatother
 
 % Patch for lstinline inside math mode (see https://tex.stackexchange.com/a/127018/149123)
 \usepackage{letltxmacro}
@@ -75,6 +78,7 @@
 \lstset{style=mystyle}
 \definecolor{eminence}{RGB}{108,48,130}
 \lstdefinelanguage{Rosetta}{%
+extendedchars,
 keywords={},
 otherkeywords={% Operators
 +, -, *, /, ->, =, <>
@@ -85,8 +89,7 @@ type,extends,func,enum,inputs,output,assign,output,not,or,and,only,single,multip
 disjoint,all,any,count,only-element,if,then,else,True,False,empty,%
 any,boolean,string,int,number,nothing,date,dateTime,zonedDateTime,time % keywords go here
 },%
-literate={% replace strings with symbols
-},
+literate={~}{-}1,
 basicstyle={\sffamily},
 keywordstyle=[2]{\itshape}, % style for types
 keywordstyle=[3]{\ttfamily\color{eminence}}, %style for keywords
@@ -215,18 +218,24 @@ neq[<>],+,-,*,/,proj[->]}
   \fi
  }
 
+\newcommand{\defboxisbreakable}{true}
+\AddToHook{env/spec/begin}{\renewcommand{\defboxisbreakable}{false}}
+\AddToHook{env/spec/end}{\renewcommand{\defboxisbreakable}{true}}
+
+\usepackage{xargs}
 \setlength{\columnseprule}{1pt}
-\newenvironment{defbox}[1][1]{%
+\newenvironmentx{defbox}[2][1=1, 2=]{%
 \begin{tcolorbox}[
 enhanced,
-breakable,
+breakable=\defboxisbreakable,
 sharp corners=all,
 colback=black!4!white,
 toprule=1.5pt,bottomrule=1.5pt,
 leftrule=0pt,rightrule=0pt,
 left=1pt,right=1pt,
 width=0.85\paperwidth,
-center
+center,
+#2
 ]
 \begin{multicols}{#1}
 \begingroup
@@ -238,6 +247,14 @@ center
 \end{multicols}
 \end{tcolorbox} 
 }
+
+\usepackage{float,caption}
+\floatstyle{plaintop}
+\newfloat{spec}{tbp}{specs}
+\floatname{spec}{Specification}
+\captionsetup[spec]{labelsep=colon}
+\numberwithin{spec}{chapter}
+
 
 %%%%%%%%%% CODE GENERATION %%%%%%%%%%
 \newcommand{\java}{\mathcal{J}}

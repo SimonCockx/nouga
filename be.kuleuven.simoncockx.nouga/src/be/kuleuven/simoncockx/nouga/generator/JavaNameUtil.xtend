@@ -5,7 +5,6 @@ import be.kuleuven.simoncockx.nouga.nouga.Data
 import static extension javax.lang.model.SourceVersion.*
 import be.kuleuven.simoncockx.nouga.lib.Nouga
 import be.kuleuven.simoncockx.nouga.nouga.Function
-import java.math.BigDecimal
 import be.kuleuven.simoncockx.nouga.nouga.Attribute
 import be.kuleuven.simoncockx.nouga.nouga.Named
 import com.google.common.collect.ImmutableList
@@ -13,11 +12,12 @@ import java.util.List
 import com.google.inject.Inject
 import com.google.inject.ImplementedBy
 import be.kuleuven.simoncockx.nouga.nouga.Model
+import be.kuleuven.simoncockx.nouga.lib.NougaNumber
 
 class JavaNameUtil {
 	public final String imports = '''
 	import «Nouga.canonicalName»;
-	import «BigDecimal.canonicalName»;
+	import «NougaNumber.canonicalName»;
 	import «ImmutableList.canonicalName»;
 	import «List.canonicalName»;
 	import «Inject.canonicalName»;

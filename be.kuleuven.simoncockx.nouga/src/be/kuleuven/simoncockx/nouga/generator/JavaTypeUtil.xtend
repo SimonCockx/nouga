@@ -3,9 +3,9 @@ package be.kuleuven.simoncockx.nouga.generator
 import be.kuleuven.simoncockx.nouga.nouga.Type
 import be.kuleuven.simoncockx.nouga.nouga.BuiltInType
 import be.kuleuven.simoncockx.nouga.nouga.DataType
-import java.math.BigDecimal
 import com.google.inject.Inject
 import be.kuleuven.simoncockx.nouga.nouga.BuiltInTypeEnum
+import be.kuleuven.simoncockx.nouga.lib.NougaNumber
 
 class JavaTypeUtil {
 	@Inject
@@ -40,7 +40,7 @@ class JavaTypeUtil {
 			case BOOLEAN:
 				Boolean.simpleName
 			case NUMBER:
-				BigDecimal.simpleName
+				NougaNumber.simpleName
 			case INT:
 				Integer.simpleName
 			case NOTHING:

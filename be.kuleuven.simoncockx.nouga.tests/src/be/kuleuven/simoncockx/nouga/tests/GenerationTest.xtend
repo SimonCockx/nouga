@@ -8,7 +8,6 @@ import org.eclipse.xtext.xbase.testing.CompilationTestHelper
 import org.junit.jupiter.api.Test
 import static extension org.junit.jupiter.api.Assertions.*
 import java.lang.reflect.Modifier
-import java.math.BigDecimal
 import java.util.List
 import java.lang.reflect.ParameterizedType
 import java.lang.reflect.Type
@@ -19,6 +18,7 @@ import com.google.inject.Guice
 import com.google.inject.AbstractModule
 import org.junit.jupiter.api.BeforeEach
 import org.eclipse.xtext.util.JavaVersion
+import be.kuleuven.simoncockx.nouga.lib.NougaNumber
 
 @ExtendWith(InjectionExtension)
 @InjectWith(NougaInjectorProvider)
@@ -65,11 +65,11 @@ class GenerationTest {
 				c.declaredConstructors.head => [
 					parameterCount.assertEquals(2);
 					parameters => [
-						get(0).type.assertEquals(BigDecimal)
+						get(0).type.assertEquals(NougaNumber)
 						get(1).parameterizedType.assertListType(Boolean)
 					]
-					newInstance(BigDecimal.valueOf(5), #[true, false]) => [
-						BigDecimal.valueOf(5).assertEquals(c.getDeclaredMethod("getSomeNumber").invoke(it));
+					newInstance(NougaNumber.valueOf(5), #[true, false]) => [
+						NougaNumber.valueOf(5).assertEquals(c.getDeclaredMethod("getSomeNumber").invoke(it));
 						#[true, false].assertListEquals(c.getDeclaredMethod("getFlags").invoke(it));
 					]
 				]
@@ -128,7 +128,7 @@ class GenerationTest {
 		'''.compile[
 			getCompiledClass => [c |
 				c.declaredConstructor.newInstance => [
-					#[BigDecimal.valueOf(42)].assertListEquals(c.getDeclaredMethod(evaluationName, int).invoke(it, 41))
+					#[NougaNumber.valueOf(42)].assertListEquals(c.getDeclaredMethod(evaluationName, int).invoke(it, 41))
 				]
 			]
 		]
@@ -136,17 +136,17 @@ class GenerationTest {
 	
 	@Test
 	def void testCoercions() {
-		evaluateExpression('number (1..1)', '42')[BigDecimal.valueOf(42).assertEquals(it)]
+		evaluateExpression('number (1..1)', '42')[NougaNumber.valueOf(42).assertEquals(it)]
 		evaluateExpression('int (0..1)', 'empty')[assertNull]
 		evaluateExpression('int (0..*)', 'empty')[#[].assertListEquals(it)]
 		evaluateExpression('int (0..*)', '1')[#[1].assertListEquals(it)]
-		evaluateExpression('number (0..*)', '42')[#[BigDecimal.valueOf(42)].assertListEquals(it)]
+		evaluateExpression('number (0..*)', '42')[#[NougaNumber.valueOf(42)].assertListEquals(it)]
 	}
 	
 	@Test
 	def void testLiterals() {
 		evaluateExpression('boolean (1..1)', 'True')[true.assertEquals(it)];
-		evaluateExpression('number (1..1)', '42.0')[BigDecimal.valueOf(42.0).assertEquals(it)];
+		evaluateExpression('number (1..1)', '42.0')[NougaNumber.valueOf(42).assertEquals(it)];
 		<Integer>evaluateExpression('int (1..1)', '42')[42.assertEquals(it)];
 		evaluateExpression('nothing (0..0)', 'empty')[#[].assertListEquals(it)];
 	}
@@ -210,6 +210,9 @@ class GenerationTest {
 		evaluateExpression('boolean (1..1)', '''«a1» = «a2»''')[false.assertEquals(it)];
 		evaluateExpression('boolean (1..1)', '''«b1» = «b2»''')[false.assertEquals(it)];
 		
+		evaluateExpression('boolean (1..1)', '1.0 = 1.00')[true.assertEquals(it)];
+		evaluateExpression('boolean (1..1)', '1 = 1.0')[true.assertEquals(it)];
+		
 		evaluateExpression('boolean (1..1)', '1 <> 1')[false.assertEquals(it)];
 		evaluateExpression('boolean (1..1)', '[1, 2] <> [1, 3]')[false.assertEquals(it)];
 		evaluateExpression('boolean (1..1)', 'empty <> empty')[true.assertEquals(it)];
@@ -240,10 +243,10 @@ class GenerationTest {
 		<Integer>evaluateExpression('int (1..1)', '5 - 12')[(-7).assertEquals(it)];
 		<Integer>evaluateExpression('int (1..1)', '5 * 12')[60.assertEquals(it)];
 		
-		evaluateExpression('number (1..1)', '5.0 + 12.25')[BigDecimal.valueOf(17.25).assertEquals(it)];
-		evaluateExpression('number (1..1)', '5.0 - 12.25')[BigDecimal.valueOf(-7.25).assertEquals(it)];
-		evaluateExpression('number (1..1)', '5.0 * 12.25')[new BigDecimal("61.250").assertEquals(it)];
-		evaluateExpression('number (1..1)', '3.5 / 5.0')[BigDecimal.valueOf(0.7).assertEquals(it)];
+		evaluateExpression('number (1..1)', '5.0 + 12.25')[NougaNumber.valueOf(17.25).assertEquals(it)];
+		evaluateExpression('number (1..1)', '5.0 - 12.25')[NougaNumber.valueOf(-7.25).assertEquals(it)];
+		evaluateExpression('number (1..1)', '5.0 * 12.25')[NougaNumber.valueOf(61.250).assertEquals(it)];
+		evaluateExpression('number (1..1)', '3.5 / 5.0')[NougaNumber.valueOf(0.7).assertEquals(it)];
 	}
 	
 	@Test
