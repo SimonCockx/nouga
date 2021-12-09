@@ -15,6 +15,7 @@
 \DeclareMathOperator{\subcardinality}{subcardinality} % check whether a cardinality range is enclosed by another cardinality range
 \DeclareMathOperator{\union}{union} % union of cardinalities
 \DeclareMathOperator{\join}{join} % join of two types
+\DeclareMathOperator(\maybeempty}{maybeempty} % all attributes may be empty
 
 \newcommand{\lv}[1]{#1^{*}} % list version of an operator
 
@@ -78,10 +79,10 @@
 \lstset{style=mystyle}
 \definecolor{eminence}{RGB}{108,48,130}
 \lstdefinelanguage{Rosetta}{%
-extendedchars,
-keywords={},
+alsoletter={-},
+keywords={-},
 otherkeywords={% Operators
-+, -, *, /, ->, =, <>
++, *, /, ->, =, <>
 },
 morekeywords=[2]{boolean,int,number}, % types go here
 morekeywords=[3]{%
@@ -89,7 +90,6 @@ type,extends,func,enum,inputs,output,assign,output,not,or,and,only,single,multip
 disjoint,all,any,count,only-element,if,then,else,True,False,empty,%
 any,boolean,string,int,number,nothing,date,dateTime,zonedDateTime,time % keywords go here
 },%
-literate={~}{-}1,
 basicstyle={\sffamily},
 keywordstyle=[2]{\itshape}, % style for types
 keywordstyle=[3]{\ttfamily\color{eminence}}, %style for keywords

@@ -46,6 +46,7 @@ auxiliary {
 	union(Cardinality c1, Cardinality c2) : Cardinality
 	listJoin(Type t1, Type t2) : Type
 	allAttributes(Data d) : Iterable<Attribute>
+	mayBeEmpty(Data d)
 }
 
 judgments {
@@ -127,6 +128,11 @@ auxiliary allAttributes(Data d) {
 		return allAttributes(d.superType) + d.attributes;
 	}
 }
+auxiliary mayBeEmpty(Data d) {
+	d.allAttributes.forall[
+		createCardinality(0, 1).isSubcardinality(type.cardinality)
+	]
+}
 
 /*** BASIC SUBTYPING **/
 rule SBuiltIn // SA-Refl, SA-Num, SA-Nothing
@@ -155,7 +161,7 @@ from {
 }
 
 /*** SUBTYPING ***/
-rule SCard // SA-Card
+rule SList // SA-List
 	G |- Type s <| Type t
 from {
 	G |- s.basicType <: t.basicType
@@ -254,6 +260,7 @@ rule TProject // TA-Project, // TA-OnlyExists
 from {
 	G |- e.receiver : var Type te
 	if (e.onlyExists) {
+		mayBeEmpty((te.basicType as DataType).^data)
 		t = singleBoolean
 	} else {
 		t = createType(e.attribute.type.basicType.clone, te.cardinality.multiply(e.attribute.type.cardinality))

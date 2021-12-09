@@ -141,6 +141,8 @@ class GenerationTest {
 		evaluateExpression('int (0..*)', 'empty')[#[].assertListEquals(it)]
 		evaluateExpression('int (0..*)', '1')[#[1].assertListEquals(it)]
 		evaluateExpression('number (0..*)', '42')[#[NougaNumber.valueOf(42)].assertListEquals(it)]
+	
+		evaluateExpression('number (1..1)', '3 / 5')[NougaNumber.valueOf(0.6).assertEquals(it)];
 	}
 	
 	@Test

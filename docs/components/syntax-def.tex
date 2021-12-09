@@ -13,34 +13,34 @@
 \ind `assign-output' `:' <E>
 
 <AD> ::= \explain{attribute declarations:}
-  "a" <T> <CD>
+  "a" <T> <CC>
 
-<CD> ::= \explain{cardinalities:}
+<CC> ::= \explain{cardinality constraints:}
   | `(' "l" `..' "k" `)' \explain{bounded}
   | `(' "l" `..' `*' `)' \explain{unbounded}
 
 <E> ::= \explain{expressions:}
+  | <LIT>\\
+  | "a"\\
   | <E> `or' <E>\\
   | <E> `and' <E>\\
   | `not' <E>\\
-  | <E> (`single' | `multiple')? `exists'\\
-  | <E> `is' `absent'\\
-  | <E> `contains' <E>\\
-  | <E> `disjoint' <E>\\
-  | <E> (`all' | `any')? (`=' | `<>') <E>\\
   | <E> (`+' | `-') <E>\\
   | <E> (`*' | `/') <E>\\
-  | <E> `count'\\
+  | "D" `\{' ("a" `:' <E> (`,' "b" `:' <E>)*)? `\}'\\
   | <E> `->' "a"\\
+  | <E> (`single' | `multiple')? `exists'\\
+  | <E> `is' `absent'\\
+  | <E> `->' "a" `only' `exists'\\
+  | <E> `count'\\
+  | <E> `only-element'\\
+  | <E> (`all' | `any')? (`=' | `<>') <E>\\
+  | <E> `contains' <E>\\
+  | <E> `disjoint' <E>\\
+  | `[' (<E> (`,' <E>)*)? `]'\\
   | `if' <E> `then' <E> (`else' <E>)?\\
   | "F" `(' (<E> (`,' <E>)*)? `)'\\
-  | <E> `->' "a" `only' `exists'\\
-  | <E> `only-element'\\
-  | "D" `\{' ("a" `:' <E> (`,' "b" `:' <E>)*)? `\}'\\
-  | `[' (<E> (`,' <E>)*)? `]'
-  | `(' <E> `)'\\
-  | "a"\\
-  | <LIT>
+  | `(' <E> `)'
 
 <LIT> ::= \explain{literals:}
   | `True' | `False' \explain{booleans}
