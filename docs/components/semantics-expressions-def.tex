@@ -1,0 +1,115 @@
+\begin{align*}
+\evaldef{E-True}{\<True>}{[\strue]}
+\\
+\evaldef{E-False}{\<False>}{[\sfalse]}
+\\
+\evaldef{E-Int}{i}{[i]}
+\\
+\evaldef{E-Number}{r}{[r]}
+\\
+\evaldef{E-Or}{e_1 \<or> e_2}{\letin{[x] = \sexpr|[e_1|] & [y] = \sexpr|[e_2|]}{[x \lor y]}}
+\\
+\evaldef{E-And}{e_1 \<and> e_2}{\letin{[x] = \sexpr|[e_1|] & [y] = \sexpr|[e_2|]}{[x \land y]}}
+\\
+\evaldef{E-Not}{\<not> e}{\letin{[x] = \sexpr|[e|]}{[\neg x]}}
+\\
+\evaldef{E-Plus}{e_1 \<+> e_2}{\letin{[x] = \sexpr|[e_1|] & [y] = \sexpr|[e_2|]}{[x + y]}}
+\\
+\evaldef{E-Subt}{e_1 \<-> e_2}{\letin{[x] = \sexpr|[e_1|] & [y] = \sexpr|[e_2|]}{[x - y]}}
+\\
+\evaldef{E-Mult}{e_1 \<*> e_2}{\letin{[x] = \sexpr|[e_1|] & [y] = \sexpr|[e_2|]}{[x * y]}}
+\\
+\evaldef{E-Div}{e_1 \</> e_2}{\letin{[x] = \sexpr|[e_1|] & [y] = \sexpr|[e_2|]}{[x / y]}}
+\\
+\evaldef{E-Instantiate}{D \set{a_1: e_1, \dots, a_n: e_n}}{[(D, \sexpr|[e_1|], \dots, \sexpr|[e_n|])]}
+\\
+\evaldef{E-Project}{e \<proj> a}{\letin{\emptyset |- e : D\ C & [x_1, \dots, x_n] = \sexpr|[e|]}{\sflatten_n(\sproject_{\stype|[D|], a}(x_1), \dots, \sproject_{\stype|[D|], a}(x_n))}}
+\\
+\evaldef{E-Exists}{e \<exists>}{
+\begin{cases}
+[\strue], & \text{if }\scount(\sexpr|[e|]) \geq 1 \\
+[\sfalse], & \text{otherwise}
+\end{cases}}
+\\
+\evaldef{E-SingleExists}{e \<single> \<exists>}{
+\begin{cases}
+[\strue], & \text{if }\scount(\sexpr|[e|]) = 1 \\
+[\sfalse], & \text{otherwise}
+\end{cases}}
+\\
+\evaldef{E-MultipleExists}{e \<multiple> \<exists>}{
+\begin{cases}
+[\strue], & \text{if }\scount(\sexpr|[e|]) \geq 2 \\
+[\sfalse], & \text{otherwise}
+\end{cases}}
+\\
+\evaldef{E-OnlyExists}{e \<proj> a_i \<only> \<exists>}{\letin{[D \set{a_1: v_1, \dots, a_n: v_n}] = \sexpr|[e|]}{
+\begin{cases}
+[\strue], & \text{if }\scount(v_i) \geq 1~\land~\forall j\in 1..n: \\
+& i\neq j \Rightarrow \scount(v_j) = 0 \\
+[\sfalse], & \text{otherwise}
+\end{cases}}}
+\\
+\evaldef{E-Count}{e \<count>}{[\scount(\sexpr|[e|])]}
+\\
+\evaldef{E-OnlyElement}{e \<only-element>}{\letin{v = \sexpr|[e|]}{
+\begin{cases}
+v, & \text{if }\scount(v) = 1 \\
+\emptylist, & \text{otherwise}
+\end{cases}}}
+\\
+\evaldef{E-Equals}{e_1 \<eq> e_2}{\letin{\emptyset |- e_1 : T_1\ (1..1) & \emptyset |- e_2 : T_2\ (1..1) & T = \join(T_1, T_2)}{\lv{\seq}_{\stype|[T|]}(\sexpr|[e_1|], \sexpr|[e_2|])}}
+\\
+\evaldef{E-NotEquals}{e_1 \<neq> e_2}{\letin{[x_1, \dots, x_m] = \sexpr|[e_1|] & [y_1, \dots, y_n] = \sexpr|[e_2|] & \emptyset |- e_1 : T_1\ (1..1) & \emptyset |- e_2 : T_2\ (1..1) & T = \join(T_1, T_2)}{
+\begin{cases}
+[\strue], & \text{if }m \neq n~\lor \\
+& \forall i\in 1..n: \neg\seq_{\stype|[T|]}(x_i, y_i) \\
+[\sfalse], & \text{otherwise}
+\end{cases}}}
+\\
+\evaldef{E-AllEquals}{e_1 \<all> \<eq> e_2}{\letin{[x_1, \dots, x_n] = \sexpr|[e_1|] & [y] = \sexpr|[e_2|] & \emptyset |- e_1 : T_1\ (1..1) & \emptyset |- e_2 : T_2\ (1..1) & T = \join(T_1, T_2)}{
+\begin{cases}
+[\strue], & \text{if }\forall i\in 1..n: \seq_{\stype|[T|]}(x_i, y) \\
+[\sfalse], & \text{otherwise}
+\end{cases}}}
+\\
+\evaldef{E-AllNotEquals}{e_1 \<all> \<neq> e_2}{\letin{[x_1, \dots, x_n] = \sexpr|[e_1|] & [y] = \sexpr|[e_2|] & \emptyset |- e_1 : T_1\ (1..1) & \emptyset |- e_2 : T_2\ (1..1) & T = \join(T_1, T_2)}{
+\begin{cases}
+[\strue], & \text{if }\forall i\in 1..n: \neg\seq_{\stype|[T|]}(x_i, y) \\
+[\sfalse], & \text{otherwise}
+\end{cases}}}
+\\
+\evaldef{E-AnyEquals}{e_1 \<any> \<eq> e_2}{\letin{[x_1, \dots, x_n] = \sexpr|[e_1|] & [y] = \sexpr|[e_2|] & \emptyset |- e_1 : T_1\ (1..1) & \emptyset |- e_2 : T_2\ (1..1) & T = \join(T_1, T_2)}{
+\begin{cases}
+[\strue], & \text{if }\exists i\in 1..n: \seq_{\stype|[T|]}(x_i, y) \\
+[\sfalse], & \text{otherwise}
+\end{cases}}}
+\\
+\evaldef{E-AnyNotEquals}{e_1 \<any> \<neq> e_2}{\letin{[x_1, \dots, x_n] = \sexpr|[e_1|] & [y] = \sexpr|[e_2|] & \emptyset |- e_1 : T_1\ (1..1) & \emptyset |- e_2 : T_2\ (1..1) & T = \join(T_1, T_2)}{
+\begin{cases}
+[\strue], & \text{if }\exists i\in 1..n: \neg\seq_{\stype|[T|]}(x_i, y) \\
+[\sfalse], & \text{otherwise}
+\end{cases}}}
+\\
+\evaldef{E-Contains}{e_1 \<contains> e_2}{\letin{[x_1, \dots, x_m] = \sexpr|[e_1|] & [y_1, \dots, y_n] = \sexpr|[e_2|] & \emptyset |- e_1 : T_1\ (1..1) & \emptyset |- e_2 : T_2\ (1..1) & T = \join(T_1, T_2)}{
+\begin{cases}
+[\strue], & \text{if }\forall j\in 1..n: \exists i\in 1..m: \seq_{\stype|[T|]}(x_i, y_j) \\
+[\sfalse], & \text{otherwise}
+\end{cases}}}
+\\
+\evaldef{E-Disjoint}{e_1 \<disjoint> e_2}{\letin{[x_1, \dots, x_m] = \sexpr|[e_1|] & [y_1, \dots, y_n] = \sexpr|[e_2|] & \emptyset |- e_1 : T_1\ (1..1) & \emptyset |- e_2 : T_2\ (1..1) & T = \join(T_1, T_2)}{
+\begin{cases}
+[\strue], & \text{if }\forall i\in 1..m: \forall j\in 1..n: \neg\seq_{\stype|[T|]}(x_i, y_j) \\
+[\sfalse], & \text{otherwise}
+\end{cases}}}
+\\
+\evaldef{E-List}{[e_1, \dots, e_n]}{\sflatten_n(\sexpr|[e_1|], \dots, \sexpr|[e_n|])}
+\\
+\evaldef{E-If}{\<if> e_1 \<then> e_2 \<else> e_3}{\letin{[x] = \sexpr|[e_1|]}{
+\begin{cases}
+\sexpr|[e_1|], & \text{if }x = \strue \\
+\sexpr|[e_2|], & \text{otherwise}
+\end{cases}}}
+\\
+\evaldef{E-Func}{F(e_1, \dots, e_n)}{\letin{a_1\ T_1\ C_1, \dots, a_n\ T_n\ C_n = \inp(F)}{\sexpr|[\;\left[\; a_1 \mapsto e_1, \dots, a_n \mapsto e_n \;\right]\op(F)|]}}
+\end{align*}

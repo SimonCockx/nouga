@@ -3,7 +3,7 @@ package be.kuleuven.simoncockx.nouga.generator
 import com.google.inject.Inject
 import be.kuleuven.simoncockx.nouga.nouga.Function
 import be.kuleuven.simoncockx.nouga.nouga.FunctionCallExpression
-import be.kuleuven.simoncockx.nouga.nouga.DataConstructionExpression
+import be.kuleuven.simoncockx.nouga.nouga.InstantiationExpression
 
 class JavaFunctionUtil {
 	@Inject
@@ -22,11 +22,11 @@ class JavaFunctionUtil {
 		@ImplementedBy(«func.toClassName».«func.toClassName»Default.class)
 		public class «func.toClassName» {
 			«func.gatherFunctionDependencies.join(System.lineSeparator)[
-			'''@Inject «toClassName» «toVarName»;'''
+			'''@Inject protected «toClassName» «toVarName»;'''
 			]»
 			
-			public «func.output.type.toJavaType» «evaluationName»(«func.inputs.join(', ')['''«type.toJavaType» «toVarName»''']») {
-				return «func.operation.toJavaExpression(func.output.type)»;
+			public «func.output.listType.toJavaType» «evaluationName»(«func.inputs.join(', ')['''«listType.toJavaType» «toVarName»''']») {
+				return «func.operation.toJavaExpression(func.output.listType)»;
 			}
 			
 			private static final class «func.toClassName»Default extends «func.toClassName» { }
@@ -38,6 +38,6 @@ class JavaFunctionUtil {
 		func.eAllContents.filter(FunctionCallExpression).map[function].toSet
 	}
 	private def gatherEntityDependencies(Function func) {
-		func.eAllContents.filter(DataConstructionExpression).map[type].toSet
+		func.eAllContents.filter(InstantiationExpression).map[type].toSet
 	}
 }

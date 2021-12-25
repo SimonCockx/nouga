@@ -1,0 +1,15 @@
+Semantics of item types $\stype|[T|]$.
+\begin{align*}
+\stype|[\<boolean>|] &= \sboolean = \set{\strue, \sfalse} \\
+\stype|[\<int>|] &= \sint \\
+\stype|[\<number>|] &= \snumber \\
+\stype|[D|] &= \bigcup_{E <: D} \sentity|[E|]
+\end{align*}
+Semantics of entities $\sentity|[D|]$.
+\begin{align*}
+\sentity|[D|] &= \letin{a_1\ T_1\ C_1, \dots, a_n\ T_n\ C_n = \allattrs(D)}{\set{D} \times \prod_{i\in 1..n} \lv{\stype}|[T_i\ C_i|]}
+\end{align*}
+Semantics of list types $\lv{\stype}|[T\ C|]$.
+\begin{align*}
+\lv{\stype}|[T\ (l..k)|] &= \left(\stype|[T|]\right)^{l : k}
+\end{align*}

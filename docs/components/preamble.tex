@@ -9,13 +9,13 @@
 \DeclareMathOperator{\op}{op} % operation
 \DeclareMathOperator{\fexpr}{expr} % function expression
 \DeclareMathOperator{\pexpr}{expr*} % path segment expression
-\DeclareMathOperator{\supertypes}{supertypes} % set of supertypes
+\DeclareMathOperator{\ancestors}{ancestors} % set of ancestors
 \DeclareMathOperator{\comparable}{comparable} % check whether two basic types are comparable
 \DeclareMathOperator{\overlap}{overlap} % check whether cardinalities overlap
 \DeclareMathOperator{\subcardinality}{subcardinality} % check whether a cardinality range is enclosed by another cardinality range
 \DeclareMathOperator{\union}{union} % union of cardinalities
 \DeclareMathOperator{\join}{join} % join of two types
-\DeclareMathOperator(\maybeempty}{maybeempty} % all attributes may be empty
+\DeclareMathOperator{\maybeempty}{maybeempty} % all attributes may be empty
 
 \newcommand{\lv}[1]{#1^{*}} % list version of an operator
 
@@ -76,7 +76,6 @@
   \SavedLstInline
 }
 
-\lstset{style=mystyle}
 \definecolor{eminence}{RGB}{108,48,130}
 \lstdefinelanguage{Rosetta}{%
 alsoletter={-},
@@ -86,7 +85,7 @@ otherkeywords={% Operators
 },
 morekeywords=[2]{boolean,int,number}, % types go here
 morekeywords=[3]{%
-type,extends,func,enum,inputs,output,assign,output,not,or,and,only,single,multiple,exists,is,absent,contains,%
+type,extends,func,enum,inputs,output,assign-output,not,or,and,only,single,multiple,exists,is,absent,contains,%
 disjoint,all,any,count,only-element,if,then,else,True,False,empty,%
 any,boolean,string,int,number,nothing,date,dateTime,zonedDateTime,time % keywords go here
 },%
@@ -96,6 +95,8 @@ keywordstyle=[3]{\ttfamily\color{eminence}}, %style for keywords
 keepspaces,
 mathescape % optional
 }[keywords,comments,strings]%
+
+\lstset{style=mystyle, language=Rosetta}
 
 %%%%%%%%% SYNTAX DEFINITIONS %%%%%%%%%%%
 \usepackage[nounderscore]{syntax}
@@ -126,6 +127,8 @@ disjoint,all,any,count,only-element,if,then,else,True,False,empty,%
 any,boolean,string,int,number,nothing,date,dateTime,zonedDateTime,time,eq[=],%
 neq[<>],+,-,*,/,proj[->]}
 
+\newcommand{\emptylist}{[\,]}
+
 %%%%%%%% INFERENCE RULES %%%%%%%%%
 \usepackage{mathpartir}
 \let\oldrule\rule
@@ -134,67 +137,60 @@ neq[<>],+,-,*,/,proj[->]}
 \newcommand{\derivation}[1]{\mathcal{#1}}
 \newcommand{\OK}{\mathinner{\text{OK}}}
 
-\newcommand{\ruledef}[3]{\inferrule*[narrower=0.7]{#2}{#3} && \text{\small{\textsc{#1}}}}
+\newcommand{\ruledef}[3]{\inferrule*[narrower=0.7]{#2}{#3} && \textsc{\small #1}}
 %\newcommand{\axiomdef}[2]{\inferrule*[Right=#1]{ }{#2}}
-\newcommand{\axiomdef}[2]{#2 \ && \text{\small{\textsc{#1}}}}
+\newcommand{\axiomdef}[2]{#2 \ && \textsc{\small #1}}
+
+\newcommand{\emphrule}[1]{{\color{red}#1}}
+
+\newcommand{\evaldef}[3]{\sexpr|[#2|] &= #3 && \textsc{\small #1}}
+% Definition for \letin; see https://tex.stackexchange.com/a/627476/149123
+\ExplSyntaxOn
+\NewDocumentCommand{\letin}{mm}
+ {
+  \internal_letin:nn { #1 } { #2 }
+ }
+\seq_new:N \l__internal_letin_assign_seq
+\cs_new_protected:Nn \internal_letin:nn
+ {
+  \seq_set_split:Nnn \l__internal_letin_assign_seq { & } { #1 }
+  \openup-\jot
+  \begin{aligned}[t]
+  &\textbf{let~}
+  \begin{aligned}[t]
+  &\seq_use:Nn \l__internal_letin_assign_seq {, \\ &} \\
+  \end{aligned}\\
+  &\textbf{in~} #2
+  \end{aligned}
+ }
+\ExplSyntaxOff
 
 %%%%%%%%% SEMANTIC DEFINITION %%%%%%%%%%%
+\usepackage{amssymb}
 \let\oldvec\vec
 \renewcommand{\vec}[1]{\boldsymbol{\mathbf{#1}}} % vector
 \DeclareMathOperator{\dom}{Dom}
 
+\newcommand{\stype}{\mathcal{T}}
+\newcommand{\sexpr}{\evalsymbol}
+\newcommand{\sentity}{\mathcal{D}}
+
 \newcommand{\set}[1]{\left\{\,#1\,\right\}}
 \newcommand{\sboolean}{\mathbb{B}}
+\newcommand{\strue}{\mathit{true}}
+\newcommand{\sfalse}{\mathit{false}}
 \newcommand{\sint}{\mathbb{Z}}
 \newcommand{\snumber}{\mathbb{R}}
 \newcommand{\sdom}{\mathbb{D}}
-\newcommand{\ssingledom}{\mathbb{D}_1}
 
-\newcommand{\sor}[2]{#1\,or\,#2}
-\newcommand{\shor}[2]{#1\,\widehat{or}\,#2}
-\newcommand{\sand}[2]{#1\,and\,#2}
-\newcommand{\shand}[2]{#1\,\widehat{and}\,#2}
-\newcommand{\snot}[1]{not\left(#1\right)}
-\newcommand{\shnot}[1]{\widehat{not}\left(#1\right)}
-
-\newcommand{\schoice}[3]{(#1) \rightarrow #2\,[]\,#3}
-\newcommand{\shchoice}[3]{(#1) \widehat{\rightarrow} #2\,[]\,#3}
-\newcommand{\scount}[1]{count\left(#1\right)}
-\newcommand{\shcount}[1]{\widehat{count}\left(#1\right)}
-\newcommand{\sflatten}[3]{flatten_{#1, #2}\left(#3\right)}
-\newcommand{\shflatten}[3]{\widehat{flatten}_{#1, #2}\left(#3\right)}
-\newcommand{\sproject}[3]{project_{#1, #2}\left(#3\right)}
-\newcommand{\shproject}[3]{\widehat{project}_{#1, #2}\left(#3\right)}
-\newcommand{\scontains}[2]{contains\left(#1, #2\right)}
-\newcommand{\shcontains}[2]{\widehat{contains}\left(#1, #2\right)}
-\newcommand{\sdisjoint}[2]{disjoint\left(#1, #2\right)}
-\newcommand{\shdisjoint}[2]{\widehat{disjoint}\left(#1, #2\right)}
-\newcommand{\sonlyexists}[3]{onlyexists_{#1, #2}\left(#3\right)}
-\newcommand{\shonlyexists}[3]{\widehat{onlyexists}_{#1, #2}\left(#3\right)}
-\newcommand{\sonlyelement}[1]{onlyelement\left(#1\right)}
-\newcommand{\shonlyelement}[1]{\widehat{onlyelement}\left(#1\right)}
-
-\newcommand{\seq}[2]{#1\,eq\,#2}
-\newcommand{\sheq}[2]{#1\,\widehat{eq}\,#2}
-\newcommand{\sneq}[2]{#1\,neq\,#2}
-\newcommand{\shneq}[2]{#1\,\widehat{neq}\,#2}
-\newcommand{\sanyeq}[2]{#1\,anyeq\,#2}
-\newcommand{\shanyeq}[2]{#1\,\widehat{anyeq}\,#2}
-\newcommand{\sanyneq}[2]{#1\,anyneq\,#2}
-\newcommand{\shanyneq}[2]{#1\,\widehat{anyneq}\,#2}
-\newcommand{\salleq}[2]{#1\,alleq\,#2}
-\newcommand{\shalleq}[2]{#1\,\widehat{alleq}\,#2}
-\newcommand{\sallneq}[2]{#1\,allneq\,#2}
-\newcommand{\shallneq}[2]{#1\,\widehat{allneq}\,#2}
-
-\newcommand{\splus}[3]{#2\,plus_{#1}\,#3}
-\newcommand{\shplus}[3]{#2\,\widehat{plus}_{#1}\,#3}
-\newcommand{\ssubt}[3]{#2\,subtract_{#1}\,#3}
-\newcommand{\shsubt}[3]{#2\,\widehat{subtract}_{#1}\,#3}
-\newcommand{\smult}[3]{#2\,mult_{#1}\,#3}
-\newcommand{\shmult}[3]{#2\,\widehat{mult}_{#1}\,#3}
-\newcommand{\sdiv}[2]{#1\,div\,#2}
-\newcommand{\shdiv}[2]{#1\,\widehat{div}\,#2}
+\DeclareMathOperator{\sflatten}{flatten}
+\DeclareMathOperator{\scount}{count}
+\DeclareMathOperator{\seq}{equals}
+\newcommand{\splus}[1]{\mathbin{\mathrm{plus}}_{#1}}
+\newcommand{\ssubt}[1]{\mathbin{\mathrm{subtract}}_{#1}}
+\newcommand{\smult}[1]{\mathbin{\mathrm{multiply}}_{#1}}
+\newcommand{\sdiv}{\mathbin{\mathrm{divide}}}
+\DeclareMathOperator{\sproject}{project}
 
 
 %%%%%%%%%% DEFINITION BOXES %%%%%%%%%
@@ -253,7 +249,23 @@ center,
 \newfloat{spec}{tbp}{specs}
 \floatname{spec}{Specification}
 \captionsetup[spec]{labelsep=colon}
-\numberwithin{spec}{chapter}
+\ifundef\chapter{}{\numberwithin{spec}{chapter}}
+
+
+\usepackage{afterpage, environ}
+\long\def\breakablespecbody#1[#2][#3]{%
+%\afterpage{%
+\bigskip\par\noindent\begin{minipage}{\textwidth}
+\captionsetup{type=spec}\caption{#2} \label{#3}
+\end{minipage}
+\nopagebreak
+#1
+%}%
+}
+\NewEnviron{breakablespec}[2]{
+\expandafter\breakablespecbody\expandafter{\BODY}[#1][#2]%
+}
+
 
 
 %%%%%%%%%% CODE GENERATION %%%%%%%%%%

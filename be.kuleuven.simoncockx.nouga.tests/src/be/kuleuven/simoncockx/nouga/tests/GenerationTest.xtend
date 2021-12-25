@@ -19,12 +19,19 @@ import com.google.inject.AbstractModule
 import org.junit.jupiter.api.BeforeEach
 import org.eclipse.xtext.util.JavaVersion
 import be.kuleuven.simoncockx.nouga.lib.NougaNumber
+import org.eclipse.xtext.testing.util.ParseHelper
+import be.kuleuven.simoncockx.nouga.nouga.Model
+import be.kuleuven.simoncockx.nouga.nouga.Function
+import org.eclipse.xtext.testing.validation.ValidationTestHelper
 
 @ExtendWith(InjectionExtension)
 @InjectWith(NougaInjectorProvider)
 class GenerationTest {
 	@Inject extension CompilationTestHelper
 	@Inject extension JavaNameUtil
+	@Inject extension ParseHelper<Model>
+	@Inject extension ValidationTestHelper
+	@Inject extension NougaTestHelper
 	
 	@BeforeEach                                         
     def setUp() {
@@ -143,6 +150,7 @@ class GenerationTest {
 		evaluateExpression('number (0..*)', '42')[#[NougaNumber.valueOf(42)].assertListEquals(it)]
 	
 		evaluateExpression('number (1..1)', '3 / 5')[NougaNumber.valueOf(0.6).assertEquals(it)];
+		evaluateExpression('number (5..5)', '[[1, 2], [3.14, 5], 7]')[#[1.0, 2.0, 3.14, 5.0, 7.0].map[NougaNumber::valueOf(it)].assertEquals(it)]
 	}
 	
 	@Test
@@ -163,6 +171,7 @@ class GenerationTest {
 		evaluateExpression('int (3..3)', '[1, 2, 3]')[#[1, 2, 3].assertListEquals(it)];
 		evaluateExpression('int (3..3)', '[1, [2, 3]]')[#[1, 2, 3].assertListEquals(it)];
 		<Integer>evaluateExpression('int (1..1)', '[1]')[1.assertEquals(it)];
+		evaluateExpression('A (2..2)', '[A {n: 1}, C {n: 2}]')[#[#[1], #[2]].assertListEquals(it.map[it.class.getMethod("getN").invoke(it)])]
 	}
 	
 	@Test
@@ -267,8 +276,8 @@ class GenerationTest {
 	def void testProjectionExpression() {
 		evaluateExpression('int (1..2)', 'A {n: 1} -> n')[#[1].assertListEquals(it)];
 		evaluateExpression('int (1..2)', 'C {n: [1, 2]} -> n')[#[1, 2].assertListEquals(it)];
-		evaluateExpression('int (1..2)', '[A {n: 1}, A {n: [2, 3]}, A {n: 4}] -> n')[#[1, 2, 3, 4].assertListEquals(it)];
-		evaluateExpression('int (1..2)', '[D {n: 1}, D {n: 2}, D {n: 3}] -> n')[#[1, 2, 3].assertListEquals(it)];
+		evaluateExpression('int (3..6)', '[A {n: 1}, A {n: [2, 3]}, A {n: 4}] -> n')[#[1, 2, 3, 4].assertListEquals(it)];
+		evaluateExpression('int (3..3)', '[D {n: 1}, D {n: 2}, D {n: 3}] -> n')[#[1, 2, 3].assertListEquals(it)];
 	}
 	
 	@Test
@@ -309,8 +318,33 @@ class GenerationTest {
 		<Integer>evaluateExpression('int (0..1)', 'empty only-element')[assertNull];
 	}
 	
+	@Test
+	def void testOnlyExists() {
+		val e1 = 'E {f1: True, f2: empty, f3: empty}';
+		val e2 = 'E {f1: True, f2: True, f3: empty}';
+		val e3 = 'E {f1: True, f2: True, f3: [True, False]}';
+		val e4 = 'E {f1: empty, f2: [True, False], f3: empty}';
+		val e5 = 'E {f1: empty, f2: empty, f3: [False, True]}';
+		val e6 = 'E {f1: empty, f2: True, f3: [True, False]}';
+		evaluateExpression('boolean (1..1)', '''«e1»->f1 only exists''')[true.assertEquals(it)];
+		evaluateExpression('boolean (1..1)', '''«e1»->f2 only exists''')[false.assertEquals(it)];
+		evaluateExpression('boolean (1..1)', '''«e1»->f3 only exists''')[false.assertEquals(it)];
+		
+		evaluateExpression('boolean (1..1)', '''«e2»->f1 only exists''')[false.assertEquals(it)];
+		evaluateExpression('boolean (1..1)', '''«e3»->f1 only exists''')[false.assertEquals(it)];
+		
+		evaluateExpression('boolean (1..1)', '''«e4»->f2 only exists''')[true.assertEquals(it)];
+		evaluateExpression('boolean (1..1)', '''«e4»->f3 only exists''')[false.assertEquals(it)];
+		evaluateExpression('boolean (1..1)', '''«e5»->f2 only exists''')[false.assertEquals(it)];
+		evaluateExpression('boolean (1..1)', '''«e5»->f3 only exists''')[true.assertEquals(it)];
+		
+		evaluateExpression('boolean (1..1)', '''«e6»->f1 only exists''')[false.assertEquals(it)];
+		evaluateExpression('boolean (1..1)', '''«e6»->f2 only exists''')[false.assertEquals(it)];
+		evaluateExpression('boolean (1..1)', '''«e6»->f3 only exists''')[false.assertEquals(it)];
+	}
+	
 	private def <T> evaluateExpression(CharSequence outputType, CharSequence expression, IAcceptor<T> accept) {
-		'''
+		val source = '''
 		namespace mydummypackage
 		
 		type A:
@@ -320,12 +354,21 @@ class GenerationTest {
 		type C extends A:
 		type D:
 			n int (1..1)
+		type E:
+		    f1 boolean (0..1)
+		    f2 boolean (0..*)
+		    f3 boolean (0..2)
 		
 		func Test:
 		  inputs:
 		  output: result «outputType»
 		  assign-output: «expression»
-		'''.compile[
+		'''
+		val model = source.parse;
+		val pexpr = (model.elements.last as Function).operation;
+		pexpr.assertWellTyped;
+		model.assertNoErrors;
+		source.compile[
 			getCompiledClass('mydummypackage.functions.Test') => [c |
 				c.declaredConstructor.newInstance => [
 					accept.accept(c.getDeclaredMethod(evaluationName).invoke(it) as T)

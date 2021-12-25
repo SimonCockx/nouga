@@ -1,0 +1,91 @@
+Subtyping $S <: T$.
+\begin{align*}
+\axiomdef{SA-Refl}{T <: T}
+\\
+\axiomdef{SA-Num}{\<int> <: \<number>}
+\\
+\ruledef{\emphrule{SA-Ancestor}}{E \in \ancestors(D)}{D <: E}
+\\
+\axiomdef{\emphrule{SA-Nothing}}{\<nothing> <: T}
+\end{align*}
+
+List subtyping $T_1\ C_1 \lv{<:} T_2\ C_2$.
+\begin{align*}
+\ruledef{SA-List}{T_1 <: T_2 \\ \subcardinality(C_1, C_2)}{T_1\ C_1 \lv{<:} T_2\ C_2}
+\end{align*}
+
+Typing rules $\Gamma |- e : T\ C$.
+\begin{align*}
+\axiomdef{TA-True}{\Gamma |- \<True> : \<boolean>\ (1..1)}
+\\
+\axiomdef{TA-False}{\Gamma |- \<False> : \<boolean>\ (1..1)}
+\\
+\axiomdef{TA-Number}{\Gamma |- r : \<number>\ (1..1)}
+\\
+\axiomdef{TA-Int}{\Gamma |- i : \<int>\ (1..1)}
+\\
+\ruledef{TA-Var}{x : T\ C \in \Gamma}{\Gamma |- x : T\ C}
+\\
+\ruledef{TA-Or}{\Gamma |- e_1 : \<boolean>\ (1..1) \\ \Gamma |- e_2 : \<boolean>\ (1..1)}{\Gamma |- e_1 \<or> e_2 : \<boolean>\ (1..1)}
+\\
+\ruledef{TA-And}{\Gamma |- e_1 : \<boolean>\ (1..1) \\ \Gamma |- e_2 : \<boolean>\ (1..1)}{\Gamma |- e_1 \<and> e_2 : \<boolean>\ (1..1)}
+\\
+\ruledef{TA-Not}{\Gamma |- e : \<boolean>\ (1..1)}{\Gamma |- \<not> e : \<boolean>\ (1..1)}
+\\
+\ruledef{TA-PlusInt}{\Gamma |- e_1 : \<int>\ (1..1) \\ \Gamma |- e_2 : \<int>\ (1..1)}{\Gamma |- e_1 \<+> e_2 : \<int>\ (1..1)}
+\\
+\ruledef{\emphrule{TA-PlusNumber}}{\Gamma |- e_1 : T_1\ (1..1) \\ \Gamma |- e_2 : T_2\ (1..1) \\ T_1 <: \<number> \\ T_2 <: \<number> \\ T_1 \neq \<int> \lor T_2 \neq \<int>}{\Gamma |- e_1 \<+> e_2 : \<number>\ (1..1)}
+\\
+\ruledef{TA-MultInt}{\Gamma |- e_1 : \<int>\ (1..1) \\ \Gamma |- e_2 : \<int>\ (1..1)}{\Gamma |- e_1 \<*> e_2 : \<int>\ (1..1)}
+\\
+\ruledef{\emphrule{TA-MultNumber}}{\Gamma |- e_1 : T_1\ (1..1) \\ \Gamma |- e_2 : T_2\ (1..1) \\ T_1 <: \<number> \\ T_2 <: \<number> \\ T_1 \neq \<int> \lor T_2 \neq \<int>}{\Gamma |- e_1 \<*> e_2 : \<number>\ (1..1)}
+\\
+\ruledef{TA-SubtInt}{\Gamma |- e_1 : \<int>\ (1..1) \\ \Gamma |- e_2 : \<int>\ (1..1)}{\Gamma |- e_1 \<-> e_2 : \<int>\ (1..1)}
+\\
+\ruledef{\emphrule{TA-SubtNumber}}{\Gamma |- e_1 : T_1\ (1..1) \\ \Gamma |- e_2 : T_2\ (1..1) \\ T_1 <: \<number> \\ T_2 <: \<number> \\ T_1 \neq \<int> \lor T_2 \neq \<int>}{\Gamma |- e_1 \<-> e_2 : \<number>\ (1..1)}
+\\
+\ruledef{\emphrule{TA-Division}}{\Gamma |- e_1 : T_1\ (1..1) \\ \Gamma |- e_2 : T_2\ (1..1) \\ T_1 <: \<number> \\ T_2 <: \<number>}{\Gamma |- e_1 \</> e_2 : \<number>\ (1..1)}
+\\
+\ruledef{\emphrule{TA-Instantiate}}{\allattrs(D) = a_1\ T_1\ C_1, \dots, a_n\ T_n\ C_n \\ \forall i \in 1..n: \Gamma |- e_i : T_i'\ C_i' \\ \forall i \in 1..n: T_i'\ C_i' \lv{<:} T_i\ C_i}{\Gamma |- D\set{a_1 : e_1, \dots, a_n : e_n} : D\ (1..1)}
+\\
+\ruledef{TA-Project}{\Gamma |- e : D\ C \\ \allattrs(D) = a_1\ T_1\ C_1, \dots, a_n\ T_n\ C_n}{\Gamma |- e \<proj> a_k : T_k\ C*C_k}
+\\
+\ruledef{TA-Exists}{\Gamma |- e : T\ C \\ \subcardinality((0..1), C)}{\Gamma |- e \<exists> : \<boolean>\ (1..1)}
+\\
+\ruledef{TA-SingleExists}{\Gamma |- e : T\ C \\ \subcardinality((1..1), C) \\ C \neq (1..1)}{\Gamma |- e \<single> \<exists> : \<boolean>\ (1..1)}
+\\
+\ruledef{TA-MultipleExists}{\Gamma |- e : T\ C \\ \subcardinality((1..2), C)}{\Gamma |- e \<multiple> \<exists> : \<boolean>\ (1..1)}
+\\
+\ruledef{TA-OnlyExists}{\Gamma |- e : D\ (1..1) \\ \allattrs(D) = a_1\ T_1\ C_1, \dots, a_n\ T_n\ C_n \\ \maybeempty(D)}{\Gamma |- e \<proj> a_k \<only> \<exists> : \<boolean>\ (1..1)}
+\\
+\ruledef{TA-Count}{\Gamma |- e : T\ C}{\Gamma |- e \<count> : \<int>\ (1..1)}
+\\
+\ruledef{TA-OnlyElement}{\Gamma |- e : T\ C}{\Gamma |- e \<only-element> : T\ (0..1)}
+\\
+\ruledef{TA-Equals}{\Gamma |- e_1 : T_1\ C_1 \\ \Gamma |- e_2 : T_2\ C_2 \\ \lv{\comparable}(T_1\ C_1, T_2\ C_2)}{\Gamma |- e_1 \<eq> e_2 : \<boolean>\ (1..1)}
+\\
+\ruledef{TA-NotEquals}{\Gamma |- e_1 : T_1\ C_1 \\ \Gamma |- e_2 : T_2\ C_2 \\ \lv{\comparable}(T_1\ C_1, T_2\ C_2)}{\Gamma |- e_1 \<neq> e_2 : \<boolean>\ (1..1)}
+\\
+\ruledef{TA-AllEquals}{\Gamma |- e_1 : T_1\ C \\ \Gamma |- e_2 : T_2\ (1..1) \\ \comparable(T_1, T_2)}{\Gamma |- e_1 \<all> \<eq> e_2 : \<boolean>\ (1..1)}
+\\
+\ruledef{TA-AllNotEquals}{\Gamma |- e_1 : T_1\ C \\ \Gamma |- e_2 : T_2\ (1..1) \\ \comparable(T_1, T_2)}{\Gamma |- e_1 \<all> \<neq> e_2 : \<boolean>\ (1..1)}
+\\
+\ruledef{TA-AnyEquals}{\Gamma |- e_1 : T_1\ C \\ \Gamma |- e_2 : T_2\ (1..1) \\ \comparable(T_1, T_2)}{\Gamma |- e_1 \<any> \<eq> e_2 : \<boolean>\ (1..1)}
+\\
+\ruledef{TA-AnyNotEquals}{\Gamma |- e_1 : T_1\ C \\ \Gamma |- e_2 : T_2\ (1..1) \\ \comparable(T_1, T_2)}{\Gamma |- e_1 \<any> \<neq> e_2 : \<boolean>\ (1..1)}
+\\
+\ruledef{TA-Contains}{\Gamma |- e_1 : T_1\ C_1 \\ \Gamma |- e_2 : T_2\ C_2 \\ \comparable(T_1, T_2)}{\Gamma |- e_1 \<contains> e_2 : \<boolean>\ (1..1)}
+\\
+\ruledef{TA-Disjoint}{\Gamma |- e_1 : T_1\ C_1 \\ \Gamma |- e_2 : T_2\ C_2 \\ \comparable(T_1, T_2)}{\Gamma |- e_1 \<disjoint> e_2 : \<boolean>\ (1..1)}
+\\
+\ruledef{\emphrule{TA-List}}{\forall i \in 1..n: \Gamma |- e_i : T_i\ C_i \\ T = \join(T_1, \dots, T_n)}{\Gamma |- [e_1, \dots, e_n] : T\ \sum_{i \in 1..n} C_i}
+\\
+\ruledef{\emphrule{TA-If}}{\Gamma |- e_1 : \<boolean>\ (1..1) \\ \Gamma |- e_2 : T_1\ C_1 \\ \Gamma |- e_3 : T_2\ C_2 \\ T\ C = \lv{\join}(T_1\ C_1, T_2\ C_2)}{\Gamma |- \<if> e_1 \<then> e_2 \<else> e_3 : T\ C}
+\\
+\ruledef{\emphrule{TA-Func}}{\inp(F) = a_1\ T_1\ C_1, \dots, a_n\ T_n\ C_n \\ \outp(F) = a\ T\ C \\ \forall i \in 1..n: \Gamma |- e_i : T_i'\ C_i' \\ \forall i \in 1..n: T_i'\ C_i' <: T_n\ C_n}{\Gamma |- F(e_1, \dots, e_n) : T\ C}
+\end{align*}
+
+Typing function declarations $F \OK$.
+\begin{align*}
+\ruledef{}{\inp(F) = a_1\ T_1\ C_1, \dots, a_n\ T_n\ C_n \\ \outp(F) = a\ T\ C \\ a_1 : T_1\ C_1, \dots, a_n : T_n\ C_n |- \op(F) : T'\ C' \\ T'\ C' <: T\ C}{F \OK}
+\end{align*}

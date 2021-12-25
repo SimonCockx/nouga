@@ -6,9 +6,10 @@ import com.google.inject.Inject
 import be.kuleuven.simoncockx.nouga.nouga.Function
 import be.kuleuven.simoncockx.nouga.nouga.Expression
 import be.kuleuven.simoncockx.nouga.typing.NougaTyping
-import be.kuleuven.simoncockx.nouga.nouga.Type
+import be.kuleuven.simoncockx.nouga.nouga.ListType
 import static extension org.junit.jupiter.api.Assertions.*
 import be.kuleuven.simoncockx.nouga.typing.TypeUtil
+import org.eclipse.xtext.testing.validation.ValidationTestHelper
 
 class NougaTestHelper {
 	@Inject
@@ -17,32 +18,46 @@ class NougaTestHelper {
 	extension NougaTyping
 	@Inject
 	TypeUtil typeUtil
+	@Inject
+	extension ValidationTestHelper
 	
-	def Expression parseExpression(CharSequence expr) {
+	def Expression parseExpression(CharSequence expr, String type) {
 		val model = '''
 			namespace test
 			
 			func Test:
 				inputs:
-				output: result boolean (1..1)
+				output: result «type»
 				assign-output: «expr»
 		'''.parse;
 		return (model.elements.last as Function).operation;
 	}
+	def Expression parseExpression(CharSequence expr) {
+		var pexpr = parseExpression(expr, 'nothing (0..0)')
+		pexpr.assertWellTyped
+		pexpr = parseExpression(expr, typeUtil.listTypeToString(pexpr.staticType));
+		pexpr.assertNoErrors
+		return pexpr
+	}
 	
-	def Type getType(CharSequence expr) {
+	def ListType getType(CharSequence expr) {
 		return getType(expr.parseExpression);
 	}
-	def Type getType(Expression expr) {
-		val res = expr.type();
+	def ListType getType(Expression expr) {
+		val res = expr.inferType();
 		assertFalse(res.failed);
 		return res.value;
 	}
 	
-	def void assertTypeEquals(Type a, Type b) {
-		typeUtil.typesAreEqual(a, b).assertTrue
+	def void assertListTypeEquals(ListType a, ListType b) {
+		typeUtil.listTypesAreEqual(a, b).assertTrue
 	}
-	def void assertSubtype(Type a, Type b) {
-		assertTrue(subtype(a, b).value)
+	def void assertListSubtype(ListType a, ListType b) {
+		assertTrue(listSubtype(a, b).value)
+	}
+	def void assertWellTyped(Expression e) {
+		val illTyped = typeUtil.getIllTypedContent(e);
+		assertTrue(illTyped.empty,
+			'''Expression is ill-typed: `«e.stringRep»`. Failed to infer type of «illTyped.join(', ')["`" + it.stringRep + "`"]».''')
 	}
 }

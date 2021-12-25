@@ -1,19 +1,3 @@
 \begin{defbox}[2]
-\begin{align*}
-\intertext{Semantics of basic types $|[T|]$.}
-|[\<boolean>|] &= \sboolean = \set{true, false} \\
-|[\<int>|] &= \sint \\
-|[\<number>|] &= \snumber \\
-|[D|] &= \left\{a_k=|[ T_k\ C_k |] \mid k\in 1..n\right\} \\
-& \text{where $\attrs(D) = a_1\ T_1\ C_1, \dots, a_n\ T_n\ C_n$}
-\end{align*}
-\begin{align*}
-\intertext{Semantics of types $|[T\ C|]$.}
-|[T\ \lit{(}i\lit{..}j\lit{)}|] &= |[T|]^{|[i|] : |[j|]}
-\end{align*}
-\begin{align*}
-\intertext{Semantics of cardinality limits $|[c|] \in \mathbb{N} \cup \set{\infty}$.}
-|[i|] &= i \\
-|[\lit{*}|] &= \infty
-\end{align*}
+\input{semantics-types-def}
 \end{defbox}

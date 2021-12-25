@@ -33,12 +33,12 @@ RootElement:
 NamedRootElement returns RootElement: Named;
 
 Data:
-	'type' Named ('extends' superType=[Data])? ':'
+	'type' Named ('extends' parent=[Data])? ':'
 		attributes+=Attribute*
 ;
 
 Attribute:
-	Named type=Type
+	Named listType=ListType
 ;
 
 Function:
@@ -53,11 +53,11 @@ Function:
 /**********************************************************************
  * Typing
  */
-Type:
-	basicType=BasicType cardinality=Cardinality
+ListType:
+	itemType=Type constraint=CardinalityConstraint
 ;
 
-BasicType:
+Type:
 	BuiltInType | DataType
 ;
 
@@ -73,7 +73,7 @@ DataType:
 	data=[Data]
 ;
 
-Cardinality:
+CardinalityConstraint:
 	'(' (inf=INT '..' sup=INT | inf=INT '..' unbounded?='*') ')'
 ;
 
@@ -85,15 +85,17 @@ Cardinality:
  * Expressions 
  */
 
+// Artificial rule to add a "staticType" property to an Expression
+TypedExpression returns Expression: staticType=ListType;
+
 Expression:
 	OrExpression
 ;
 
-
 // Artificial rules to create class hierarchy for binary operations.
 BinaryExpressionOperation returns Expression: {BinaryOperation};
 // Make ComparisonOperation and ArithmeticOperation a subclass of BinaryOperation
-BinaryOperation: {ComparisonOperation} | {ArithmeticOperation} | {BooleanOperation};
+BinaryOperation: {ComparisonOperation} | {ArithmeticOperation} | {BooleanOperation} | {ContainsExpression} | {DisjointExpression};
 // Make ComparisonOperation a subclass of BinaryBooleanOperation
 BooleanOperation: {OrExpression} | {AndExpression};
 
@@ -106,8 +108,8 @@ AndExpression returns Expression:
 
 ContainsExpression returns Expression:
 	EqualityExpression (->
-		( {ContainsExpression.container=current} 'contains' contained=EqualityExpression
-		| {DisjointExpression.container=current} 'disjoint' disjoint=EqualityExpression)
+		( {ContainsExpression.left=current} 'contains' right=EqualityExpression
+		| {DisjointExpression.left=current} 'disjoint' right=EqualityExpression)
 	)?
 ;
 
@@ -149,12 +151,12 @@ PrimaryExpression returns Expression:
 	| FunctionCallExpression
 	| VariableReference
 	| Literal
-	| DataConstructionExpression
+	| InstantiationExpression
 	| '(' Expression ')'
 ;
 
-DataConstructionExpression returns Expression:
-	{DataConstructionExpression} type=[Data] '{' (values+=KeyValuePair (',' values+=KeyValuePair)*)? '}'
+InstantiationExpression returns Expression:
+	{InstantiationExpression} type=[Data] '{' (values+=KeyValuePair (',' values+=KeyValuePair)*)? '}'
 ;
 
 KeyValuePair:
@@ -166,7 +168,7 @@ ConditionalExpression returns Expression:
 ;
 
 FunctionCallExpression returns Expression:
-	{FunctionCallExpression} function=[Function] '(' (args+=Expression (',' args+=Expression))? ')'
+	{FunctionCallExpression} function=[Function] '(' (args+=Expression (',' args+=Expression)*)? ')'
 ;
 
 VariableReference returns Expression:

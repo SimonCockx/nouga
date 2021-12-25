@@ -84,7 +84,7 @@ Typing rules $\Gamma |- e : T\ C$.
 \\
 \ruledef{T-If}{\Gamma |- e_1 : \<boolean>\ (1..1) \\ \Gamma |- e_2 : T\ C \\ \Gamma |- e_3 : T\ C}{\Gamma |- \<if> e_1 \<then> e_2 \<else> e_3 : T\ C}
 \\
-\ruledef{T-Func}{\forall i \in 1..n: \Gamma |- e_i : T_i\ C_i \\ \inp(F) = a_1\ T_1\ C_1, \dots, a_n\ T_n\ C_n \\ \outp(F) = a\ T\ C}{\Gamma |- F(e_1, \dots, e_n) : T\ C}
+\ruledef{T-Func}{\inp(F) = a_1\ T_1\ C_1, \dots, a_n\ T_n\ C_n \\ \outp(F) = a\ T\ C \\ \forall i \in 1..n: \Gamma |- e_i : T_i\ C_i}{\Gamma |- F(e_1, \dots, e_n) : T\ C}
 \end{align*}
 
 Typing function declarations $F \OK$.

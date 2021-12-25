@@ -7,7 +7,7 @@ import be.kuleuven.simoncockx.nouga.nouga.Type
 import be.kuleuven.simoncockx.nouga.nouga.BooleanLiteral
 import be.kuleuven.simoncockx.nouga.nouga.NumberLiteral
 import be.kuleuven.simoncockx.nouga.nouga.IntLiteral
-import be.kuleuven.simoncockx.nouga.nouga.BasicType
+import be.kuleuven.simoncockx.nouga.nouga.ListType;
 import be.kuleuven.simoncockx.nouga.nouga.BuiltInType
 import be.kuleuven.simoncockx.nouga.nouga.BuiltInTypeEnum
 import java.util.List
@@ -21,11 +21,11 @@ import be.kuleuven.simoncockx.nouga.nouga.DisjointExpression
 import be.kuleuven.simoncockx.nouga.nouga.ComparisonOperation
 import be.kuleuven.simoncockx.nouga.nouga.ArithmeticOperation
 import be.kuleuven.simoncockx.nouga.nouga.CountExpression
-import be.kuleuven.simoncockx.nouga.nouga.Cardinality
+import be.kuleuven.simoncockx.nouga.nouga.CardinalityConstraint
 import be.kuleuven.simoncockx.nouga.nouga.ProjectionExpression
 import be.kuleuven.simoncockx.nouga.nouga.ConditionalExpression
 import be.kuleuven.simoncockx.nouga.nouga.FunctionCallExpression
-import be.kuleuven.simoncockx.nouga.nouga.DataConstructionExpression
+import be.kuleuven.simoncockx.nouga.nouga.InstantiationExpression
 import be.kuleuven.simoncockx.nouga.nouga.VariableReference
 import be.kuleuven.simoncockx.nouga.nouga.ListLiteral
 import be.kuleuven.simoncockx.nouga.nouga.OnlyElementExpression
@@ -33,108 +33,187 @@ import be.kuleuven.simoncockx.nouga.nouga.Function
 import be.kuleuven.simoncockx.nouga.nouga.NotExpression
 import be.kuleuven.simoncockx.nouga.nouga.Attribute
 import be.kuleuven.simoncockx.nouga.nouga.AbsentExpression
+import be.kuleuven.simoncockx.nouga.nouga.BinaryOperation
 
 inject extension TypeFactory typeFactory
 inject extension TypeUtil typeUtil
 
 auxiliary {
-	supertypes(DataType t) : List<Data>
-	comparable(BasicType t1, BasicType t2)
-	overlap(Cardinality c1, Cardinality c2)
-	listComparable(Type t1, Type t2)
-	join(BasicType t1, BasicType t2) : BasicType
-	union(Cardinality c1, Cardinality c2) : Cardinality
-	listJoin(Type t1, Type t2) : Type
+	ancestors(DataType t) : List<Data>
+	comparable(Type t1, Type t2)
+	overlap(CardinalityConstraint c1, CardinalityConstraint c2)
+	listComparable(ListType t1, ListType t2)
+	join(Type t1, Type t2) : Type
+	union(CardinalityConstraint c1, CardinalityConstraint c2) : CardinalityConstraint
+	listJoin(ListType t1, ListType t2) : ListType
 	allAttributes(Data d) : Iterable<Attribute>
 	mayBeEmpty(Data d)
+	listTypeCheck(Expression sourceObject, ListType expected)
+	typeCheck(Expression sourceObject, Type expected)
+	listSubtypeCheck(Expression sourceObject, ListType expected)
+	subtypeCheck(Expression sourceObject, Type expected)
+	comparableListTypeCheck(BinaryOperation sourceObject)
+	comparableTypeCheck(BinaryOperation sourceObject)
+	constraintCheck(Expression sourceObject, CardinalityConstraint expected)
+	notConstraintCheck(Expression sourceObject, CardinalityConstraint notExpected)
+	isLooserConstraintCheck(Expression sourceObject, CardinalityConstraint expected)
 }
 
 judgments {
-	type |- Expression expression : output Type
-		error "cannot type " + stringRep(expression)
+	inferType |- Expression expression : output ListType
+		error "Cannot type " + stringRep(expression) + "."
 		source expression
-	basicSubtype |- BasicType subtype <: BasicType supertype
-	subtype |- Type subtype <| Type supertype
+	subtype |- Type subtype <: Type supertype
+		error subtype + " is not a subtype of " + supertype
+	listSubtype |- ListType subtype <| ListType supertype
+		error subtype + " is not a list subtype of " + supertype
 }
 
 /****** AUXILIARY DEFINITIONS *******/
-auxiliary supertypes(DataType t) {
+auxiliary ancestors(DataType t) {
 	getAll(t.^data,
-		NougaPackage::eINSTANCE.data_SuperType,
-		NougaPackage::eINSTANCE.data_SuperType,
+		NougaPackage::eINSTANCE.data_Parent,
+		NougaPackage::eINSTANCE.data_Parent,
 		typeof(Data)
 	)
 }
-auxiliary comparable(BasicType t1, BasicType t2) {
+auxiliary comparable(Type t1, Type t2) {
 	empty |- t1 <: t2
 	or
 	empty |- t2 <: t1
 }
-auxiliary overlap(Cardinality c1, Cardinality c2) {
+auxiliary overlap(CardinalityConstraint c1, CardinalityConstraint c2) {
 	(c1.unbounded || c1.sup >= c2.inf) && (c2.unbounded || c2.sup >= c1.inf)
 }
-auxiliary listComparable(Type t1, Type t2) {
-	comparable(t1.basicType, t2.basicType)
-	overlap(t1.cardinality, t2.cardinality)
+auxiliary listComparable(ListType t1, ListType t2) {
+	comparable(t1.itemType, t2.itemType)
+	overlap(t1.constraint, t2.constraint)
 }
 auxiliary join(BuiltInType t1, BuiltInType t2) {
 	if (t1.type == t2.type) {
-		return t1
+		return t1.clone
 	} else if (t1.type == BuiltInTypeEnum.INT && t2.type == BuiltInTypeEnum.NUMBER) {
-		return t2
+		return t2.clone
 	} else if (t1.type == BuiltInTypeEnum.NUMBER && t2.type == BuiltInTypeEnum.INT) {
-		return t1
+		return t1.clone
 	} else if (t1.type == BuiltInTypeEnum.NOTHING) {
-		return t2
+		return t2.clone
 	} else if (t2.type == BuiltInTypeEnum.NOTHING) {
-		return t1
+		return t1.clone
 	}
 }
 auxiliary join(DataType t1, DataType t2) {
-	if (t1.^data == t2.^data) {
-		return t1
-	} else {
-		val st1 = supertypes(t1)
-		val result = supertypes(t2).findFirst[st1.contains(it)]
-		if (result !== null) {
-			return createDataType(result)
-		}
-	}
+	val st1 = ancestors(t1)
+	st1.add(0, t1.^data)
+	val st2 = ancestors(t2)
+	st2.add(0, t2.^data)
+	val result = st2.findFirst[st1.contains(it)]
+	result !== null
+	return createDataType(result)
 }
 auxiliary join(BuiltInType t1, DataType t2) {
-	if (t1.type == BuiltInTypeEnum.NOTHING) {
-		return t2;
-	}
+	t1.type == BuiltInTypeEnum.NOTHING
+	return t2.clone;
 }
 auxiliary join(DataType t1, BuiltInType t2) {
-	if (t2.type == BuiltInTypeEnum.NOTHING) {
-		return t1;
-	}
+	t2.type == BuiltInTypeEnum.NOTHING
+	return t1.clone;
 }
-auxiliary union(Cardinality c1, Cardinality c2) {
+auxiliary union(CardinalityConstraint c1, CardinalityConstraint c2) {
 	if (c1.unbounded || c2.unbounded) {
-		return createUnboundedCardinality(Math.min(c1.inf, c2.inf))
+		return createUnboundedConstraint(Math.min(c1.inf, c2.inf))
 	} else {
-		return createCardinality(Math.min(c1.inf, c2.inf), Math.max(c1.sup, c2.sup))
+		return createConstraint(Math.min(c1.inf, c2.inf), Math.max(c1.sup, c2.sup))
 	}
 }
-auxiliary listJoin(Type t1, Type t2) {
-	return createType(join(t1.basicType, t2.basicType), union(t1.cardinality, t2.cardinality))
+auxiliary listJoin(ListType t1, ListType t2) {
+	val sup = join(t1.itemType, t2.itemType);
+	sup !== null
+	return createListType(sup, union(t1.constraint, t2.constraint))
 }
 auxiliary allAttributes(Data d) {
-	if (d.superType === null) {
+	if (d.parent === null) {
 		return d.attributes;
 	} else {
-		return allAttributes(d.superType) + d.attributes;
+		return allAttributes(d.parent) + d.attributes;
 	}
 }
 auxiliary mayBeEmpty(Data d) {
 	d.allAttributes.forall[
-		createCardinality(0, 1).isSubcardinality(type.cardinality)
+		createConstraint(0, 1).isSubconstraint(listType.constraint)
 	]
 }
+auxiliary listTypeCheck(Expression sourceObject, ListType expected) {
+	if (expected !== null && sourceObject.staticType !== null) {
+		expected.listTypesAreEqual(sourceObject.staticType)
+		or
+		fail error "Expected list type `" + expected.listTypeToString + "`, but was `" + sourceObject.staticType.listTypeToString + "`."
+			source sourceObject
+	}
+}
+auxiliary typeCheck(Expression sourceObject, Type expected) {
+	if (expected !== null && sourceObject.staticType !== null) {
+		expected.typesAreEqual(sourceObject.staticType.itemType)
+		or
+		fail error "Expected item type `" + expected.typeToString + "`, but was `" + sourceObject.staticType.itemType.typeToString + "`."
+			source sourceObject
+	}
+}
+auxiliary listSubtypeCheck(Expression sourceObject, ListType expected) {
+	if (expected !== null && sourceObject.staticType !== null && !{ empty |- sourceObject.staticType <| expected }) {
+		fail error "Expected a list subtype of `" + expected.listTypeToString + "`, but was `" + sourceObject.staticType.listTypeToString + "`."
+			source sourceObject
+	}	
+}
+auxiliary subtypeCheck(Expression sourceObject, Type expected) {
+	if (expected !== null && sourceObject.staticType !== null && !{ empty |- sourceObject.staticType.itemType <: expected }) {
+		fail error "Expected a subtype of `" + expected.typeToString + "`, but was `" + sourceObject.staticType.itemType.typeToString + "`."
+			source sourceObject
+	}	
+}
+auxiliary comparableListTypeCheck(BinaryOperation sourceObject) {
+	if (sourceObject.left.staticType !== null && sourceObject.right.staticType !== null) {
+		sourceObject.left.staticType.listComparable(sourceObject.right.staticType)
+		or
+		fail error "List types `" + sourceObject.left.staticType.listTypeToString + "` and `" + sourceObject.right.staticType.listTypeToString + "` are not comparable."
+			source sourceObject
+	}
+}
+auxiliary comparableTypeCheck(BinaryOperation sourceObject) {
+	if (sourceObject.left.staticType !== null && sourceObject.right.staticType !== null) {
+		sourceObject.left.staticType.itemType.comparable(sourceObject.right.staticType.itemType)
+		or
+		fail error "Types `" + sourceObject.left.staticType.itemType.typeToString + "` and `" + sourceObject.right.staticType.itemType.typeToString + "` are not comparable."
+			source sourceObject
+	}
+}
+auxiliary constraintCheck(Expression sourceObject, CardinalityConstraint expected) {
+	if (expected !== null && sourceObject.staticType !== null) {
+		expected.constraintsAreEqual(sourceObject.staticType.constraint)
+		or
+		fail error "Expected constraint `" + expected.constraintToString + "`, but was `" + sourceObject.staticType.constraint.constraintToString + "`."
+			source sourceObject
+	}
+}
+auxiliary notConstraintCheck(Expression sourceObject, CardinalityConstraint notExpected) {
+	if (notExpected !== null && sourceObject.staticType !== null) {
+		!notExpected.constraintsAreEqual(sourceObject.staticType.constraint)
+		or
+		fail error "Cardinality constraint may not be `" + notExpected.constraintToString + "`."
+			source sourceObject
+	}
+}
+auxiliary isLooserConstraintCheck(Expression sourceObject, CardinalityConstraint expected) {
+	if (expected !== null && sourceObject.staticType !== null) {
+		expected.isSubconstraint(sourceObject.staticType.constraint)
+		or
+		fail error "Expected constraint to include `" + expected.constraintToString + "`, but was `" + sourceObject.staticType.constraint.constraintToString + "`."
+			source sourceObject
+	}
+}
+	
 
-/*** BASIC SUBTYPING **/
+/*** SUBTYPING **/
 rule SBuiltIn // SA-Refl, SA-Num, SA-Nothing
 	G |- BuiltInType t1 <: BuiltInType t2
 from {
@@ -156,147 +235,73 @@ from {
 		t1.^data == t2.^data
 	} or
 	{
-		supertypes(t1).contains(t2.^data)
+		ancestors(t1).contains(t2.^data)
 	}
 }
 
-/*** SUBTYPING ***/
+/*** LIST SUBTYPING ***/
 rule SList // SA-List
-	G |- Type s <| Type t
+	G |- ListType s <| ListType t
 from {
-	G |- s.basicType <: t.basicType
-	s.cardinality.isSubcardinality(t.cardinality)
+	G |- s.itemType <: t.itemType
+	s.constraint.isSubconstraint(t.constraint)
 }
 
 
 /*** TYPING ***/
-rule TBooleanOperation // TA-Or, TA-And
+axiom TBooleanOperation // TA-Or, TA-And
 	G |- BooleanOperation e : singleBoolean
-from {
-	G |- e.left : var Type t1
-	t1.typesAreEqual(singleBoolean)
-	G |- e.right : var Type t2
-	t2.typesAreEqual(singleBoolean)
-}
-rule TNot // TA-Not
+axiom TNot // TA-Not
 	G |- NotExpression e : singleBoolean
-from {
-	G |- e.expression : var Type t
-	t.typesAreEqual(singleBoolean)
-}
-rule TExists // TA-Exists, TA-SingleExists, TA-MultipleExists
+axiom TExists // TA-Exists, TA-SingleExists, TA-MultipleExists
 	G |- ExistsExpression e : singleBoolean
-from {
-	G |- e.argument : var Type t
-	if (e.single) {
-		single.isSubcardinality(t.cardinality)
-		!t.cardinality.cardinalitiesAreEqual(single)
-	} else if (e.multiple) {
-		createCardinality(1, 2).isSubcardinality(t.cardinality)
-	} else {
-		createCardinality(0, 1).isSubcardinality(t.cardinality)
-	}
-}
-rule TAbsent // No corresponding rule. In the specification, this is treated as syntactic sugar.
+axiom TAbsent // No corresponding rule. In the specification, this is treated as syntactic sugar.
 	G |- AbsentExpression e : singleBoolean
-from {
-	G |- e.argument : var Type t
-	createCardinality(0, 1).isSubcardinality(t.cardinality)
-}
-rule TContains // TA-Contains
+axiom TContains // TA-Contains
 	G |- ContainsExpression e : singleBoolean
-from {
-	G |- e.container : var Type t1
-	G |- e.contained : var Type t2
-	comparable(t1.basicType, t2.basicType)
-}
-rule TDisjoint // TA-Disjoint
+axiom TDisjoint // TA-Disjoint
 	G |- DisjointExpression e : singleBoolean
-from {
-	G |- e.container : var Type t1
-	G |- e.disjoint : var Type t2
-	comparable(t1.basicType, t2.basicType)
-}
-rule TEquality // TA-Equals, TA-NotEquals, TA-AllEquals, TA-AllNotEquals, TA-AnyEquals, TA-AnyNotEquals 
+axiom TEquality // TA-Equals, TA-NotEquals, TA-AllEquals, TA-AllNotEquals, TA-AnyEquals, TA-AnyNotEquals 
 	G |- ComparisonOperation e : singleBoolean
-from {
-	G |- e.left : var Type t1
-	G |- e.right : var Type t2
-	if (e.cardOp == 'all' || e.cardOp == 'any') {
-		comparable(t1.basicType, t2.basicType)
-		t2.cardinality.cardinalitiesAreEqual(single)
-	} else {
-		listComparable(t1, t2)
-	}
-}
 rule TArithmetic // TA-PlusInt, TA-PlusNumber, TA-MultInt, TA-MultNumber, TA-SubsInt, TA-SubsNumber, TA-Division
-	G |- ArithmeticOperation e : Type t
+	G |- ArithmeticOperation e : ListType t
 from {
-	G |- e.left : var Type t1
-	t1.cardinality.cardinalitiesAreEqual(single)
-	G |- e.right : var Type t2
-	t2.cardinality.cardinalitiesAreEqual(single)
 	if (e.operator == '/') {
-		G |- t1.basicType <: number
-		G |- t2.basicType <: number
 		t = singleNumber
 	} else {
-		if (t1.basicType.basicTypesAreEqual(^int) && t2.basicType.basicTypesAreEqual(^int)) {
+		val t1 = e.left.staticType.itemType
+		val t2 = e.right.staticType.itemType
+		if (t1.typesAreEqual(^int) && t2.typesAreEqual(^int) || !{G |- t1 <: number} || !{G |- t2 <: number}) {
 			t = singleInt
 		} else {
-			G |- t1.basicType <: number
-			G |- t2.basicType <: number
 			t = singleNumber
 		}
 	}
 }
-rule TCount // TA-Count
+axiom TCount // TA-Count
 	G |- CountExpression e : singleInt
-from {
-	G |- e.argument : var Type t
-}
 rule TProject // TA-Project, // TA-OnlyExists
-	G |- ProjectionExpression e : Type t
+	G |- ProjectionExpression e : ListType t
 from {
-	G |- e.receiver : var Type te
 	if (e.onlyExists) {
-		mayBeEmpty((te.basicType as DataType).^data)
 		t = singleBoolean
 	} else {
-		t = createType(e.attribute.type.basicType.clone, te.cardinality.multiply(e.attribute.type.cardinality))
+		t = createListType(e.attribute.listType.itemType.clone, e.receiver.staticType.constraint.multiply(e.attribute.listType.constraint))
 	}
 }
 rule TIf // TA-If
-	G |- ConditionalExpression e : Type t
+	G |- ConditionalExpression e : ListType t
 from {
-	G |- e.^if : var Type ifType
-	ifType.typesAreEqual(singleBoolean)
-	
-	G |- e.ifthen : var Type t1
-	G |- e.elsethen : var Type t2
-	t = listJoin(t1, t2)
+	if (e.ifthen.staticType !== null && e.elsethen.staticType !== null) {
+		t = listJoin(e.ifthen.staticType, e.elsethen.staticType)
+	}
 }
-rule TFunc // TA-Func
-	G |- FunctionCallExpression e : e.function.^output.type.clone
-from {
-	e.function.inputs.size() == e.args.size()
-	(0..<e.args.size).forall[idx |
-		G |- e.args.get(idx) : var Type t
-		G |- t <| e.function.inputs.get(idx).type
-	]
-}
-rule TConstruct // TA-Construct
-	G |- DataConstructionExpression e : createType(createDataType(e.type), createCardinality(1, 1))
-from {
-	allAttributes(e.type).size() == e.values.size()
-	e.values.map[key].toSet().size() == e.values.size()
-	e.values.forall[
-		G |- value : var Type t
-		G |- t <| key.type
-	]
-}
+axiom TFunc // TA-Func
+	G |- FunctionCallExpression e : e.function.^output.listType.clone
+axiom TInstantiate // TA-Instantiate
+	G |- InstantiationExpression e : createListType(createDataType(e.type), single)
 axiom TVar // TA-Var
-	G |- VariableReference e : e.reference.type.clone
+	G |- VariableReference e : e.reference.listType.clone
 axiom BooleanLiteral // TA-True, TA-False
 	G |- BooleanLiteral bool : singleBoolean
 axiom NumberLiteral // TA-Number
@@ -304,33 +309,149 @@ axiom NumberLiteral // TA-Number
 axiom IntLiteral // TA-Int
 	G |- IntLiteral n : singleInt
 rule TList // TA-List
-	G |- ListLiteral e : Type t
+	G |- ListLiteral e : ListType t
 from {
-	t = e.elements.fold(emptyNothing, [ Type acc, Expression elem |
-		G |- elem : var Type t1
-		createType(join(t1.basicType, acc.basicType), t1.cardinality.add(acc.cardinality))
-	])
+	if (e.elements.forall[staticType !== null]) {
+		t = e.elements.fold(emptyNothing, [ ListType acc, Expression elem |
+			if (acc === null) {
+				null
+			} else {
+				val sup = join(elem.staticType.itemType, acc.itemType);
+				if (sup === null) {
+					null
+				} else {
+					createListType(join(elem.staticType.itemType, acc.itemType), elem.staticType.constraint.add(acc.constraint))
+				}
+			}
+		])
+	}
 }
-rule TOnlyElement // TA-OnlyElement
-	G |- OnlyElementExpression e : Type t
-from {
-	G |- e.argument : var Type te
-	t = createType(te.basicType, createCardinality(0, 1))
-}
+axiom TOnlyElement // TA-OnlyElement
+	G |- OnlyElementExpression e : createListType(e.argument.staticType.itemType.clone, createConstraint(0, 1))
 
 
 /****** CHECK RULES ********/
-checkrule CheckCardinality for
-	Cardinality c
+checkrule CheckConstraint for
+	CardinalityConstraint c
 from {
 	c.unbounded
 	or
 	c.inf <= c.sup
+	or
+	  fail error "The lower bound must be lesser or equal to the upper bound."
+}
+
+// Type checking
+checkrule CheckLeftBooleanOperation for BooleanOperation e from {
+	listTypeCheck(e.left, singleBoolean)
+}
+checkrule CheckRightBooleanOperation for BooleanOperation e from {
+	listTypeCheck(e.right, singleBoolean)
+}
+checkrule CheckNotExpression for NotExpression e from {
+	listTypeCheck(e.expression, singleBoolean)
+}
+checkrule CheckExistsExpression for ExistsExpression e from {
+	if (e.single) {
+		isLooserConstraintCheck(e.argument, single)
+		notConstraintCheck(e.argument, single)
+	} else if (e.multiple) {
+		isLooserConstraintCheck(e.argument, createConstraint(1, 2))
+	} else {
+		isLooserConstraintCheck(e.argument, createConstraint(0, 1))
+	}
+}
+checkrule CheckAbsentExpression for AbsentExpression e from {
+	isLooserConstraintCheck(e.argument, createConstraint(0, 1))
+}
+checkrule CheckContainsExpression for ContainsExpression e from {
+	comparableTypeCheck(e)
+}
+checkrule CheckDisjointExpression for DisjointExpression e from {
+	comparableTypeCheck(e)
+}
+checkrule CheckComparisonOperation for ComparisonOperation e from {
+	if (e.cardOp == 'all' || e.cardOp == 'any') {
+		constraintCheck(e.right, single)
+		comparableTypeCheck(e)
+	} else {
+		comparableListTypeCheck(e)
+	}
+}
+checkrule CheckLeftArithmeticOperation for ArithmeticOperation e from {
+	constraintCheck(e.left, single)
+	subtypeCheck(e.left, number)
+}
+checkrule CheckRightArithmeticOperation for ArithmeticOperation e from {
+	constraintCheck(e.right, single)
+	subtypeCheck(e.right, number)
+}
+checkrule CheckProjectionExpression for ProjectionExpression e from {
+	if (e.onlyExists && e.receiver.staticType !== null) {
+		constraintCheck(e.receiver, single)
+		val t = e.receiver.staticType.itemType as DataType
+		mayBeEmpty(t.^data)
+		or
+		fail error "The `only exists` operator is not applicable to instances of `" + t.typeToString() + "`."
+			source e.receiver
+	}
+}
+checkrule CheckIfConditionalExpression for ConditionalExpression e from {
+	listTypeCheck(e.^if, singleBoolean)
+}
+checkrule CheckBodyConditionalExpression for ConditionalExpression e from {
+	if (e.ifthen.staticType !== null && e.elsethen.staticType !== null) {
+		listJoin(e.ifthen.staticType, e.elsethen.staticType)
+		or
+		fail error "List types `" + e.ifthen.staticType.listTypeToString + "` and `" + e.elsethen.staticType.listTypeToString + "` do not have a common list supertype."
+	}
+}
+checkrule CheckFunctionCallExpression for FunctionCallExpression e from {
+	{
+		e.function.inputs.size() == e.args.size()
+		or
+		fail error "Expected " + e.function.inputs.size() + " argument(s), but got " + e.args.size() + "."
+	}
+	(0..<e.args.size).forall[idx |
+		listSubtypeCheck(e.args.get(idx), e.function.inputs.get(idx).listType)
+	]
+}
+checkrule CheckInstantiationExpression for InstantiationExpression e from {
+	{
+		allAttributes(e.type).size() == e.values.size()
+		or
+		fail error "Expected " + allAttributes(e.type).size() + " value(s), but got " + e.values.size() + "."
+	}
+	{
+		e.values.map[key].toSet().size() == e.values.size()
+		or
+		fail error "Expected " + e.values.size() + " attribute(s), but got " + e.values.map[key].toSet().size() + "."
+	}
+	e.values.forall[
+		listSubtypeCheck(value, key.listType)
+	]
+}
+checkrule CheckListLiteral for ListLiteral e from {
+	if (e.elements.forall[staticType !== null]) {
+		e.elements.fold(emptyNothing, [ ListType acc, Expression elem |
+			if (acc === null) {
+				null
+			} else {
+				val sup = join(elem.staticType.itemType, acc.itemType);
+				if (sup === null) {
+					null
+				} else {
+					createListType(join(elem.staticType.itemType, acc.itemType), elem.staticType.constraint.add(acc.constraint))
+				}
+			}
+		]) !== null
+		or
+		fail error "Elements do not have a common supertype: " + e.elements.filter[it !== null].join(', ')["`" + it.staticType.itemType.typeToString + "`"] + "."
+	}
 }
 
 checkrule TypecheckFunc for
 	Function f
 from {
-	empty |- f.operation : var Type t
-	empty |- t <| f.^output.type
+	listSubtypeCheck(f.operation, f.^output.listType)
 }

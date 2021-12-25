@@ -15,7 +15,7 @@ class JavaEntityUtil {
 	
 	def CharSequence toJavaClass(Data data) {
 		'''
-		public class «data.toClassName»«IF data.superType !== null» extends «data.superType.toClassName»«ENDIF» {
+		public class «data.toClassName»«IF data.parent !== null» extends «data.parent.toClassName»«ENDIF» {
 			«FOR attr: data.attributes»
 			«attr.toJavaField»
 			«ENDFOR»
@@ -38,11 +38,11 @@ class JavaEntityUtil {
 		
 		        final «data.toClassName» other = («data.toClassName»)obj;
 		        «FOR attr: data.allAttributes»
-		        «IF attr.type.isPrimitiveType»
+		        «IF attr.listType.isPrimitiveType»
 		        if (this.«attr.toGetterName»() != other.«attr.toGetterName»()) {
 		        	return false;
 		        }
-    			«ELSEIF attr.type.isListType»
+    			«ELSEIF attr.listType.isListType»
 		        if (!this.«attr.toGetterName»().equals(other.«attr.toGetterName»())) {
 		        	return false;
 		        }
@@ -60,9 +60,9 @@ class JavaEntityUtil {
 		    public int hashCode() {
 		        int hash = 3;
 		        «FOR attr: data.allAttributes»
-		        «IF attr.type.isPrimitiveType»
-		        hash = 53 * hash + «attr.type.basicType.toReferenceJavaType».hashCode(this.«attr.toGetterName»());
-    			«ELSEIF attr.type.isListType»
+		        «IF attr.listType.isPrimitiveType»
+		        hash = 53 * hash + «attr.listType.itemType.toReferenceJavaType».hashCode(this.«attr.toGetterName»());
+    			«ELSEIF attr.listType.isListType»
 		        hash = 53 * hash + this.«attr.toGetterName»().hashCode();
 		        «ELSE»
 		        hash = 53 * hash + (this.«attr.toGetterName»() == null ? 0 : this.«attr.toGetterName»().hashCode());
@@ -75,23 +75,23 @@ class JavaEntityUtil {
 	}
 	
 	def CharSequence toJavaField(Attribute attr) {
-		'''private final «attr.type.toJavaType» «attr.toVarName»;'''
+		'''private final «attr.listType.toJavaType» «attr.toVarName»;'''
 	}
 	def CharSequence toJavaConstructor(Data data) {
 		'''
-		public «data.toClassName»(«data.allAttributes.join(', ')['''«type.toJavaType» «toVarName»''']») {
-			«IF data.superType !== null»
-			super(«data.superType.allAttributes.join(', ')[toVarName]»);
+		public «data.toClassName»(«data.allAttributes.join(', ')['''«listType.toJavaType» «toVarName»''']») {
+			«IF data.parent !== null»
+			super(«data.parent.allAttributes.join(', ')[toVarName]»);
 			«ENDIF»
 			«data.attributes.join(System.lineSeparator)[
-				'''this.«toVarName» = «type.isListType ? '''ImmutableList.copyOf(«toVarName»)''' : toVarName»;'''
+				'''this.«toVarName» = «listType.isListType ? '''ImmutableList.copyOf(«toVarName»)''' : toVarName»;'''
 			]»
 		}
 		'''
 	}
 	def CharSequence toJavaGetter(Attribute attr) {
 		'''
-		public «attr.type.toJavaType» «attr.toGetterName»() {
+		public «attr.listType.toJavaType» «attr.toGetterName»() {
 			return this.«attr.toVarName»;
 		}
 		'''

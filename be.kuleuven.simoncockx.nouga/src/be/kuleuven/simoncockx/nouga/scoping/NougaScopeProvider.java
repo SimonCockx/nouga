@@ -13,9 +13,9 @@ import org.eclipse.xtext.scoping.Scopes;
 
 import com.google.inject.Inject;
 
-import be.kuleuven.simoncockx.nouga.nouga.BasicType;
+import be.kuleuven.simoncockx.nouga.nouga.Type;
 import be.kuleuven.simoncockx.nouga.nouga.Data;
-import be.kuleuven.simoncockx.nouga.nouga.DataConstructionExpression;
+import be.kuleuven.simoncockx.nouga.nouga.InstantiationExpression;
 import be.kuleuven.simoncockx.nouga.nouga.DataType;
 import be.kuleuven.simoncockx.nouga.nouga.Function;
 import be.kuleuven.simoncockx.nouga.nouga.KeyValuePair;
@@ -35,13 +35,13 @@ public class NougaScopeProvider extends AbstractNougaScopeProvider {
 	
 	@Override
 	public IScope getScope(EObject context, EReference reference) {
-		if (context instanceof Data && reference == NougaPackage.Literals.DATA__SUPER_TYPE) {
+		if (context instanceof Data && reference == NougaPackage.Literals.DATA__PARENT) {
 			EObject rootElement = EcoreUtil2.getRootContainer(context);
 	        List<Data> candidates = EcoreUtil2.getAllContentsOfType(rootElement, Data.class);
 	        return Scopes.scopeFor(candidates);
 		} else if (context instanceof ProjectionExpression && reference == NougaPackage.Literals.PROJECTION_EXPRESSION__ATTRIBUTE) {
 			ProjectionExpression ctx = (ProjectionExpression)context;
-			BasicType type = typing.type(ctx.getReceiver()).getValue().getBasicType();
+			Type type = ctx.getReceiver().getStaticType().getItemType();
 			if (type instanceof DataType) {
 				return Scopes.scopeFor(typing.allAttributes(((DataType)type).getData()));
 			}
@@ -50,8 +50,8 @@ public class NougaScopeProvider extends AbstractNougaScopeProvider {
 			Function function = (Function)context;
 			return Scopes.scopeFor(function.getInputs());
 		} else if (context instanceof KeyValuePair && reference == NougaPackage.Literals.KEY_VALUE_PAIR__KEY) {
-			DataConstructionExpression construct = EcoreUtil2.getContainerOfType(context, DataConstructionExpression.class);
-			return Scopes.scopeFor(typing.allAttributes(construct.getType()));
+			InstantiationExpression instance = EcoreUtil2.getContainerOfType(context, InstantiationExpression.class);
+			return Scopes.scopeFor(typing.allAttributes(instance.getType()));
 		}
 		return super.getScope(context, reference);
 	}

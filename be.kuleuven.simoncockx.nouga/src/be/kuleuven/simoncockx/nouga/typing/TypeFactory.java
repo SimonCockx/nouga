@@ -1,9 +1,9 @@
 package be.kuleuven.simoncockx.nouga.typing;
 
-import be.kuleuven.simoncockx.nouga.nouga.BasicType;
+import be.kuleuven.simoncockx.nouga.nouga.ListType;
 import be.kuleuven.simoncockx.nouga.nouga.BuiltInType;
 import be.kuleuven.simoncockx.nouga.nouga.BuiltInTypeEnum;
-import be.kuleuven.simoncockx.nouga.nouga.Cardinality;
+import be.kuleuven.simoncockx.nouga.nouga.CardinalityConstraint;
 import be.kuleuven.simoncockx.nouga.nouga.Data;
 import be.kuleuven.simoncockx.nouga.nouga.DataType;
 import be.kuleuven.simoncockx.nouga.nouga.NougaFactory;
@@ -23,48 +23,48 @@ public class TypeFactory {
 		return t;
 	}
 	
-	public Type createType(BasicType basicType, Cardinality c) {
-		Type type = NougaFactory.eINSTANCE.createType();
-		type.setBasicType(basicType);
-		type.setCardinality(c);
+	public ListType createListType(Type itemType, CardinalityConstraint c) {
+		ListType type = NougaFactory.eINSTANCE.createListType();
+		type.setItemType(itemType);
+		type.setConstraint(c);
 		return type;
 	}
 
-	public Cardinality createCardinality(int inf, int sup) {
-		Cardinality card = NougaFactory.eINSTANCE.createCardinality();
+	public CardinalityConstraint createConstraint(int inf, int sup) {
+		CardinalityConstraint card = NougaFactory.eINSTANCE.createCardinalityConstraint();
 		card.setInf(inf);
 		card.setSup(sup);
 		return card;
 	}
-	public Cardinality createUnboundedCardinality(int inf) {
-		Cardinality card = NougaFactory.eINSTANCE.createCardinality();
+	public CardinalityConstraint createUnboundedConstraint(int inf) {
+		CardinalityConstraint card = NougaFactory.eINSTANCE.createCardinalityConstraint();
 		card.setInf(inf);
 		card.setUnbounded(true);
 		return card;
 	}
 	
 	// Convenience functions
-	public Type createType(BuiltInTypeEnum builtInType, int inf, int sup) {
-		return createType(createBuiltInType(builtInType), createCardinality(inf, sup));
+	public ListType createListType(BuiltInTypeEnum builtInType, int inf, int sup) {
+		return createListType(createBuiltInType(builtInType), createConstraint(inf, sup));
 	}
-	public Type createType(Data data, int inf, int sup) {
-		return createType(createDataType(data), createCardinality(inf, sup));
+	public ListType createListType(Data data, int inf, int sup) {
+		return createListType(createDataType(data), createConstraint(inf, sup));
 	}
-	public Type createType(BasicType basicType, int inf, int sup) {
-		return createType(basicType, createCardinality(inf, sup));
+	public ListType createListType(Type itemType, int inf, int sup) {
+		return createListType(itemType, createConstraint(inf, sup));
 	}
-	public Type createType(BuiltInTypeEnum builtInType, int inf) {
-		return createType(createBuiltInType(builtInType), createUnboundedCardinality(inf));
+	public ListType createListType(BuiltInTypeEnum builtInType, int inf) {
+		return createListType(createBuiltInType(builtInType), createUnboundedConstraint(inf));
 	}
-	public Type createType(Data data, int inf) {
-		return createType(createDataType(data), createUnboundedCardinality(inf));
+	public ListType createListType(Data data, int inf) {
+		return createListType(createDataType(data), createUnboundedConstraint(inf));
 	}
-	public Type createType(BasicType basicType, int inf) {
-		return createType(basicType, createUnboundedCardinality(inf));
+	public ListType createListType(Type itemType, int inf) {
+		return createListType(itemType, createUnboundedConstraint(inf));
 	}
 	
-	public Cardinality getSingle() {
-		return createCardinality(1, 1);
+	public CardinalityConstraint getSingle() {
+		return createConstraint(1, 1);
 	}
 	public BuiltInType getBoolean() {
 		return createBuiltInType(BuiltInTypeEnum.BOOLEAN);
@@ -78,16 +78,16 @@ public class TypeFactory {
 	public BuiltInType getNothing() {
 		return createBuiltInType(BuiltInTypeEnum.NOTHING);
 	}
-	public Type getSingleBoolean() {
-		return createType(getBoolean(), getSingle());
+	public ListType getSingleBoolean() {
+		return createListType(getBoolean(), getSingle());
 	}
-	public Type getSingleNumber() {
-		return createType(getNumber(), getSingle());
+	public ListType getSingleNumber() {
+		return createListType(getNumber(), getSingle());
 	}
-	public Type getSingleInt() {
-		return createType(getInt(), getSingle());
+	public ListType getSingleInt() {
+		return createListType(getInt(), getSingle());
 	}
-	public Type getEmptyNothing() {
-		return createType(getNothing(), 0, 0);
+	public ListType getEmptyNothing() {
+		return createListType(getNothing(), 0, 0);
 	}
 }

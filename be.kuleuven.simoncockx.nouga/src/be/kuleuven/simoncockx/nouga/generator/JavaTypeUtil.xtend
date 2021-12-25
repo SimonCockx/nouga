@@ -1,6 +1,6 @@
 package be.kuleuven.simoncockx.nouga.generator
 
-import be.kuleuven.simoncockx.nouga.nouga.Type
+import be.kuleuven.simoncockx.nouga.nouga.ListType
 import be.kuleuven.simoncockx.nouga.nouga.BuiltInType
 import be.kuleuven.simoncockx.nouga.nouga.DataType
 import com.google.inject.Inject
@@ -11,14 +11,14 @@ class JavaTypeUtil {
 	@Inject
 	extension JavaNameUtil
 	
-	def boolean isListType(Type t) {
-		t.cardinality.unbounded || t.cardinality.sup != 1
+	def boolean isListType(ListType t) {
+		t.constraint.unbounded || t.constraint.sup != 1
 	}
-	def boolean isPrimitiveType(Type t) {
-		if (t.isListType || t.cardinality.inf == 0) {
+	def boolean isPrimitiveType(ListType t) {
+		if (t.isListType || t.constraint.inf == 0) {
 			return false;
 		}
-		val b = t.basicType;
+		val b = t.itemType;
 		if (b instanceof BuiltInType) {
 			if (b.type == BuiltInTypeEnum.BOOLEAN || b.type == BuiltInTypeEnum.INT) {
 				return true;
@@ -26,13 +26,13 @@ class JavaTypeUtil {
 		}
 		return false;
 	}
-	def toJavaType(Type t) {
+	def toJavaType(ListType t) {
 		if (t.isListType) {
-			return '''List<? extends «t.basicType.toReferenceJavaType»>'''
+			return '''List<? extends «t.itemType.toReferenceJavaType»>'''
 		} else if (t.isPrimitiveType) {
-			return (t.basicType as BuiltInType).toPrimitiveJavaType
+			return (t.itemType as BuiltInType).toPrimitiveJavaType
 		}
-		return t.basicType.toReferenceJavaType
+		return t.itemType.toReferenceJavaType
 	}
 	
 	def dispatch toReferenceJavaType(BuiltInType t) {

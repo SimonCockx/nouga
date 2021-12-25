@@ -13,7 +13,7 @@ import be.kuleuven.simoncockx.nouga.nouga.ProjectionExpression
 import be.kuleuven.simoncockx.nouga.nouga.Data
 import static extension org.junit.jupiter.api.Assertions.*
 import be.kuleuven.simoncockx.nouga.nouga.VariableReference
-import be.kuleuven.simoncockx.nouga.nouga.DataConstructionExpression
+import be.kuleuven.simoncockx.nouga.nouga.InstantiationExpression
 
 @ExtendWith(InjectionExtension)
 @InjectWith(NougaInjectorProvider)
@@ -36,7 +36,7 @@ class ScopingTest {
 		'''.parse;
 		model.assertNoErrors;
 		model => [
-			(elements.last as Data).superType.
+			(elements.last as Data).parent.
 				assertSame(elements.head)
 		]
 	}
@@ -60,7 +60,7 @@ class ScopingTest {
 	}
 	
 	@Test
-	def void constructionScopePositiveTest() {
+	def void instantiationScopePositiveTest() {
 		val model = '''
 			namespace just.some.package
 			
@@ -79,7 +79,7 @@ class ScopingTest {
 		val superType = model.elements.head as Data;
 		val myType = model.elements.get(1) as Data;
 		model.elements.last as Function => [
-			(operation as DataConstructionExpression).values => [
+			(operation as InstantiationExpression).values => [
 				head.key.assertSame(myType.attributes.head)
 				last.key.assertSame(superType.attributes.head)
 			]

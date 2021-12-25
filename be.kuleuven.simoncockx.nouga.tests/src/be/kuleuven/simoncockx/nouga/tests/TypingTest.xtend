@@ -27,17 +27,17 @@ class TypingTest {
 	
 	@Test
 	def void testLiteralTyping() {
-		'False'.type.assertTypeEquals(singleBoolean);
-		'-5.32e7'.type.assertTypeEquals(singleNumber);
-		'42'.type.assertTypeEquals(singleInt);
-		'[]'.type.assertTypeEquals(emptyNothing);
+		'False'.type.assertListTypeEquals(singleBoolean);
+		'-5.32e7'.type.assertListTypeEquals(singleNumber);
+		'42'.type.assertListTypeEquals(singleInt);
+		'[]'.type.assertListTypeEquals(emptyNothing);
 	}
 	
 	@Test
 	def void testSubtyping() {
-		val t1 = createType(BuiltInTypeEnum.INT, 1, 3);
-		val t2 = createType(BuiltInTypeEnum.NUMBER, 1, 5);
-		t1.assertSubtype(t2)
+		val t1 = createListType(BuiltInTypeEnum.INT, 1, 3);
+		val t2 = createListType(BuiltInTypeEnum.NUMBER, 1, 5);
+		t1.assertListSubtype(t2)
 		
 		val model = '''
 		namespace test
@@ -48,70 +48,70 @@ class TypingTest {
 		model.assertNoErrors;
 		val a = model.elements.head as Data
 		val b = model.elements.last as Data
-		createType(b, 1, 1).assertSubtype(createType(a, 1, 1))
+		createListType(b, 1, 1).assertListSubtype(createListType(a, 1, 1))
 	}
 	
 	@Test
 	def void testTList() {
-		'[2, 4.5, 7, -3.14]'.type.assertTypeEquals(createType(BuiltInTypeEnum.NUMBER, 4, 4));
+		'[2, 4.5, 7, -3.14]'.type.assertListTypeEquals(createListType(BuiltInTypeEnum.NUMBER, 4, 4));
 	}
 	
 	@Test
 	def void testTBooleanOperation() {
-		'True or False'.type.assertTypeEquals(singleBoolean);
-		'True and False'.type.assertTypeEquals(singleBoolean);
+		'True or False'.type.assertListTypeEquals(singleBoolean);
+		'True and False'.type.assertListTypeEquals(singleBoolean);
 	}
 	
 	@Test
 	def void testTNot() {
-		'not True'.type.assertTypeEquals(singleBoolean);
+		'not True'.type.assertListTypeEquals(singleBoolean);
 	}
 	
 	@Test
 	def void testTExists() {
-		'(if True then empty else 1) exists'.type.assertTypeEquals(singleBoolean);
-		'(if True then empty else 1) single exists'.type.assertTypeEquals(singleBoolean);
-		'(if True then 1 else [2, 3]) single exists'.type.assertTypeEquals(singleBoolean);
-		'(if True then 1 else [2, 3]) multiple exists'.type.assertTypeEquals(singleBoolean);
-		'(if True then empty else 1) is absent'.type.assertTypeEquals(singleBoolean);
+		'(if True then empty else 1) exists'.type.assertListTypeEquals(singleBoolean);
+		'(if True then empty else 1) single exists'.type.assertListTypeEquals(singleBoolean);
+		'(if True then 1 else [2, 3]) single exists'.type.assertListTypeEquals(singleBoolean);
+		'(if True then 1 else [2, 3]) multiple exists'.type.assertListTypeEquals(singleBoolean);
+		'(if True then empty else 1) is absent'.type.assertListTypeEquals(singleBoolean);
 	}
 	
 	@Test
 	def void testTContains() {
-		'[3.5, 1.0] contains [5, 2, 10]'.type.assertTypeEquals(singleBoolean);
-		'[3, 1] disjoint [5.1, 10.0, -5.3]'.type.assertTypeEquals(singleBoolean);
+		'[3.5, 1.0] contains [5, 2, 10]'.type.assertListTypeEquals(singleBoolean);
+		'[3, 1] disjoint [5.1, 10.0, -5.3]'.type.assertListTypeEquals(singleBoolean);
 	}
 	
 	@Test
 	def void testTEquals() {
 		'''
 		(if True then [1] else [2, 3]) = (if False then [4.0, 5] else [6.0, 7, 8])
-		'''.type.assertTypeEquals(singleBoolean)
+		'''.type.assertListTypeEquals(singleBoolean)
 		'''
 		(if True then [1] else [2, 3]) <> (if False then [4.0, 5] else [6.0, 7, 8])
-		'''.type.assertTypeEquals(singleBoolean)
-		'[1, 3] all = 5.0'.type.assertTypeEquals(singleBoolean)
-		'empty all <> 5.0'.type.assertTypeEquals(singleBoolean)
-		'[1, 3] any = 5.0'.type.assertTypeEquals(singleBoolean)
-		'[3.0] any <> 5'.type.assertTypeEquals(singleBoolean)
+		'''.type.assertListTypeEquals(singleBoolean)
+		'[1, 3] all = 5.0'.type.assertListTypeEquals(singleBoolean)
+		'empty all <> 5.0'.type.assertListTypeEquals(singleBoolean)
+		'[1, 3] any = 5.0'.type.assertListTypeEquals(singleBoolean)
+		'[3.0] any <> 5'.type.assertListTypeEquals(singleBoolean)
 	}
 	
 	@Test
 	def void testTArithmetic() {
-		'3 + 4'.type.assertTypeEquals(singleInt)
-		'3.0 + 4'.type.assertTypeEquals(singleNumber)
-		'3 + 4.0'.type.assertTypeEquals(singleNumber)
-		'3.0 + 4.0'.type.assertTypeEquals(singleNumber)
-		'3 - 4'.type.assertTypeEquals(singleInt)
-		'3 - 4.0'.type.assertTypeEquals(singleNumber)
-		'3 * 4'.type.assertTypeEquals(singleInt)
-		'3.0 * 4'.type.assertTypeEquals(singleNumber)
-		'3 / 4'.type.assertTypeEquals(singleNumber)
+		'3 + 4'.type.assertListTypeEquals(singleInt)
+		'3.0 + 4'.type.assertListTypeEquals(singleNumber)
+		'3 + 4.0'.type.assertListTypeEquals(singleNumber)
+		'3.0 + 4.0'.type.assertListTypeEquals(singleNumber)
+		'3 - 4'.type.assertListTypeEquals(singleInt)
+		'3 - 4.0'.type.assertListTypeEquals(singleNumber)
+		'3 * 4'.type.assertListTypeEquals(singleInt)
+		'3.0 * 4'.type.assertListTypeEquals(singleNumber)
+		'3 / 4'.type.assertListTypeEquals(singleNumber)
 	}
 	
 	@Test
 	def void testTCount() {
-		'[] count'.type.assertTypeEquals(singleInt);
+		'[] count'.type.assertListTypeEquals(singleInt);
 	}
 	
 	@Test
@@ -135,14 +135,15 @@ class TypingTest {
 			assign-output:
 				CreateMyTypes() -> val
 		'''.parse
-		model.assertNoErrors;
 		val expression = (model.elements.last as Function).operation;
-		expression.type.assertTypeEquals(createType(^int, 6, 35));
+		expression.assertWellTyped;
+		model.assertNoErrors;
+		expression.type.assertListTypeEquals(createListType(^int, 6, 35));
 	}
 	
 	@Test
 	def void testTIf() {
-		'if True then [1, 2] else [3.0, 4.0, 5.0, 6.0]'.type.assertTypeEquals(createType(number, 2, 4));
+		'if True then [1, 2] else [3.0, 4.0, 5.0, 6.0]'.type.assertListTypeEquals(createListType(number, 2, 4));
 	}
 	
 	@Test
@@ -161,13 +162,14 @@ class TypingTest {
 			assign-output:
 				SomeFunc()
 		'''.parse
-		model.assertNoErrors;
 		val expression = (model.elements.last as Function).operation;
-		expression.type.assertTypeEquals(createType(number, 3, 5));
+		expression.assertWellTyped;
+		model.assertNoErrors;
+		expression.type.assertListTypeEquals(createListType(number, 3, 5));
 	}
 	
 	@Test
-	def void testTConstruct() {
+	def void testTInstantiate() {
 		val model = '''
 		namespace test
 		
@@ -182,10 +184,11 @@ class TypingTest {
 			assign-output:
 				MyType {val: [1, 2], n: 42, otherVal: empty}
 		'''.parse
+		val expression = (model.elements.last as Function).operation;
+		expression.assertWellTyped;
 		model.assertNoErrors;
 		val data = model.elements.get(1) as Data
-		val expression = (model.elements.last as Function).operation;
-		expression.type.assertTypeEquals(createType(data, 1, 1));
+		expression.type.assertListTypeEquals(createListType(data, 1, 1));
 	}
 	
 	@Test
@@ -199,9 +202,10 @@ class TypingTest {
 			assign-output:
 				input
 		'''.parse
-		model.assertNoErrors;
 		val expression = (model.elements.last as Function).operation;
-		expression.type.assertTypeEquals(createType(number, 2, 4));
+		expression.assertWellTyped;
+		model.assertNoErrors;
+		expression.type.assertListTypeEquals(createListType(number, 2, 4));
 	}
 	
 	@Test
@@ -218,8 +222,9 @@ class TypingTest {
 			assign-output:
 				MyType {val: True, otherVal: empty} -> val only exists
 		'''.parse
-		model.assertNoErrors;
 		val expression = (model.elements.last as Function).operation;
-		expression.type.assertTypeEquals(createType(^boolean, 1, 1));
+		expression.assertWellTyped;
+		model.assertNoErrors;
+		expression.type.assertListTypeEquals(createListType(^boolean, 1, 1));
 	}
 }
