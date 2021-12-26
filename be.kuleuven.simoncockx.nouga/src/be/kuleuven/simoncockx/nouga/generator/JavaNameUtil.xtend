@@ -13,13 +13,17 @@ import com.google.inject.Inject
 import com.google.inject.ImplementedBy
 import be.kuleuven.simoncockx.nouga.nouga.Model
 import be.kuleuven.simoncockx.nouga.lib.NougaNumber
+import java.util.Arrays
+import be.kuleuven.simoncockx.nouga.lib.NougaEntity
 
 class JavaNameUtil {
 	public final String imports = '''
 	import «Nouga.canonicalName»;
 	import «NougaNumber.canonicalName»;
+	import «NougaEntity.canonicalName»;
 	import «ImmutableList.canonicalName»;
 	import «List.canonicalName»;
+	import «Arrays.canonicalName»;
 	import «Inject.canonicalName»;
 	import «ImplementedBy.canonicalName»;
 	'''

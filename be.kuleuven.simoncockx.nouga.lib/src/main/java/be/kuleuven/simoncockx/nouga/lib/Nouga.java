@@ -154,16 +154,31 @@ public class Nouga {
 		return condition ? thenResult : elseResult;
 	}
 	
-	@SafeVarargs
-	public static <T, Prop> boolean checkAll(T e, Function<T, Boolean> ... checks) {
-		return Stream.of(checks).allMatch(check -> check.apply(e));
-	}
-	
 	public static <T> T onlyElement(List<? extends T> e) {
 		if (e.size() == 1) {
 			return e.get(0);
 		}
 		return null;
+	}
+	
+	public static boolean onlyExists(NougaEntity e, String attr) {
+		if (!dispatchExists(e.getAttributeValue(attr))) {
+			return false;
+		}
+		for (String attrName : e.getAttributeNames()) {
+			if (!attrName.equals(attr) && dispatchExists(e.getAttributeValue(attrName))) {
+				return false;
+			}
+		}
+		return true;
+	}
+	private static boolean dispatchExists(Object value) {
+		if (value instanceof List) {
+			@SuppressWarnings("unchecked")
+			List<Object> l = (List<Object>)value;
+			return Nouga.exists(l);
+		}
+		return Nouga.exists(value);
 	}
 	
 	public static NougaNumber coerceIntToNumber(int e) {

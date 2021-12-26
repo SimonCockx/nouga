@@ -42,8 +42,8 @@ public class JavaLibUtil {
 	public String project;
 	public String flatProject;
 	public String ifThenElse;
-	public String checkAll;
 	public String onlyElement;
+	public String onlyExists;
 	public String coerceIntToNumber;
 	public String coerceToList;
 	

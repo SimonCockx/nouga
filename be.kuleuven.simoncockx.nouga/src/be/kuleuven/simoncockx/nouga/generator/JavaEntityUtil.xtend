@@ -4,6 +4,7 @@ import be.kuleuven.simoncockx.nouga.nouga.Data
 import com.google.inject.Inject
 import be.kuleuven.simoncockx.nouga.nouga.Attribute
 import be.kuleuven.simoncockx.nouga.typing.NougaTyping
+import java.util.Arrays
 
 class JavaEntityUtil {
 	@Inject
@@ -15,7 +16,7 @@ class JavaEntityUtil {
 	
 	def CharSequence toJavaClass(Data data) {
 		'''
-		public class «data.toClassName»«IF data.parent !== null» extends «data.parent.toClassName»«ENDIF» {
+		public class «data.toClassName» extends «IF data.parent === null»NougaEntity«ELSE»«data.parent.toClassName»«ENDIF» {
 			«FOR attr: data.attributes»
 			«attr.toJavaField»
 			«ENDFOR»
@@ -54,6 +55,23 @@ class JavaEntityUtil {
     			«ENDFOR»
 		
 		        return true;
+			}
+			
+			@Override
+			public List<String> getAttributeNames() {
+				return «Arrays.simpleName».asList(«data.allAttributes.join(", ")['"' + name + '"']»);
+			}
+
+			@Override
+			public Object getAttributeValue(String attr) {
+				switch (attr) {
+				«FOR attr: data.attributes»
+					case "«attr.name»":
+						return this.«attr.toGetterName»();
+				«ENDFOR»
+					default:
+						return super.getAttributeValue(attr);
+				}
 			}
 			
 			@Override

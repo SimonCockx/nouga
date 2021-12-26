@@ -180,12 +180,12 @@ class JavaExpressionUtil {
 	}
 	def dispatch CharSequence toUnsafeJavaExpression(ProjectionExpression e, ListType type) {
 		val t = e.receiver.staticType;
-		val basic = t.itemType as DataType;
-		val className = basic.data.toClassName;
-		val getter = e.attribute.toGetterName;
 		if (e.onlyExists) {
-			'''«lib.checkAll»(«e.receiver.toUnsafeJavaExpression(t)», e -> «lib.exists»(e.«getter»()), «basic.data.allAttributes.filter[it != e.attribute].join(', ')['''e -> !«lib.exists»(e.«toGetterName»())''']»)'''
+			'''«lib.onlyExists»(«e.receiver.toUnsafeJavaExpression(t)», "«e.attribute.name»")'''
 		} else {
+			val basic = t.itemType as DataType;
+			val className = basic.data.toClassName;
+			val getter = e.attribute.toGetterName;
 			if (t.isListType) {
 				if (e.attribute.listType.isListType) {
 					'''«lib.flatProject»(«e.receiver.toUnsafeJavaExpression(t)», «className»::«getter»)'''

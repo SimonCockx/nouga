@@ -23,6 +23,7 @@ import org.eclipse.xtext.testing.util.ParseHelper
 import be.kuleuven.simoncockx.nouga.nouga.Model
 import be.kuleuven.simoncockx.nouga.nouga.Function
 import org.eclipse.xtext.testing.validation.ValidationTestHelper
+import be.kuleuven.simoncockx.nouga.lib.NougaEntity
 
 @ExtendWith(InjectionExtension)
 @InjectWith(NougaInjectorProvider)
@@ -52,9 +53,9 @@ class GenerationTest {
 					get(0).parameterCount.assertEquals(0);
 				]
 				declaredFields.length.assertEquals(0);
-				declaredMethods.length.assertEquals(2);
+				declaredMethods.length.assertEquals(4);
 				Modifier.isPublic(modifiers)
-				superclass.assertEquals(Object)
+				NougaEntity.assertEquals(superclass)
 			]
 		]
 	}
@@ -78,6 +79,7 @@ class GenerationTest {
 					newInstance(NougaNumber.valueOf(5), #[true, false]) => [
 						NougaNumber.valueOf(5).assertEquals(c.getDeclaredMethod("getSomeNumber").invoke(it));
 						#[true, false].assertListEquals(c.getDeclaredMethod("getFlags").invoke(it));
+						#["someNumber", "flags"].assertListEquals(c.getMethod("getAttributeNames").invoke(it));
 					]
 				]
 			]			
@@ -112,12 +114,15 @@ class GenerationTest {
 		type A:
 		  n int (1..2)
 		type B extends A:
+		  f boolean (1..1)
 		'''.compile[c |
 			c.getCompiledClass('mydummypackage.A') => [A |
 				c.getCompiledClass('mydummypackage.B') => [
-					A.assertEquals(superclass)
-					val b = declaredConstructors.head.newInstance(#[1, 2] as Object);
-					#[1, 2].assertListEquals(A.getDeclaredMethod('getN').invoke(b))
+					superclass.assertEquals(A)
+					val b = declaredConstructors.head.newInstance(#[1, 2] as Object, true);
+					#[1, 2].assertListEquals(A.getDeclaredMethod('getN').invoke(b));
+					true.assertEquals(getDeclaredMethod('getF').invoke(b))
+					#["n", "f"].assertListEquals(getMethod("getAttributeNames").invoke(b));
 				]
 			]
 		]
@@ -341,6 +346,13 @@ class GenerationTest {
 		evaluateExpression('boolean (1..1)', '''«e6»->f1 only exists''')[false.assertEquals(it)];
 		evaluateExpression('boolean (1..1)', '''«e6»->f2 only exists''')[false.assertEquals(it)];
 		evaluateExpression('boolean (1..1)', '''«e6»->f3 only exists''')[false.assertEquals(it)];
+	
+		val f1 = 'F {f1: True, f2: empty, f3: empty, f4: empty}';
+		val f2 = 'F {f1: True, f2: empty, f3: empty, f4: True}';
+		val g1 = 'G {f1: True, f2: empty, f3: empty, f4: True}';
+		evaluateExpression('boolean (1..1)', '''(if True then «f1» else «e1»)->f1 only exists''')[true.assertEquals(it)];
+		evaluateExpression('boolean (1..1)', '''(if True then «f2» else «e1»)->f1 only exists''')[false.assertEquals(it)];
+		evaluateExpression('boolean (1..1)', '''(if True then «g1» else «e1»)->f1 only exists''')[false.assertEquals(it)];
 	}
 	
 	private def <T> evaluateExpression(CharSequence outputType, CharSequence expression, IAcceptor<T> accept) {
@@ -358,6 +370,10 @@ class GenerationTest {
 		    f1 boolean (0..1)
 		    f2 boolean (0..*)
 		    f3 boolean (0..2)
+		type F extends E:
+			f4 boolean (0..1)
+		type G extends E:
+			f4 boolean (1..1)
 		
 		func Test:
 		  inputs:
