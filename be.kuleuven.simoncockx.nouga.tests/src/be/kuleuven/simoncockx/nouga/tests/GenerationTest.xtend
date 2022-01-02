@@ -317,6 +317,27 @@ class GenerationTest {
 	}
 	
 	@Test
+	def void testRecursion() {
+		'''
+		namespace mydummypackage
+		
+		func Fac:
+		  inputs:
+		    n int (1..1)
+		  output: result int (1..1)
+		  assign-output: if n = 0 then 1 else n * Fac(n-1)
+		'''.compile[
+			getCompiledClass('mydummypackage.functions.Fac') => [c |
+				val injector = Guice.createInjector(new AbstractModule() {override configure() {}});
+				val test = injector.getInstance(c);
+				val fac = c.getDeclaredMethod(evaluationName, int);
+				6.assertEquals(fac.invoke(test, 3));
+				24.assertEquals(fac.invoke(test, 4));
+			]
+		]
+	}
+	
+	@Test
 	def void testOnlyElement() {
 		<Integer>evaluateExpression('int (0..1)', '1 only-element')[1.assertEquals(it)];
 		<Integer>evaluateExpression('int (0..1)', '[1, 2] only-element')[assertNull];

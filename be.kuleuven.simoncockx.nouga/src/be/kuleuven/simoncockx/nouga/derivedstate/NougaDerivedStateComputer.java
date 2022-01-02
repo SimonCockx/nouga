@@ -15,7 +15,7 @@ import be.kuleuven.simoncockx.nouga.typing.NougaTyping;
 /**
  * Derived state:
  * - syntactic sugar for if-then: automatically add 'empty' to the 'else' clause.
- * - typing expressions
+ * - static type of expressions
  */
 public class NougaDerivedStateComputer implements IDerivedStateComputer {
 	@Inject

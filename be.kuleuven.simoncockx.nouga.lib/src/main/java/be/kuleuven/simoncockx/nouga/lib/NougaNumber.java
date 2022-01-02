@@ -17,7 +17,7 @@ public class NougaNumber extends Number {
 		this.value = value;
 	}
 	public NougaNumber(String repr) {
-		this.value = new BigDecimal(repr);
+		this(new BigDecimal(repr));
 	}
 	
 	public static NougaNumber valueOf(double value) {

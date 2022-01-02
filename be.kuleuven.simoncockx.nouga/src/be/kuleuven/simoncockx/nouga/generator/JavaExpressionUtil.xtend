@@ -51,7 +51,7 @@ class JavaExpressionUtil {
 	 */
 	def CharSequence toJavaExpression(Expression e, ListType expectedType) {
 		val actualType = e.staticType;
-		var result = e.toUnsafeJavaExpression(actualType);
+		var result = e.toUnsafeJavaExpression;
 		val safeResult = result.addCoercions(actualType, expectedType);
 		return safeResult;
 	}
@@ -82,45 +82,45 @@ class JavaExpressionUtil {
 	
 	/**
 	 * Guarantee: given that expression e has type t,
-	 * the type of toUnsafeJavaExpression(e, t) equals t.toJavaType()
+	 * the type of toUnsafeJavaExpression(e) equals t.toJavaType()
 	 */
-	def dispatch CharSequence toUnsafeJavaExpression(BooleanLiteral e, ListType type) {
+	def dispatch CharSequence toUnsafeJavaExpression(BooleanLiteral e) {
 		e.value.toString
 	}
-	def dispatch CharSequence toUnsafeJavaExpression(NumberLiteral e, ListType type) {
+	def dispatch CharSequence toUnsafeJavaExpression(NumberLiteral e) {
 		'''new «NougaNumber.simpleName»("«e.value»")'''
 	}
-	def dispatch CharSequence toUnsafeJavaExpression(IntLiteral e, ListType type) {
+	def dispatch CharSequence toUnsafeJavaExpression(IntLiteral e) {
 		e.value
 	}
-	def dispatch CharSequence toUnsafeJavaExpression(VariableReference e, ListType type) {
+	def dispatch CharSequence toUnsafeJavaExpression(VariableReference e) {
 		e.reference.toVarName
 	}
 	
-	def dispatch CharSequence toUnsafeJavaExpression(ListLiteral e, ListType type) {
-		if (type.isListType) {
+	def dispatch CharSequence toUnsafeJavaExpression(ListLiteral e) {
+		if (e.staticType.isListType) {
 			val isListOfSingleValues = e.elements.forall[!it.staticType.isListType];
 			if (isListOfSingleValues) {
-				'''«lib.list»(«e.elements.join(', ')[toJavaExpression(createListType(type.itemType.clone, 1, 1))]»)'''
+				'''«lib.list»(«e.elements.join(', ')[toJavaExpression(createListType(e.staticType.itemType.clone, 1, 1))]»)'''
 			} else {
-				'''«lib.list»(«e.elements.join(', ')[toJavaExpression(createListType(type.itemType.clone, 0))]»)'''
+				'''«lib.list»(«e.elements.join(', ')[toJavaExpression(createListType(e.staticType.itemType.clone, 0))]»)'''
 			}
 		} else {
 			val singleElement = e.elements.findFirst[!it.staticType.isListType];
-			singleElement.toJavaExpression(type)
+			singleElement.toJavaExpression(e.staticType)
 		}
 	}
-	def dispatch CharSequence toUnsafeJavaExpression(OrExpression e, ListType type) {
+	def dispatch CharSequence toUnsafeJavaExpression(OrExpression e) {
 		toBinaryJavaExpression(lib.or, e.left, e.right, singleBoolean)
 	}
-	def dispatch CharSequence toUnsafeJavaExpression(AndExpression e, ListType type) {
+	def dispatch CharSequence toUnsafeJavaExpression(AndExpression e) {
 		toBinaryJavaExpression(lib.and, e.left, e.right, singleBoolean)
 	}
-	def dispatch CharSequence toUnsafeJavaExpression(NotExpression e, ListType type) {
+	def dispatch CharSequence toUnsafeJavaExpression(NotExpression e) {
 		'''«lib.not»(«e.expression.toJavaExpression(singleBoolean)»)'''
 	}
-	def dispatch CharSequence toUnsafeJavaExpression(ExistsExpression e, ListType type) {
-		val arg = e.argument.toUnsafeJavaExpression(e.argument.staticType);
+	def dispatch CharSequence toUnsafeJavaExpression(ExistsExpression e) {
+		val arg = e.argument.toUnsafeJavaExpression
 		if (e.single) {
 			'''«lib.singleExists»(«arg»)'''
 		} else if (e.multiple) {
@@ -129,17 +129,17 @@ class JavaExpressionUtil {
 			'''«lib.exists»(«arg»)'''
 		}
 	}
-	def dispatch CharSequence toUnsafeJavaExpression(AbsentExpression e, ListType type) {
-		val arg = e.argument.toUnsafeJavaExpression(e.argument.staticType)
+	def dispatch CharSequence toUnsafeJavaExpression(AbsentExpression e) {
+		val arg = e.argument.toUnsafeJavaExpression
 		'''«lib.isAbsent»(«arg»)'''
 	}
-	def dispatch CharSequence toUnsafeJavaExpression(ContainsExpression e, ListType type) {
+	def dispatch CharSequence toUnsafeJavaExpression(ContainsExpression e) {
 		toComparableBinaryJavaExpression(lib.contains, e.left, e.right)
 	}
-	def dispatch CharSequence toUnsafeJavaExpression(DisjointExpression e, ListType type) {
+	def dispatch CharSequence toUnsafeJavaExpression(DisjointExpression e) {
 		toComparableBinaryJavaExpression(lib.disjoint, e.left, e.right)
 	}
-	def dispatch CharSequence toUnsafeJavaExpression(ComparisonOperation e, ListType type) {
+	def dispatch CharSequence toUnsafeJavaExpression(ComparisonOperation e) {
 		if (e.cardOp == 'all') {
 			toSingleComparableBinaryJavaExpression(
 				e.operator == '=' ? lib.allEquals : lib.allNotEquals,
@@ -157,9 +157,9 @@ class JavaExpressionUtil {
 			)
 		}
 	}
-	def dispatch CharSequence toUnsafeJavaExpression(ArithmeticOperation e, ListType type) {
+	def dispatch CharSequence toUnsafeJavaExpression(ArithmeticOperation e) {
 		toBinaryJavaExpression(
-			if ((type.itemType as BuiltInType).type == BuiltInTypeEnum.NUMBER) {
+			if ((e.staticType.itemType as BuiltInType).type == BuiltInTypeEnum.NUMBER) {
 				switch (e.operator) {
 					case '+': lib.addNumber
 					case '-': lib.subtractNumber
@@ -172,41 +172,41 @@ class JavaExpressionUtil {
 					case '-': lib.subtractInt
 					case '*': lib.multiplyInt
 				}
-			}, e.left, e.right, type)
+			}, e.left, e.right, e.staticType)
 	}
-	def dispatch CharSequence toUnsafeJavaExpression(CountExpression e, ListType type) {
-		val arg = e.argument.toUnsafeJavaExpression(e.argument.staticType);
+	def dispatch CharSequence toUnsafeJavaExpression(CountExpression e) {
+		val arg = e.argument.toUnsafeJavaExpression
 		'''«lib.count»(«arg»)'''
 	}
-	def dispatch CharSequence toUnsafeJavaExpression(ProjectionExpression e, ListType type) {
-		val t = e.receiver.staticType;
+	def dispatch CharSequence toUnsafeJavaExpression(ProjectionExpression e) {
 		if (e.onlyExists) {
-			'''«lib.onlyExists»(«e.receiver.toUnsafeJavaExpression(t)», "«e.attribute.name»")'''
+			'''«lib.onlyExists»(«e.receiver.toUnsafeJavaExpression», "«e.attribute.name»")'''
 		} else {
+			val t = e.receiver.staticType;
 			val basic = t.itemType as DataType;
 			val className = basic.data.toClassName;
 			val getter = e.attribute.toGetterName;
 			if (t.isListType) {
 				if (e.attribute.listType.isListType) {
-					'''«lib.flatProject»(«e.receiver.toUnsafeJavaExpression(t)», «className»::«getter»)'''
+					'''«lib.flatProject»(«e.receiver.toUnsafeJavaExpression», «className»::«getter»)'''
 				} else {
-					'''«lib.project»(«e.receiver.toUnsafeJavaExpression(t)», «className»::«getter»)'''
+					'''«lib.project»(«e.receiver.toUnsafeJavaExpression», «className»::«getter»)'''
 				}
 			} else {
-				'''«e.receiver.toUnsafeJavaExpression(t)».«getter»()'''
+				'''«e.receiver.toUnsafeJavaExpression».«getter»()'''
 			}
 		}
 	}
-	def dispatch CharSequence toUnsafeJavaExpression(ConditionalExpression e, ListType type) {
-		'''«lib.ifThenElse»(«toJavaExpression(e.^if, singleBoolean)», «toJavaExpression(e.ifthen, type)», «toJavaExpression(e.elsethen, type)»)'''
+	def dispatch CharSequence toUnsafeJavaExpression(ConditionalExpression e) {
+		'''«lib.ifThenElse»(«toJavaExpression(e.^if, singleBoolean)», () -> («e.staticType.toJavaType»)«toJavaExpression(e.ifthen, e.staticType)», () -> («e.staticType.toJavaType»)«toJavaExpression(e.elsethen, e.staticType)»)'''
 	}
-	def dispatch CharSequence toUnsafeJavaExpression(FunctionCallExpression e, ListType type) {
+	def dispatch CharSequence toUnsafeJavaExpression(FunctionCallExpression e) {
 		'''«e.function.toEvaluationName»(«(0..<e.args.size).join(', ')[idx | toJavaExpression(e.args.get(idx), e.function.inputs.get(idx).listType)]»)'''
 	}
-	def dispatch CharSequence toUnsafeJavaExpression(InstantiationExpression e, ListType type) {
+	def dispatch CharSequence toUnsafeJavaExpression(InstantiationExpression e) {
 		'''new «e.type.toClassName»(«e.type.allAttributes.join(', ')[attr | toJavaExpression(e.values.findFirst[key == attr].value, attr.listType)]»)'''
 	}
-	def dispatch CharSequence toUnsafeJavaExpression(OnlyElementExpression e, ListType type) {
+	def dispatch CharSequence toUnsafeJavaExpression(OnlyElementExpression e) {
 		val argType = e.argument.staticType;
 		val arg = e.argument.toJavaExpression(createListType(argType.itemType.clone, 0));
 		'''«lib.onlyElement»(«arg»)'''

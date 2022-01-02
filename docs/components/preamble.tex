@@ -1,3 +1,5 @@
+\usepackage{import}
+
 %%%%%%% AUXILIARY FUNCTIONS %%%%%%%%
 \usepackage{amsmath}
 \DeclareMathOperator{\ET}{ET} % entity table
@@ -87,7 +89,8 @@ morekeywords=[2]{boolean,int,number}, % types go here
 morekeywords=[3]{%
 type,extends,func,enum,inputs,output,assign-output,not,or,and,only,single,multiple,exists,is,absent,contains,%
 disjoint,all,any,count,only-element,if,then,else,True,False,empty,%
-any,boolean,string,int,number,nothing,date,dateTime,zonedDateTime,time % keywords go here
+any,boolean,string,int,number,nothing,date,dateTime,zonedDateTime,time,%
+true,false % keywords go here
 },%
 basicstyle={\sffamily},
 keywordstyle=[2]{\itshape}, % style for types
@@ -124,8 +127,8 @@ mathescape % optional
 \reservestyle[\lit]{\rosetta}{\mathinner}
 \rosetta{type,extends,func,enum,inputs,output,assign-output,not,or,and,only,single,multiple,exists,is,absent,contains,%
 disjoint,all,any,count,only-element,if,then,else,True,False,empty,%
-any,boolean,string,int,number,nothing,date,dateTime,zonedDateTime,time,eq[=],%
-neq[<>],+,-,*,/,proj[->]}
+any,boolean,string,int,number,nothing,date,dateTime,zonedDateTime,time,%
+true,false,eq[=],neq[<>],+,-,*,/,proj[->]}
 
 \newcommand{\emptylist}{[\,]}
 
@@ -137,13 +140,12 @@ neq[<>],+,-,*,/,proj[->]}
 \newcommand{\derivation}[1]{\mathcal{#1}}
 \newcommand{\OK}{\mathinner{\text{OK}}}
 
-\newcommand{\ruledef}[3]{\inferrule*[narrower=0.7]{#2}{#3} && \textsc{\small #1}}
-%\newcommand{\axiomdef}[2]{\inferrule*[Right=#1]{ }{#2}}
-\newcommand{\axiomdef}[2]{#2 \ && \textsc{\small #1}}
+\newcommand{\ruledef}[3]{\inferrule*[vcenter,narrower=0.8]{#2}{#3} & \quad \textsc{\small #1}}
+\newcommand{\axiomdef}[2]{#2 & \quad \textsc{\small #1}}
 
 \newcommand{\emphrule}[1]{{\color{red}#1}}
 
-\newcommand{\evaldef}[3]{\sexpr|[#2|] &= #3 && \textsc{\small #1}}
+\newcommand{\evaldef}[3]{\sexpr|[#2|]S &= #3 && \textsc{\small #1}}
 % Definition for \letin; see https://tex.stackexchange.com/a/627476/149123
 \ExplSyntaxOn
 \NewDocumentCommand{\letin}{mm}
@@ -174,6 +176,7 @@ neq[<>],+,-,*,/,proj[->]}
 \newcommand{\stype}{\mathcal{T}}
 \newcommand{\sexpr}{\evalsymbol}
 \newcommand{\sentity}{\mathcal{D}}
+\newcommand{\sprog}{\mathcal{P}}
 
 \newcommand{\set}[1]{\left\{\,#1\,\right\}}
 \newcommand{\sboolean}{\mathbb{B}}
@@ -181,6 +184,8 @@ neq[<>],+,-,*,/,proj[->]}
 \newcommand{\sfalse}{\mathit{false}}
 \newcommand{\sint}{\mathbb{Z}}
 \newcommand{\snumber}{\mathbb{R}}
+\newcommand{\sprim}{\text{Prim}}
+\newcommand{\sent}{\text{Ent}}
 \newcommand{\sdom}{\mathbb{D}}
 
 \DeclareMathOperator{\sflatten}{flatten}

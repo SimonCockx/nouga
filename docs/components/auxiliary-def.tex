@@ -1,15 +1,19 @@
+Attribute lookup.
 \begin{align*}
-\intertext{Attribute lookup}
 \ruledef{}{\ET(D) = \<type> D \dots: a_1\ T_1\ C_1 \dots a_n\ T_n\ C_n}{\attrs(D) = a_1\ T_1\ C_1, \dots , a_n\ T_n\ C_n}
 \\
 \ruledef{}{\ET(D) = \<type> D: \dots}{\allattrs(D) = \attrs(D)}
 \\
-\ruledef{}{\ET(D) = \<type> D \<extends> E: \dots}{\allattrs(D) = \attrs(E), \attrs(D)}
-\intertext{Ancestors}
+\ruledef{}{\ET(D) = \<type> D \<extends> E: \dots}{\allattrs(D) = \allattrs(E), \attrs(D)}
+\end{align*}
+Ancestors.
+\begin{align*}
 \ruledef{}{\ET(D) = \<type> D \<extends> E: \dots}{E \in \ancestors(D)}
 \\
 \ruledef{}{A \in \ancestors(D) \\ \ET(A) = \<type> A \<extends> B: \dots}{B \in \ancestors(D)}
-\intertext{Function lookups}
+\end{align*}
+Function lookups.
+\begin{align*}
 \ruledef{}{\FT(F) = \<func> F: \<inputs>: a_1\ T_1\ C_1 \dots a_n\ T_n\ C_n \<output>: \dots}{\inp(F) = a_1\ T_1\ C_1, \dots, a_n\ T_n\ C_n}
 \\
 \ruledef{}{\FT(F) = \<func> F: \<inputs>: \dots \<output>: a\ T\ C \dots}{\outp(F) = a\ T\ C}

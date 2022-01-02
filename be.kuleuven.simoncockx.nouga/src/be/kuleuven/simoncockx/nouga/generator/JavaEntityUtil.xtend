@@ -76,8 +76,8 @@ class JavaEntityUtil {
 			
 			@Override
 		    public int hashCode() {
-		        int hash = 3;
-		        «FOR attr: data.allAttributes»
+		        int hash = «IF data.parent === null»3«ELSE»super.hashCode()«ENDIF»;
+		        «FOR attr: data.attributes»
 		        «IF attr.listType.isPrimitiveType»
 		        hash = 53 * hash + «attr.listType.itemType.toReferenceJavaType».hashCode(this.«attr.toGetterName»());
     			«ELSEIF attr.listType.isListType»

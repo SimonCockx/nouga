@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -150,11 +151,12 @@ public class Nouga {
 				.collect(Collectors.toList());
 	}
 	
-	public static <T> T ifThenElse(boolean condition, T thenResult, T elseResult) {
-		return condition ? thenResult : elseResult;
+	public static <T> T ifThenElse(boolean condition, Supplier<T> thenResult, Supplier<T> elseResult) {
+		return condition ? thenResult.get() : elseResult.get();
 	}
 	
 	public static <T> T onlyElement(List<? extends T> e) {
+		Nouga.ifThenElse(true, () -> (List<? extends Integer>)Nouga.coerceToList(1), () -> Nouga.list(1, 2));
 		if (e.size() == 1) {
 			return e.get(0);
 		}
