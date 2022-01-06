@@ -12,6 +12,7 @@ import be.kuleuven.simoncockx.nouga.lib.Nouga;
  * See https://stackoverflow.com/a/2010302/3083982.
  */
 public class JavaLibUtil {
+	public String libName = Nouga.class.getSimpleName();
 	
 	public String single;
 	public String empty;
@@ -45,14 +46,16 @@ public class JavaLibUtil {
 	public String onlyElement;
 	public String onlyExists;
 	public String coerceIntToNumber;
-	public String coerceToList;
+	public String coerceItemToList;
 	
 	public JavaLibUtil() {
 		Field[] fields = JavaLibUtil.class.getDeclaredFields();
 		List<String> notFound = new ArrayList<String>();
 		for (var i=0; i<fields.length; i++) {
 			try {
-				fields[i].set(this, verifyMethod(fields[i].getName()));
+				if (fields[i].get(this) == null) {
+					fields[i].set(this, verifyMethod(fields[i].getName()));
+				}
 			} catch (IllegalAccessException e) {
 				throw new RuntimeException(e);
 			} catch (NoSuchMethodException e) {
@@ -68,7 +71,7 @@ public class JavaLibUtil {
 	private String verifyMethod(String name) throws NoSuchMethodException {
 		for (Method m : Nouga.class.getDeclaredMethods()) {
 			if (m.getName().equals(name)) {
-				return Nouga.class.getSimpleName() + "." + m.getName();
+				return this.libName + "." + m.getName();
 			}
 		}
 		throw new NoSuchMethodException(name);

@@ -4,6 +4,7 @@ import com.google.inject.Inject
 import be.kuleuven.simoncockx.nouga.nouga.Function
 import be.kuleuven.simoncockx.nouga.nouga.FunctionCallExpression
 import be.kuleuven.simoncockx.nouga.nouga.InstantiationExpression
+import be.kuleuven.simoncockx.nouga.nouga.DataType
 
 class JavaFunctionUtil {
 	@Inject
@@ -29,7 +30,7 @@ class JavaFunctionUtil {
 				return «func.operation.toJavaExpression(func.output.listType)»;
 			}
 			
-			private static final class «func.toClassName»Default extends «func.toClassName» { }
+			static final class «func.toClassName»Default extends «func.toClassName» { }
 		}
 		'''
 	}
@@ -38,6 +39,11 @@ class JavaFunctionUtil {
 		func.eAllContents.filter(FunctionCallExpression).map[function].toSet
 	}
 	private def gatherEntityDependencies(Function func) {
+		val outputDep = if (func.output.listType.itemType instanceof DataType) {
+			#{(func.output.listType.itemType as DataType).data}
+		} else #{};
 		func.eAllContents.filter(InstantiationExpression).map[type].toSet
+		+ func.inputs.map[listType.itemType].filter(DataType).map[data].toSet
+		+ outputDep
 	}
 }

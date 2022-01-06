@@ -34,7 +34,7 @@ public class NougaNumber extends Number {
 		return new NougaNumber(this.value.subtract(other.value));
 	}
 	public NougaNumber multiply(NougaNumber other) {
-		return new NougaNumber(this.value.multiply(other.value));
+		return new NougaNumber(this.value.multiply(other.value, DECIMAL_PRECISION));
 	}
 	public NougaNumber divide(NougaNumber other) {
 		return new NougaNumber(this.value.divide(other.value, DECIMAL_PRECISION));

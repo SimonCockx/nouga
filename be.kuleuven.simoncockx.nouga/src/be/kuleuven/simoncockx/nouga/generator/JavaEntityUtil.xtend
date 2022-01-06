@@ -28,36 +28,6 @@ class JavaEntityUtil {
 			«ENDFOR»
 			
 			@Override
-			public boolean equals(Object obj) {
-				if (obj == null) {
-		            return false;
-		        }
-		
-		        if (obj.getClass() != this.getClass()) {
-		            return false;
-		        }
-		
-		        final «data.toClassName» other = («data.toClassName»)obj;
-		        «FOR attr: data.allAttributes»
-		        «IF attr.listType.isPrimitiveType»
-		        if (this.«attr.toGetterName»() != other.«attr.toGetterName»()) {
-		        	return false;
-		        }
-    			«ELSEIF attr.listType.isListType»
-		        if (!this.«attr.toGetterName»().equals(other.«attr.toGetterName»())) {
-		        	return false;
-		        }
-		        «ELSE»
-		        if (this.«attr.toGetterName»() == null ? other.«attr.toGetterName»() != null : !this.«attr.toGetterName»().equals(other.«attr.toGetterName»())) {
-		        	return false;
-		        }
-    			«ENDIF»
-    			«ENDFOR»
-		
-		        return true;
-			}
-			
-			@Override
 			public List<String> getAttributeNames() {
 				return «Arrays.simpleName».asList(«data.allAttributes.join(", ")['"' + name + '"']»);
 			}
@@ -75,17 +45,47 @@ class JavaEntityUtil {
 			}
 			
 			@Override
+			public boolean equals(Object obj) {
+				if (obj == null) {
+		            return false;
+		        }
+		
+		        if (obj.getClass() != this.getClass()) {
+		            return false;
+		        }
+		
+		        final «data.toClassName» other = («data.toClassName»)obj;
+		        «FOR attr: data.allAttributes»
+		        «IF attr.listType.isPrimitiveType»
+		        if (this.«attr.toGetterName»() != other.«attr.toGetterName»()) {
+		        	return false;
+		        }
+				«ELSEIF attr.listType.isListType»
+		        if (!this.«attr.toGetterName»().equals(other.«attr.toGetterName»())) {
+		        	return false;
+		        }
+		        «ELSE»
+		        if (this.«attr.toGetterName»() == null ? other.«attr.toGetterName»() != null : !this.«attr.toGetterName»().equals(other.«attr.toGetterName»())) {
+		        	return false;
+		        }
+				«ENDIF»
+				«ENDFOR»
+		
+		        return true;
+			}
+			
+			@Override
 		    public int hashCode() {
 		        int hash = «IF data.parent === null»3«ELSE»super.hashCode()«ENDIF»;
 		        «FOR attr: data.attributes»
 		        «IF attr.listType.isPrimitiveType»
-		        hash = 53 * hash + «attr.listType.itemType.toReferenceJavaType».hashCode(this.«attr.toGetterName»());
-    			«ELSEIF attr.listType.isListType»
+		        hash = 53 * hash + «attr.listType.itemType.toItemReferenceJavaType».hashCode(this.«attr.toGetterName»());
+				«ELSEIF attr.listType.isListType»
 		        hash = 53 * hash + this.«attr.toGetterName»().hashCode();
 		        «ELSE»
 		        hash = 53 * hash + (this.«attr.toGetterName»() == null ? 0 : this.«attr.toGetterName»().hashCode());
-    			«ENDIF»
-    			«ENDFOR»
+				«ENDIF»
+				«ENDFOR»
 		        return hash;
 		    }
 		}

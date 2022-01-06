@@ -15,8 +15,7 @@
 \end{cases} \\
 \seq_\sent(\_, \_) &: \sent \times \sent \to \sboolean : \seq_\sent((D, v_1, \dots, v_m), (E, w_1, \dots, w_n)) \\
 &= \begin{cases}
-\strue, & \text{if } D = E~\land \\
-& \forall i \in 1..n: \lv{\seq}(v_{i}, w_{i}) \\
+\strue, & \text{if } D = E \land \forall i \in 1..n: \lv{\seq}(v_{i}, w_{i}) \\
 \sfalse, & \text{otherwise}
 \end{cases} \\
 \lv{\seq}(\_, \_) &: \sdom^{*} \times \sdom^{*} \to \sboolean : \lv{\seq}([x_1, \dots, x_m], [y_1, \dots, y_n]) \\
@@ -24,5 +23,6 @@
 \strue, & \text{if } m = n \land \forall i\in 1..n: \seq(x_i, y_i) \\
 \sfalse, & \text{otherwise}
 \end{cases} \\
-\sproject_{D, a}(\_) &: D \to \sdom^{*} : \sproject_{D, a_i}((E, v_1, \dots, v_n)) = \letin{a_1\ T_1\ C_1, \dots, a_n\ T_n\ C_n = \allattrs(E)}{v_i}
+\sproject_a(\_) &: \sent \to \sdom^{*} : \sproject_{a_i}((D, v_1, \dots, v_n)) \\
+&= \letin{a_1\ T_1\ C_1, \dots, a_n\ T_n\ C_n = \allattrs(D)}{v_i}
 \end{align*}

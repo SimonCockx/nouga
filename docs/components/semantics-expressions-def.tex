@@ -25,7 +25,7 @@
 \\
 \evaldef{E-Instantiate}{D \set{a_1: e_1, \dots, a_n: e_n}}{[(D, \sexpr|[e_1|]S, \dots, \sexpr|[e_n|]S)]}
 \\
-\evaldef{E-Project}{(e : D\ C) \<proj> a}{\letin{[x_1, \dots, x_n] = \sexpr|[e|]S}{\sflatten_n(\sproject_{\stype|[D|], a}(x_1), \dots, \sproject_{\stype|[D|], a}(x_n))}}
+\evaldef{E-Project}{e \<proj> a}{\letin{[x_1, \dots, x_n] = \sexpr|[e|]S}{\sflatten_n(\sproject_a(x_1), \dots, \sproject_a(x_n))}}
 \\
 \evaldef{E-Exists}{e \<exists>}{
 \begin{cases}
@@ -60,48 +60,50 @@ v, & \text{if }\scount(v) = 1 \\
 \emptylist, & \text{otherwise}
 \end{cases}}}
 \\
-\evaldef{E-Equals}{(e_1 : T_1\ C_1) \<eq> (e_2 : T_2\ C_2)}{\letin{T = \join(T_1, T_2)}{\lv{\seq}_{\stype|[T|]}(\sexpr|[e_1|]S, \sexpr|[e_2|]S)}}
+\evaldef{E-Equals}{e_1 \<eq> e_2}{\lv{\seq}_(\sexpr|[e_1|]S, \sexpr|[e_2|]S)}
 \\
-\evaldef{E-NotEquals}{(e_1 : T_1\ C_1) \<neq> (e_2 : T_2\ C_2)}{\letin{[x_1, \dots, x_m] = \sexpr|[e_1|]S & [y_1, \dots, y_n] = \sexpr|[e_2|]S & T = \join(T_1, T_2)}{
+\evaldef{E-NotEquals}{e_1 \<neq> e_2}{\letin{[x_1, \dots, x_m] = \sexpr|[e_1|]S & [y_1, \dots, y_n] = \sexpr|[e_2|]S}{
 \begin{cases}
 [\strue], & \text{if }m \neq n~\lor \\
-& \forall i\in 1..n: \neg\seq_{\stype|[T|]}(x_i, y_i) \\
+& \forall i\in 1..n: \neg\seq_(x_i, y_i) \\
 [\sfalse], & \text{otherwise}
 \end{cases}}}
 \\
-\evaldef{E-AllEquals}{(e_1 : T_1\ C) \<all> \<eq> (e_2 : T_2\ (1..1))}{\letin{[x_1, \dots, x_n] = \sexpr|[e_1|]S & [y] = \sexpr|[e_2|]S & T = \join(T_1, T_2)}{
+\evaldef{E-AllEquals}{e_1 \<all> \<eq> e_2}{\letin{[x_1, \dots, x_n] = \sexpr|[e_1|]S & [y] = \sexpr|[e_2|]S}{
 \begin{cases}
-[\strue], & \text{if }\forall i\in 1..n: \seq_{\stype|[T|]}(x_i, y) \\
+[\strue], & \text{if }\forall i\in 1..n: \seq_(x_i, y) \\
 [\sfalse], & \text{otherwise}
 \end{cases}}}
 \\
-\evaldef{E-AllNotEquals}{(e_1 : T_1\ C) \<all> \<neq> (e_2 : T_2\ (1..1))}{\letin{[x_1, \dots, x_n] = \sexpr|[e_1|]S & [y] = \sexpr|[e_2|]S & T = \join(T_1, T_2)}{
+\evaldef{E-AllNotEquals}{e_1 \<all> \<neq> e_2}{\letin{[x_1, \dots, x_n] = \sexpr|[e_1|]S & [y] = \sexpr|[e_2|]S}{
 \begin{cases}
-[\strue], & \text{if }\forall i\in 1..n: \neg\seq_{\stype|[T|]}(x_i, y) \\
+[\strue], & \text{if }\forall i\in 1..n: \neg\seq(x_i, y) \\
 [\sfalse], & \text{otherwise}
 \end{cases}}}
 \\
-\evaldef{E-AnyEquals}{(e_1 : T_1\ C) \<any> \<eq> (e_2 : T_2\ (1..1))}{\letin{[x_1, \dots, x_n] = \sexpr|[e_1|]S & [y] = \sexpr|[e_2|]S & T = \join(T_1, T_2)}{
+\evaldef{E-AnyEquals}{e_1 \<any> \<eq> e_2}{\letin{[x_1, \dots, x_n] = \sexpr|[e_1|]S & [y] = \sexpr|[e_2|]S}{
 \begin{cases}
-[\strue], & \text{if }\exists i\in 1..n: \seq_{\stype|[T|]}(x_i, y) \\
+[\strue], & \text{if }\exists i\in 1..n: \seq(x_i, y) \\
 [\sfalse], & \text{otherwise}
 \end{cases}}}
 \\
-\evaldef{E-AnyNotEquals}{(e_1 : T_1\ C) \<any> \<neq> (e_2 : T_2\ (1..1))}{\letin{[x_1, \dots, x_n] = \sexpr|[e_1|]S & [y] = \sexpr|[e_2|]S & T = \join(T_1, T_2)}{
+\evaldef{E-AnyNotEquals}{e_1 \<any> \<neq> e_2}{\letin{[x_1, \dots, x_n] = \sexpr|[e_1|]S & [y] = \sexpr|[e_2|]S}{
 \begin{cases}
-[\strue], & \text{if }\exists i\in 1..n: \neg\seq_{\stype|[T|]}(x_i, y) \\
+[\strue], & \text{if }\exists i\in 1..n: \neg\seq(x_i, y) \\
 [\sfalse], & \text{otherwise}
 \end{cases}}}
 \\
-\evaldef{E-Contains}{(e_1 : T_1\ C_1) \<contains> (e_2 : T_2\ C_2)}{\letin{[x_1, \dots, x_m] = \sexpr|[e_1|]S & [y_1, \dots, y_n] = \sexpr|[e_2|]S & T = \join(T_1, T_2)}{
+\evaldef{E-Contains}{e_1 \<contains> e_2}{\letin{[x_1, \dots, x_m] = \sexpr|[e_1|]S & [y_1, \dots, y_n] = \sexpr|[e_2|]S}{
 \begin{cases}
-[\strue], & \text{if }\forall j\in 1..n: \exists i\in 1..m: \seq_{\stype|[T|]}(x_i, y_j) \\
+[\strue], & \text{if }\forall j\in 1..n:\\
+& \exists i\in 1..m: \seq(x_i, y_j) \\
 [\sfalse], & \text{otherwise}
 \end{cases}}}
 \\
-\evaldef{E-Disjoint}{(e_1 : T_1\ C_1) \<disjoint> (e_2 : T_2\ C_2)}{\letin{[x_1, \dots, x_m] = \sexpr|[e_1|]S & [y_1, \dots, y_n] = \sexpr|[e_2|]S & T = \join(T_1, T_2)}{
+\evaldef{E-Disjoint}{e_1 \<disjoint> e_2}{\letin{[x_1, \dots, x_m] = \sexpr|[e_1|]S & [y_1, \dots, y_n] = \sexpr|[e_2|]S}{
 \begin{cases}
-[\strue], & \text{if }\forall i\in 1..m: \forall j\in 1..n: \neg\seq_{\stype|[T|]}(x_i, y_j) \\
+[\strue], & \text{if }\forall i\in 1..m: \\
+& \forall j\in 1..n: \neg\seq(x_i, y_j) \\
 [\sfalse], & \text{otherwise}
 \end{cases}}}
 \\

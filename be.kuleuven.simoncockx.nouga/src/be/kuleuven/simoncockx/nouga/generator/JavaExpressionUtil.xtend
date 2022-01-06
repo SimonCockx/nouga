@@ -75,7 +75,7 @@ class JavaExpressionUtil {
 			}
 		}
 		if (!actual.isListType && expected.isListType) {
-			result = '''«lib.coerceToList»(«result»)''';
+			result = '''«lib.coerceItemToList»(«result»)''';
 		}
 		return result;
 	}
@@ -198,7 +198,7 @@ class JavaExpressionUtil {
 		}
 	}
 	def dispatch CharSequence toUnsafeJavaExpression(ConditionalExpression e) {
-		'''«lib.ifThenElse»(«toJavaExpression(e.^if, singleBoolean)», () -> («e.staticType.toJavaType»)«toJavaExpression(e.ifthen, e.staticType)», () -> («e.staticType.toJavaType»)«toJavaExpression(e.elsethen, e.staticType)»)'''
+		'''«lib.libName».<«e.staticType.toReferenceJavaType»>ifThenElse(«toJavaExpression(e.^if, singleBoolean)», () -> «toJavaExpression(e.ifthen, e.staticType)», () -> «toJavaExpression(e.elsethen, e.staticType)»)'''
 	}
 	def dispatch CharSequence toUnsafeJavaExpression(FunctionCallExpression e) {
 		'''«e.function.toEvaluationName»(«(0..<e.args.size).join(', ')[idx | toJavaExpression(e.args.get(idx), e.function.inputs.get(idx).listType)]»)'''

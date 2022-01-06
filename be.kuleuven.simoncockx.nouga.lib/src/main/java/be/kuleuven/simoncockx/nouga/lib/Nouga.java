@@ -156,7 +156,6 @@ public class Nouga {
 	}
 	
 	public static <T> T onlyElement(List<? extends T> e) {
-		Nouga.ifThenElse(true, () -> (List<? extends Integer>)Nouga.coerceToList(1), () -> Nouga.list(1, 2));
 		if (e.size() == 1) {
 			return e.get(0);
 		}
@@ -195,7 +194,7 @@ public class Nouga {
 	public static <T> List<? extends T> coerceNothingToAnything(List<? extends Void> e) {
 		return empty();
 	}
-	public static <T> List<? extends T> coerceToList(T e) {
+	public static <T> List<? extends T> coerceItemToList(T e) {
 		if (e == null) {
 			return empty();
 		}

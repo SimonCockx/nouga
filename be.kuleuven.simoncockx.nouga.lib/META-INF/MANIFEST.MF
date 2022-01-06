@@ -1,10 +1,12 @@
 Manifest-Version: 1.0
+Automatic-Module-Name: be.kuleuven.simoncockx.nouga.lib
 Bundle-ManifestVersion: 2
-Bundle-Name: Lib
-Bundle-SymbolicName: be.kuleuven.simoncockx.nouga.lib
+Bundle-Name: be.kuleuven.simoncockx.nouga.lib
+Bundle-SymbolicName: be.kuleuven.simoncockx.nouga.lib;singleton:=true
 Bundle-Version: 1.0.0.qualifier
 Bundle-ClassPath: lib.jar,
  Thesis/.p2/pool/plugins/com.google.guava_30.1.0.v20210127-2300.jar
 Automatic-Module-Name: be.kuleuven.simoncockx.nouga.lib
 Bundle-RequiredExecutionEnvironment: JavaSE-11
 Export-Package: be.kuleuven.simoncockx.nouga.lib
+Bundle-ActivationPolicy: lazy

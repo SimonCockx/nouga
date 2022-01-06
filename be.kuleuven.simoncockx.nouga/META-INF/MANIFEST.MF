@@ -17,7 +17,7 @@ Require-Bundle: org.eclipse.xtext,
  org.eclipse.emf.codegen.ecore;bundle-version="2.25.0",
  org.eclipse.xtext.ecore;bundle-version="2.25.0",
  org.eclipse.emf.common,
- be.kuleuven.simoncockx.nouga.lib
+ be.kuleuven.simoncockx.nouga.lib;bundle-version="1.0.0"
 Bundle-RequiredExecutionEnvironment: JavaSE-11
 Export-Package: be.kuleuven.simoncockx.nouga,
  be.kuleuven.simoncockx.nouga.generator,

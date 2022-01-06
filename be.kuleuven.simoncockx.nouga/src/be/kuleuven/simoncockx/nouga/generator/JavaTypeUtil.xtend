@@ -27,15 +27,20 @@ class JavaTypeUtil {
 		return false;
 	}
 	def toJavaType(ListType t) {
-		if (t.isListType) {
-			return '''List<? extends «t.itemType.toReferenceJavaType»>'''
-		} else if (t.isPrimitiveType) {
+		if (t.isPrimitiveType) {
 			return (t.itemType as BuiltInType).toPrimitiveJavaType
 		}
-		return t.itemType.toReferenceJavaType
+		return t.toReferenceJavaType;
 	}
 	
-	def dispatch toReferenceJavaType(BuiltInType t) {
+	def toReferenceJavaType(ListType t) {
+		if (t.isListType) {
+			return '''List<? extends «t.itemType.toItemReferenceJavaType»>'''
+		}
+		return t.itemType.toItemReferenceJavaType
+	}
+	
+	def dispatch toItemReferenceJavaType(BuiltInType t) {
 		switch (t.type) {
 			case BOOLEAN:
 				Boolean.simpleName
@@ -47,7 +52,7 @@ class JavaTypeUtil {
 				Void.simpleName
 		}
 	}
-	def dispatch toReferenceJavaType(DataType t) {
+	def dispatch toItemReferenceJavaType(DataType t) {
 		t.data.toClassName
 	}
 	def toPrimitiveJavaType(BuiltInType t) {

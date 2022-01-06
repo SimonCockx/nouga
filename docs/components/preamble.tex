@@ -14,7 +14,8 @@
 \DeclareMathOperator{\ancestors}{ancestors} % set of ancestors
 \DeclareMathOperator{\comparable}{comparable} % check whether two basic types are comparable
 \DeclareMathOperator{\overlap}{overlap} % check whether cardinalities overlap
-\DeclareMathOperator{\subcardinality}{subcardinality} % check whether a cardinality range is enclosed by another cardinality range
+% \DeclareMathOperator{\subcardinality}{subcardinality} % check whether a cardinality range is enclosed by another cardinality range
+\newcommand{\subcard}{\subseteq}
 \DeclareMathOperator{\union}{union} % union of cardinalities
 \DeclareMathOperator{\join}{join} % join of two types
 \DeclareMathOperator{\maybeempty}{maybeempty} % all attributes may be empty
@@ -138,10 +139,16 @@ true,false,eq[=],neq[<>],+,-,*,/,proj[->]}
 \renewcommand{\rule}[1]{\textnormal{\textsc{#1}}}
 
 \newcommand{\derivation}[1]{\mathcal{#1}}
-\newcommand{\OK}{\mathinner{\text{OK}}}
+\newcommand{\OK}{\text{\;OK}}
 
-\newcommand{\ruledef}[3]{\inferrule*[vcenter,narrower=0.8]{#2}{#3} & \quad \textsc{\small #1}}
-\newcommand{\axiomdef}[2]{#2 & \quad \textsc{\small #1}}
+\usepackage{xifthen}
+\newcommand{\ruledef}[3]{%
+\inferrule*[vcenter,narrower=0.8]{#2}{#3}\ifthenelse{\isempty{#1}}%
+    {}
+    {& \quad \textsc{\small #1}}
+}
+%\newcommand{\axiomdef}[2]{#2 & \quad \textsc{\small #1}}
+\newcommand{\axiomdef}[2]{\ruledef{#1}{ }{#2}}
 
 \newcommand{\emphrule}[1]{{\color{red}#1}}
 
@@ -184,8 +191,8 @@ true,false,eq[=],neq[<>],+,-,*,/,proj[->]}
 \newcommand{\sfalse}{\mathit{false}}
 \newcommand{\sint}{\mathbb{Z}}
 \newcommand{\snumber}{\mathbb{R}}
-\newcommand{\sprim}{\text{Prim}}
-\newcommand{\sent}{\text{Ent}}
+\newcommand{\sprim}{\mathbb{P}}
+\newcommand{\sent}{\mathbb{E}}
 \newcommand{\sdom}{\mathbb{D}}
 
 \DeclareMathOperator{\sflatten}{flatten}
@@ -277,3 +284,29 @@ center,
 \newcommand{\java}{\mathcal{J}}
 \DeclareMathOperator{\javaid}{javaId}
 \DeclareMathOperator{\freeid}{freeId}
+
+\newcommand{\templ}[1]{\text{\guillemotleft #1 \guillemotright}}
+
+\lstnewenvironment{jsnippet}[1][]{%
+  \endgraf\noindent\ignorespaces\lstset{
+	  language=java,
+	  numbers=none,
+	  mathescape,
+	  #1
+	}\minipage{\linewidth}
+}
+{%
+  \endminipage\endgraf
+}
+\lstnewenvironment{javagen}[3][]{%
+  \endgraf\noindent$#2_\java|[#3|] =$
+  \endgraf\noindent\ignorespaces\lstset{
+	  language=java,
+	  numbers=none,
+	  mathescape,
+	  #1
+	}\minipage{\linewidth}
+}
+{%
+  \endminipage\endgraf
+}

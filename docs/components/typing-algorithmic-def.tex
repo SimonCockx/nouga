@@ -11,7 +11,7 @@ Subtyping $S <: T$.
 
 List subtyping $T_1\ C_1 \lv{<:} T_2\ C_2$.
 \begin{align*}
-\ruledef{SA-List}{T_1 <: T_2 \\ \subcardinality(C_1, C_2)}{T_1\ C_1 \lv{<:} T_2\ C_2}
+\ruledef{SA-List}{T_1 <: T_2 \\ C_1 \subcard C_2}{T_1\ C_1 \lv{<:} T_2\ C_2}
 \end{align*}
 
 Typing rules $\Gamma |- e : T\ C$.
@@ -50,11 +50,11 @@ Typing rules $\Gamma |- e : T\ C$.
 \\
 \ruledef{TA-Project}{\Gamma |- e : D\ C \\ \allattrs(D) = a_1\ T_1\ C_1, \dots, a_n\ T_n\ C_n}{\Gamma |- e \<proj> a_k : T_k\ C*C_k}
 \\
-\ruledef{TA-Exists}{\Gamma |- e : T\ C \\ \subcardinality((0..1), C)}{\Gamma |- e \<exists> : \<boolean>\ (1..1)}
+\ruledef{TA-Exists}{\Gamma |- e : T\ C \\ (0..1) \subcard C}{\Gamma |- e \<exists> : \<boolean>\ (1..1)}
 \\
-\ruledef{TA-SingleExists}{\Gamma |- e : T\ C \\ \subcardinality((1..1), C) \\ C \neq (1..1)}{\Gamma |- e \<single> \<exists> : \<boolean>\ (1..1)}
+\ruledef{TA-SingleExists}{\Gamma |- e : T\ C \\ (1..1) \subcard C \\ C \neq (1..1)}{\Gamma |- e \<single> \<exists> : \<boolean>\ (1..1)}
 \\
-\ruledef{TA-MultipleExists}{\Gamma |- e : T\ C \\ \subcardinality((1..2), C)}{\Gamma |- e \<multiple> \<exists> : \<boolean>\ (1..1)}
+\ruledef{TA-MultipleExists}{\Gamma |- e : T\ C \\ (1..2) \subcard C}{\Gamma |- e \<multiple> \<exists> : \<boolean>\ (1..1)}
 \\
 \ruledef{TA-OnlyExists}{\Gamma |- e : D\ (1..1) \\ \allattrs(D) = a_1\ T_1\ C_1, \dots, a_n\ T_n\ C_n \\ \maybeempty(D)}{\Gamma |- e \<proj> a_k \<only> \<exists> : \<boolean>\ (1..1)}
 \\
@@ -85,7 +85,7 @@ Typing rules $\Gamma |- e : T\ C$.
 \ruledef{\emphrule{TA-Func}}{\inp(F) = a_1\ T_1\ C_1, \dots, a_n\ T_n\ C_n \\ \outp(F) = a\ T\ C \\ \forall i \in 1..n: \Gamma |- e_i : T_i'\ C_i' \\ \forall i \in 1..n: T_i'\ C_i' <: T_n\ C_n}{\Gamma |- F(e_1, \dots, e_n) : T\ C}
 \end{align*}
 
-Typing function declarations $F \OK$.
-\begin{align*}
+Typing function declarations $F \emphrule{\OK}$.
+\begin{equation*}
 \ruledef{}{\inp(F) = a_1\ T_1\ C_1, \dots, a_n\ T_n\ C_n \\ \outp(F) = a\ T\ C \\ a_1 : T_1\ C_1, \dots, a_n : T_n\ C_n |- \op(F) : T'\ C' \\ T'\ C' <: T\ C}{F \OK}
-\end{align*}
+\end{equation*}
