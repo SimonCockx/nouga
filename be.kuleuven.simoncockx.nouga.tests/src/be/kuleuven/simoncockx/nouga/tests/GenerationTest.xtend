@@ -168,7 +168,7 @@ class GenerationTest {
 		evaluateExpression('number (1..1)', '42.0e+5')[NougaNumber.valueOf(42.0e+5).assertEquals(it)];
 		evaluateExpression('number (1..1)', '42.0E2')[NougaNumber.valueOf(42.0e2).assertEquals(it)];
 		<Integer>evaluateExpression('int (1..1)', '42')[42.assertEquals(it)];
-		evaluateExpression('nothing (0..0)', 'empty')[#[].assertListEquals(it)];
+		evaluateExpression('nothing (0..0)', 'empty')[assertNull];
 	}
 	
 	@Test
@@ -177,6 +177,7 @@ class GenerationTest {
 		evaluateExpression('int (3..3)', '[1, [2, 3]]')[#[1, 2, 3].assertListEquals(it)];
 		<Integer>evaluateExpression('int (1..1)', '[1]')[1.assertEquals(it)];
 		evaluateExpression('A (2..2)', '[A {n: 1}, C {n: 2}]')[#[#[1], #[2]].assertListEquals(it.map[it.class.getMethod("getN").invoke(it)])]
+		evaluateExpression('nothing (0..0)', '[]')[assertNull];
 	}
 	
 	@Test

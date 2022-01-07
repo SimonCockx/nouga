@@ -12,7 +12,7 @@ class JavaTypeUtil {
 	extension JavaNameUtil
 	
 	def boolean isListType(ListType t) {
-		t.constraint.unbounded || t.constraint.sup != 1
+		t.constraint.unbounded || t.constraint.sup > 1
 	}
 	def boolean isPrimitiveType(ListType t) {
 		if (t.isListType || t.constraint.inf == 0) {

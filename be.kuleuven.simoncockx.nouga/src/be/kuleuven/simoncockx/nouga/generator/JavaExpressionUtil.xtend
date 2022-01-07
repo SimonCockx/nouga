@@ -105,8 +105,10 @@ class JavaExpressionUtil {
 			} else {
 				'''«lib.list»(«e.elements.join(', ')[toJavaExpression(createListType(e.staticType.itemType.clone, 0))]»)'''
 			}
+		} else if (e.staticType.constraint.sup == 0) {
+			return '''(Void)null'''; // empty list
 		} else {
-			val singleElement = e.elements.findFirst[!it.staticType.isListType];
+			val singleElement = e.elements.findFirst[it.staticType.constraint.sup == 1];
 			singleElement.toJavaExpression(e.staticType)
 		}
 	}

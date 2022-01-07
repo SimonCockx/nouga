@@ -2,10 +2,20 @@ package be.kuleuven.simoncockx.nouga.lib;
 
 import java.math.BigDecimal;
 import java.math.MathContext;
+import java.math.RoundingMode;
 
 /**
- * A class that behaves similar to BigDecimal, but ignores precision when checking
- * equality.
+ * An implementation of the IEEE754 decimal128 standard. Under the hood, this class uses
+ * BigDecimal. Also see {@link MathContext#DECIMAL128}.
+ * (Actually, *almost* an implementation of the decimal128 standard. 
+ *  See section "Relation to IEEE 754 Decimal Arithmetic" in the
+ *  BigDecimal documentation for edge cases:
+ *  https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/math/BigDecimal.html
+ * )
+ * 
+ * Note that this class circumvents problems caused by a
+ * per-instance precision, like in BigDecimal.
+ * E.g., for equality, see https://stackoverflow.com/q/6787142/3083982
  */
 public class NougaNumber extends Number {
 	public static final MathContext DECIMAL_PRECISION = MathContext.DECIMAL128;
@@ -13,18 +23,18 @@ public class NougaNumber extends Number {
 
 	private final BigDecimal value;
 	
-	public NougaNumber(BigDecimal value) {
+	private NougaNumber(BigDecimal value) {
 		this.value = value;
 	}
 	public NougaNumber(String repr) {
-		this(new BigDecimal(repr));
+		this(new BigDecimal(repr, DECIMAL_PRECISION));
 	}
 	
 	public static NougaNumber valueOf(double value) {
-		return new NougaNumber(BigDecimal.valueOf(value));
+		return new NougaNumber(Double.toString(value));
 	}
 	public static NougaNumber valueOf(long value) {
-		return new NougaNumber(BigDecimal.valueOf(value));
+		return new NougaNumber(new BigDecimal(value, DECIMAL_PRECISION));
 	}
 	
 	public NougaNumber add(NougaNumber other) {
@@ -61,7 +71,7 @@ public class NougaNumber extends Number {
 	
 	@Override
 	public String toString() {
-		return this.value.toString();
+		return this.value.stripTrailingZeros().toString();
 	}
 	
 	@Override

@@ -27,5 +27,21 @@ class NougaParsingTest {
 		'''.parse.assertNoErrors
 	}
 	
-	
+	@Test
+	def void testNestedProjection() {
+		'''
+		    namespace dummypackage
+		    
+		    type A:
+		      val int (1..1)
+		    type B:
+		      a A (1..1)
+		    
+		    func NestedProjection:
+		      inputs: b B (1..1)
+		      output: result int (1..1)
+		      assign-output:
+		        b -> a -> val
+		'''.parse.assertNoErrors
+	}
 }

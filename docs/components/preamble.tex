@@ -310,3 +310,9 @@ center,
 {%
   \endminipage\endgraf
 }
+
+\floatstyle{plaintop}
+\newfloat{lstfloat}{tbp}{lop}
+\floatname{lstfloat}{Listing}
+\captionsetup[lstfloat]{labelsep=colon}
+\ifundef\chapter{}{\numberwithin{lstfloat}{chapter}}
