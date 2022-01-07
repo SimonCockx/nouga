@@ -30,6 +30,8 @@ import be.kuleuven.simoncockx.nouga.nouga.OnlyElementExpression
 import be.kuleuven.simoncockx.nouga.nouga.VariableReference
 import be.kuleuven.simoncockx.nouga.nouga.AbsentExpression
 import be.kuleuven.simoncockx.nouga.lib.NougaNumber
+import org.eclipse.xtext.EcoreUtil2
+import be.kuleuven.simoncockx.nouga.nouga.Function
 
 class JavaExpressionUtil {
 	@Inject
@@ -203,7 +205,8 @@ class JavaExpressionUtil {
 		'''«lib.libName».<«e.staticType.toReferenceJavaType»>ifThenElse(«toJavaExpression(e.^if, singleBoolean)», () -> «toJavaExpression(e.ifthen, e.staticType)», () -> «toJavaExpression(e.elsethen, e.staticType)»)'''
 	}
 	def dispatch CharSequence toUnsafeJavaExpression(FunctionCallExpression e) {
-		'''«e.function.toEvaluationName»(«(0..<e.args.size).join(', ')[idx | toJavaExpression(e.args.get(idx), e.function.inputs.get(idx).listType)]»)'''
+		val context = EcoreUtil2.getContainerOfType(e, Function)
+		'''«e.function.toEvaluationName(context)»(«(0..<e.args.size).join(', ')[idx | toJavaExpression(e.args.get(idx), e.function.inputs.get(idx).listType)]»)'''
 	}
 	def dispatch CharSequence toUnsafeJavaExpression(InstantiationExpression e) {
 		'''new «e.type.toClassName»(«e.type.allAttributes.join(', ')[attr | toJavaExpression(e.values.findFirst[key == attr].value, attr.listType)]»)'''

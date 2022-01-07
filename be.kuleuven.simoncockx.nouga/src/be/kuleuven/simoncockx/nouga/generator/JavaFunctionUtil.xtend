@@ -23,7 +23,7 @@ class JavaFunctionUtil {
 		@ImplementedBy(«func.toClassName».«func.toClassName»Default.class)
 		public class «func.toClassName» {
 			«func.gatherFunctionDependencies.join(System.lineSeparator)[
-			'''@Inject protected «toClassName» «toVarName»;'''
+			'''@Inject protected «toClassName» «toDependencyFieldName(func)»;'''
 			]»
 			
 			public «func.output.listType.toJavaType» «evaluationName»(«func.inputs.join(', ')['''«listType.toJavaType» «toVarName»''']») {

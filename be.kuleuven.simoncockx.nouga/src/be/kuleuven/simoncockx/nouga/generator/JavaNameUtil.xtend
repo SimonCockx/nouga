@@ -64,11 +64,18 @@ class JavaNameUtil {
 		// Escape names that correspond to keywords
 		return n + '_'
 	}
+	def toDependencyFieldName(Named attr, Function context) {
+		var n = attr.toVarName
+		while (context.inputs.map[toVarName].contains(n)) {
+			n = n + '_'
+		}
+		return n
+	}
 	def toGetterName(Attribute attr) {
 		'''get«attr.name.capitalize»'''
 	}
-	def toEvaluationName(Function func) {
-		'''«func.toVarName».«evaluationName»'''
+	def toEvaluationName(Function func, Function context) {
+		'''«func.toDependencyFieldName(context)».«evaluationName»'''
 	}
 	
 	private def String capitalize(String str) {
