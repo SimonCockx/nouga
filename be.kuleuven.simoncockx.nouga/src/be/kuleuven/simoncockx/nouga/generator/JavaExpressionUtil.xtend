@@ -98,22 +98,7 @@ class JavaExpressionUtil {
 	def dispatch CharSequence toUnsafeJavaExpression(VariableReference e) {
 		e.reference.toVarName
 	}
-	
-	def dispatch CharSequence toUnsafeJavaExpression(ListLiteral e) {
-		if (e.staticType.isListType) {
-			val isListOfSingleValues = e.elements.forall[!it.staticType.isListType];
-			if (isListOfSingleValues) {
-				'''«lib.list»(«e.elements.join(', ')[toJavaExpression(createListType(e.staticType.itemType.clone, 1, 1))]»)'''
-			} else {
-				'''«lib.list»(«e.elements.join(', ')[toJavaExpression(createListType(e.staticType.itemType.clone, 0))]»)'''
-			}
-		} else if (e.staticType.constraint.sup == 0) {
-			return '''(Void)null'''; // empty list
-		} else {
-			val singleElement = e.elements.findFirst[it.staticType.constraint.sup == 1];
-			singleElement.toJavaExpression(e.staticType)
-		}
-	}
+
 	def dispatch CharSequence toUnsafeJavaExpression(OrExpression e) {
 		toBinaryJavaExpression(lib.or, e.left, e.right, singleBoolean)
 	}
@@ -123,6 +108,41 @@ class JavaExpressionUtil {
 	def dispatch CharSequence toUnsafeJavaExpression(NotExpression e) {
 		'''«lib.not»(«e.expression.toJavaExpression(singleBoolean)»)'''
 	}
+	
+	def dispatch CharSequence toUnsafeJavaExpression(ArithmeticOperation e) {
+		toBinaryJavaExpression(
+			switch (e.operator) {
+				case '+': lib.add
+				case '-': lib.subtract
+				case '*': lib.multiply
+				case '/': lib.divide
+			}, e.left, e.right, e.staticType)
+	}
+	
+	def dispatch CharSequence toUnsafeJavaExpression(InstantiationExpression e) {
+		'''new «e.type.toClassName»(«e.type.allAttributes.join(', ')[attr | toJavaExpression(e.values.findFirst[key == attr].value, attr.listType)]»)'''
+	}
+	def dispatch CharSequence toUnsafeJavaExpression(ProjectionExpression e) {
+		if (e.onlyExists) {
+			'''«lib.onlyExists»(«e.receiver.toUnsafeJavaExpression», "«e.attribute.name»")'''
+		} else {
+			val t = e.receiver.staticType;
+			val basic = t.itemType as DataType;
+			val className = basic.data.toClassName;
+			val getter = e.attribute.toGetterName;
+			if (t.isListType || t.constraint.inf === 0) {
+				val expected = createListType(t.itemType.clone, 0);
+				if (e.attribute.listType.isListType) {
+					'''«lib.flatProject»(«e.receiver.toJavaExpression(expected)», «className»::«getter»)'''
+				} else {
+					'''«lib.project»(«e.receiver.toJavaExpression(expected)», «className»::«getter»)'''
+				}
+			} else {
+				'''«e.receiver.toUnsafeJavaExpression».«getter»()'''
+			}
+		}
+	}
+	
 	def dispatch CharSequence toUnsafeJavaExpression(ExistsExpression e) {
 		val arg = e.argument.toUnsafeJavaExpression
 		if (e.single) {
@@ -137,12 +157,16 @@ class JavaExpressionUtil {
 		val arg = e.argument.toUnsafeJavaExpression
 		'''«lib.isAbsent»(«arg»)'''
 	}
-	def dispatch CharSequence toUnsafeJavaExpression(ContainsExpression e) {
-		toComparableBinaryJavaExpression(lib.contains, e.left, e.right)
+	def dispatch CharSequence toUnsafeJavaExpression(CountExpression e) {
+		val arg = e.argument.toUnsafeJavaExpression
+		'''«lib.count»(«arg»)'''
 	}
-	def dispatch CharSequence toUnsafeJavaExpression(DisjointExpression e) {
-		toComparableBinaryJavaExpression(lib.disjoint, e.left, e.right)
+	def dispatch CharSequence toUnsafeJavaExpression(OnlyElementExpression e) {
+		val argType = e.argument.staticType;
+		val arg = e.argument.toJavaExpression(createListType(argType.itemType.clone, 0));
+		'''«lib.onlyElement»(«arg»)'''
 	}
+	
 	def dispatch CharSequence toUnsafeJavaExpression(ComparisonOperation e) {
 		if (e.cardOp == 'all') {
 			toSingleComparableBinaryJavaExpression(
@@ -161,36 +185,26 @@ class JavaExpressionUtil {
 			)
 		}
 	}
-	def dispatch CharSequence toUnsafeJavaExpression(ArithmeticOperation e) {
-		toBinaryJavaExpression(
-			switch (e.operator) {
-				case '+': lib.add
-				case '-': lib.subtract
-				case '*': lib.multiply
-				case '/': lib.divide
-			}, e.left, e.right, e.staticType)
+	def dispatch CharSequence toUnsafeJavaExpression(ContainsExpression e) {
+		toComparableBinaryJavaExpression(lib.contains, e.left, e.right)
 	}
-	def dispatch CharSequence toUnsafeJavaExpression(CountExpression e) {
-		val arg = e.argument.toUnsafeJavaExpression
-		'''«lib.count»(«arg»)'''
+	def dispatch CharSequence toUnsafeJavaExpression(DisjointExpression e) {
+		toComparableBinaryJavaExpression(lib.disjoint, e.left, e.right)
 	}
-	def dispatch CharSequence toUnsafeJavaExpression(ProjectionExpression e) {
-		if (e.onlyExists) {
-			'''«lib.onlyExists»(«e.receiver.toUnsafeJavaExpression», "«e.attribute.name»")'''
-		} else {
-			val t = e.receiver.staticType;
-			val basic = t.itemType as DataType;
-			val className = basic.data.toClassName;
-			val getter = e.attribute.toGetterName;
-			if (t.isListType) {
-				if (e.attribute.listType.isListType) {
-					'''«lib.flatProject»(«e.receiver.toUnsafeJavaExpression», «className»::«getter»)'''
-				} else {
-					'''«lib.project»(«e.receiver.toUnsafeJavaExpression», «className»::«getter»)'''
-				}
+		
+	def dispatch CharSequence toUnsafeJavaExpression(ListLiteral e) {
+		if (e.staticType.isListType) {
+			val isListOfSingleValues = e.elements.forall[!it.staticType.isListType];
+			if (isListOfSingleValues) {
+				'''«lib.list»(«e.elements.join(', ')[toJavaExpression(createListType(e.staticType.itemType.clone, 1, 1))]»)'''
 			} else {
-				'''«e.receiver.toUnsafeJavaExpression».«getter»()'''
+				'''«lib.list»(«e.elements.join(', ')[toJavaExpression(createListType(e.staticType.itemType.clone, 0))]»)'''
 			}
+		} else if (e.staticType.constraint.sup == 0) {
+			return '''(Void)null'''; // empty list
+		} else {
+			val singleElement = e.elements.findFirst[it.staticType.constraint.sup == 1];
+			singleElement.toJavaExpression(e.staticType)
 		}
 	}
 	def dispatch CharSequence toUnsafeJavaExpression(ConditionalExpression e) {
@@ -200,14 +214,7 @@ class JavaExpressionUtil {
 		val context = EcoreUtil2.getContainerOfType(e, Function)
 		'''«e.function.toEvaluationName(context)»(«(0..<e.args.size).join(', ')[idx | toJavaExpression(e.args.get(idx), e.function.inputs.get(idx).listType)]»)'''
 	}
-	def dispatch CharSequence toUnsafeJavaExpression(InstantiationExpression e) {
-		'''new «e.type.toClassName»(«e.type.allAttributes.join(', ')[attr | toJavaExpression(e.values.findFirst[key == attr].value, attr.listType)]»)'''
-	}
-	def dispatch CharSequence toUnsafeJavaExpression(OnlyElementExpression e) {
-		val argType = e.argument.staticType;
-		val arg = e.argument.toJavaExpression(createListType(argType.itemType.clone, 0));
-		'''«lib.onlyElement»(«arg»)'''
-	}
+	
 	
 	private def CharSequence toBinaryJavaExpression(CharSequence func, Expression left, Expression right, ListType expectedType) {
 		'''«func»(«left.toJavaExpression(expectedType)», «right.toJavaExpression(expectedType)»)'''

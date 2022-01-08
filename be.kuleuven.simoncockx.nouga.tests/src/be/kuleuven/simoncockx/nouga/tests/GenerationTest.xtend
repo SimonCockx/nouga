@@ -284,6 +284,7 @@ class GenerationTest {
 		evaluateExpression('int (1..2)', 'C {n: [1, 2]} -> n')[#[1, 2].assertListEquals(it)];
 		evaluateExpression('int (3..6)', '[A {n: 1}, A {n: [2, 3]}, A {n: 4}] -> n')[#[1, 2, 3, 4].assertListEquals(it)];
 		evaluateExpression('int (3..3)', '[D {n: 1}, D {n: 2}, D {n: 3}] -> n')[#[1, 2, 3].assertListEquals(it)];
+		evaluateExpression('int (0..2)', '(if True then empty else A {n: 1}) -> n')[#[].assertListEquals(it)];
 	}
 	
 	@Test
