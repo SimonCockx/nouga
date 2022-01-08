@@ -105,24 +105,24 @@ public class Nouga {
 		return e1.stream().anyMatch(e -> !e.equals(e2));
 	}
 	
-	public static int addInt(int e1, int e2) {
+	public static int add(int e1, int e2) {
 		return e1 + e2;
 	}
-	public static NougaNumber addNumber(NougaNumber e1, NougaNumber e2) {
+	public static NougaNumber add(NougaNumber e1, NougaNumber e2) {
 		return e1.add(e2);
 	}
 	
-	public static int subtractInt(int e1, int e2) {
+	public static int subtract(int e1, int e2) {
 		return e1 - e2;
 	}
-	public static NougaNumber subtractNumber(NougaNumber e1, NougaNumber e2) {
+	public static NougaNumber subtract(NougaNumber e1, NougaNumber e2) {
 		return e1.subtract(e2);
 	}
 	
-	public static int multiplyInt(int e1, int e2) {
+	public static int multiply(int e1, int e2) {
 		return e1 * e2;
 	}
-	public static NougaNumber multiplyNumber(NougaNumber e1, NougaNumber e2) {
+	public static NougaNumber multiply(NougaNumber e1, NougaNumber e2) {
 		return e1.multiply(e2);
 	}
 	

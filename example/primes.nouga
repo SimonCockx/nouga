@@ -1,0 +1,41 @@
+namespace primes
+// A Nouga implementation of the Sieve of Eratosthenes.
+
+func Range:
+  inputs:
+    low int (1..1)
+    high int (1..1)
+  output: range int (0..*)
+  assign-output:
+      [low, if low <> high then Range(low + 1, high)]
+
+func MultiplesInRange:
+  inputs:
+    n int (1..1)
+    multiplier int (1..1)
+    validRange int (0..*)
+  output:
+    multiples int (0..*)
+  assign-output:
+    if validRange any = n*multiplier then
+      [n*multiplier, MultiplesInRange(n, multiplier + 1, validRange)]
+
+func Sieve:
+  inputs:
+    sieve int (0..*)
+    n int (1..1)
+    validRange int (0..*)
+  output: primes int (0..*)
+  assign-output:
+    if validRange any = n then
+      if sieve all <> n then // n is a prime number
+        [n, Sieve([sieve, MultiplesInRange(n, 1, validRange)], n + 1, validRange)]
+      else // n is not a prime number
+        Sieve(sieve, n + 1, validRange)
+
+func IsPrime:
+  inputs:
+    n int (1..1)
+  output: nIsPrime boolean (1..1)
+  assign-output:
+    Sieve([0, 1], 2, Range(0, n)) any = n

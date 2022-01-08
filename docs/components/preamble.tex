@@ -292,6 +292,8 @@ center,
 	  language=java,
 	  numbers=none,
 	  mathescape,
+	  otherkeywords={},
+	  keywordstyle={\color{eminence}},
 	  #1
 	}\minipage{\linewidth}
 }
@@ -316,3 +318,9 @@ center,
 \floatname{lstfloat}{Listing}
 \captionsetup[lstfloat]{labelsep=colon}
 \ifundef\chapter{}{\numberwithin{lstfloat}{chapter}}
+
+\newcommand{\javatypedef}[3]{\lv{\stype}_\java|[#2|] &= #3 && \rule{\small #1}}
+
+\DeclareMathOperator{\generateoutput}{genoutput}
+\DeclareMathOperator{\generateexpression}{genexpr}
+\newcommand{\javaexprdef}[3]{\seval_\java|[#2|] &= #3 && \rule{\small #1}}

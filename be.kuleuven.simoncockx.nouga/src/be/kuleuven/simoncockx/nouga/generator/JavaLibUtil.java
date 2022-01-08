@@ -32,12 +32,9 @@ public class JavaLibUtil {
 	public String allNotEquals;
 	public String anyEquals;
 	public String anyNotEquals;
-	public String addInt;
-	public String addNumber;
-	public String subtractInt;
-	public String subtractNumber;
-	public String multiplyInt;
-	public String multiplyNumber;
+	public String add;
+	public String subtract;
+	public String multiply;
 	public String divide;
 	public String count;
 	public String project;

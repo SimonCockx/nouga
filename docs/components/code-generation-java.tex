@@ -3,14 +3,14 @@
 
 Java representation of list types $\lv{\stype}_\java|[T\ C|]$.
 \begin{align*}
-\lv{\stype}_\java|[T\ (0..1)|] &= \stype_\java|[T|] && \rule{\small J-Optional}\\
-\lv{\stype}_\java|[T\ (1..1)|] &= \begin{cases}
+\javatypedef{J-Optional}{T\ (0..1)}{\stype_\java|[T|]} \\
+\javatypedef{J-Singular}{T\ (1..1)}{\begin{cases}
 \lstinline|boolean|, &\text{if }T = \<boolean> \\
 \lstinline|int|, &\text{if }T = \<int> \\
 \stype_\java|[T|], &\text{otherwise}
-\end{cases} && \rule{\small J-Singular} \\
-\lv{\stype}_\java|[T\ (k..l)|] &= \usebox{\mybox}, \qquad \text{if }l > 1 && \rule{\small J-Plural}\\
-\lv{\stype}_\java|[T\ (0..0)|] &= \stype_\java|[T|] && \rule{\small J-Empty}
+\end{cases}} \\
+\javatypedef{J-Plural}{T\ (k..l)}{\usebox{\mybox}, \qquad \text{if }l > 1} \\
+\javatypedef{J-Empty}{T\ (0..0)}{\stype_\java|[T|]}
 \end{align*}
 
 Java reference type of each item type $\stype_\java|[T|]$.

@@ -1,0 +1,158 @@
+namespace test
+
+func ConstraintDemo:
+  inputs:
+  output: result int (2..4)
+  assign-output:
+    if True then [1, 2] else [1, 2, 3, 4]
+
+
+// AUXILIARY
+type MyType:
+	flag boolean (0..1)
+	multi int (1..2)
+	one int (1..1)
+	many int (2..5)
+
+type MayBeEmptyType:
+	prop1 boolean (0..1)
+	prop2 int (0..*)
+	prop3 number (0..5)
+
+type A:
+type B extends A:
+type C extends A:
+
+func AssertInt:
+	inputs: a int (1..1)
+	output: b int (1..1)
+	assign-output: a
+
+// START
+
+func BooleanOperation:
+	inputs:
+	output: result boolean (1..1)
+	assign-output:
+		True or False and (1.0 or True) // OK
+
+func Exists:
+	inputs: in MyType (1..1)
+	output: result boolean (1..1)
+	assign-output:
+		in->flag exists // OK
+		and in->flag multiple exists // OK
+		and in->flag single exists // OK
+		and in->multi exists // OK
+		and in->multi multiple exists // OK
+		and in->one single exists // OK
+		and in->multi single exists // OK
+		and in->flag single exists // OK
+		and in->many single exists // OK
+
+func OnlyExists:
+	inputs: a MyType (1..1) b MayBeEmptyType (1..1)
+	output: result boolean (1..1)
+	assign-output:
+		a -> flag only exists // OK -- this is always false
+		and b -> prop1 only exists // OK
+		and [b, b] -> prop2 only exists // OK
+
+func Comparisons:
+	inputs: a A (0..*) b B (0..*) c C (0..*) sb B (1..1)
+	output: result boolean (1..1)
+	assign-output:
+		a contains b // OK
+		and b contains a // OK
+		and b contains c // OK
+		and a = b // OK
+		and a all = b // OK
+		and a all = sb // OK
+		and c any = sb // OK
+
+func Arithmetic:
+	inputs:
+	output: result number (1..1)
+	assign-output:
+		AssertInt(1 + 1) // OK
+		+ AssertInt(1 - 1) // OK
+		+ AssertInt(1 * 1) // OK
+		+ (1 / 1) // OK
+		+ AssertInt(5.0 + 5) // OK
+		+ AssertInt(True + 1.0) // OK -- errors do not cascade
+		+ (True - False) // OK -- both arguments are checked
+		+ ([1, 2] + [3, 4]) // OK
+
+func Conditional:
+	inputs:
+	output: result number (1..1)
+	assign-output:
+		if True then 1 else 1.0 // OK
+		+ AssertA(if True then A{} else B{}) // NOT OK
+		+ AssertA(if True then B{} else C{}) // OK
+		+ if [True, False] then 0 else 1 // OK
+		+ if empty then 1 else 0 // OK
+func AssertA:
+	inputs: a A (0..*)
+	output: result int (1..1)
+	assign-output: 0
+
+func SomeFunc:
+	inputs:
+		a int (1..1)
+		b number (0..3)
+	output: r nothing (0..0)
+	assign-output: empty
+func FunctionCall:
+	inputs:
+	output: r nothing (0..0)
+	assign-output:
+		[ SomeFunc(1, 2.0) // OK
+		, SomeFunc() // OK
+		, SomeFunc(1, 2.0, empty) // OK
+		, SomeFunc([1, 1], 2.0) // OK
+		, SomeFunc(1.0, 3) // OK
+		]
+
+func Instantiation:
+	inputs:
+	output: result MyType (0..*)
+	assign-output:
+		[ MyType {flag: True, multi: 1, one: 2, many: [1, 2]} // OK
+		, MyType {flag: True, flag: True, one: 2, many: [1, 2]} // OK
+		, MyType {flag: True, multi: 1, many: [1, 2]} // OK
+		, MyType {flag: empty, multi: [1, 2, 3], one: 1, many: [1, 2]} // OK
+		]
+
+func List:
+	inputs:
+	output: result number (0..*)
+	assign-output:
+		[ [1, 2] // OK
+		, [[], []] // OK
+		, [[1, 2], 3] // OK
+		, [1.0, 1] // OK
+		, [True, 1] // OK -- errors do not cascade
+		]
+
+func ValidationTest:
+	inputs:
+	output: result boolean (1..1)
+	assign-output:
+		5 // OK
+
+func CascadeTest:
+	inputs:
+	output: result boolean (1..1)
+	assign-output:
+		True or [True, 1] // OK
+
+		
+func AddOrZero:
+  inputs: a number (0..1) b number (0..1)
+  output: result number (1..1)
+  assign-output:
+    if a exists and b exists then
+      a + b
+    else
+      0

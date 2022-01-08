@@ -1,0 +1,7 @@
+namespace recursion
+
+func Fac:
+  inputs:
+    n int (1..1)
+  output: result int (1..1)
+  assign-output: if True then 1 else n * Fac(n-1)

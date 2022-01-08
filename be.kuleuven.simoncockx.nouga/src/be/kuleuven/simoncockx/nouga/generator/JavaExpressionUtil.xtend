@@ -163,19 +163,11 @@ class JavaExpressionUtil {
 	}
 	def dispatch CharSequence toUnsafeJavaExpression(ArithmeticOperation e) {
 		toBinaryJavaExpression(
-			if ((e.staticType.itemType as BuiltInType).type == BuiltInTypeEnum.NUMBER) {
-				switch (e.operator) {
-					case '+': lib.addNumber
-					case '-': lib.subtractNumber
-					case '*': lib.multiplyNumber
-					case '/': lib.divide
-				}
-			} else {
-				switch (e.operator) {
-					case '+': lib.addInt
-					case '-': lib.subtractInt
-					case '*': lib.multiplyInt
-				}
+			switch (e.operator) {
+				case '+': lib.add
+				case '-': lib.subtract
+				case '*': lib.multiply
+				case '/': lib.divide
 			}, e.left, e.right, e.staticType)
 	}
 	def dispatch CharSequence toUnsafeJavaExpression(CountExpression e) {

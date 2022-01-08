@@ -1,0 +1,28 @@
+namespace codegeneration
+
+type Sample:
+  a int (1..1) // maps to int
+  b int (0..1) // maps to Integer
+  c int (0..*) // maps to List<? extends Integer>
+
+  d number (1..1) // maps to NougaNumber
+  e number (0..1) // maps to NougaNumber
+  f number (0..*) // maps to List<? extends NougaNumber>
+
+func GetTheInt:
+  inputs:
+  output: result int (1..1)
+  assign-output:
+    42
+
+func IntToNumber:
+  inputs:
+  output: result number (0..*)
+  assign-output:
+    [1, GetTheInt(), 3.14, 5]
+
+func SingleToList:
+  inputs:
+  output: result number (0..*)
+  assign-output:
+    if True then 5 else [1.0, 2.52, 3.14]
