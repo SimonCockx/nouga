@@ -2,7 +2,7 @@ namespace test
 
 func ConstraintDemo:
   inputs:
-  output: result int (2..4)
+  output: result int (3..4)
   assign-output:
     if True then [1, 2] else [1, 2, 3, 4]
 

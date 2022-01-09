@@ -34,7 +34,7 @@ func Observe:
 		result number (0..1)
 	
 	assign-output:
-		if observable->constObs exists then observable->constObs->val
+		if observable->const exists then observable->const->val
 		else if observable->time exists then DateDifference(observable->time->time, time)
 
 func Const:
@@ -44,8 +44,8 @@ func Const:
     observable Observable (1..1)
   assign-output:
     Observable {
-    	const: ConstObservable { val: constant },
-    	observable: empty
+    	const: empty,
+    	time: empty
     }
 
 type Contract:

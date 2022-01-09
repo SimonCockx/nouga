@@ -19,6 +19,7 @@ import be.kuleuven.simoncockx.nouga.nouga.InstantiationExpression;
 import be.kuleuven.simoncockx.nouga.nouga.DataType;
 import be.kuleuven.simoncockx.nouga.nouga.Function;
 import be.kuleuven.simoncockx.nouga.nouga.KeyValuePair;
+import be.kuleuven.simoncockx.nouga.nouga.ListType;
 import be.kuleuven.simoncockx.nouga.nouga.NougaPackage;
 import be.kuleuven.simoncockx.nouga.nouga.ProjectionExpression;
 import be.kuleuven.simoncockx.nouga.typing.NougaTyping;
@@ -41,9 +42,12 @@ public class NougaScopeProvider extends AbstractNougaScopeProvider {
 	        return Scopes.scopeFor(candidates);
 		} else if (context instanceof ProjectionExpression && reference == NougaPackage.Literals.PROJECTION_EXPRESSION__ATTRIBUTE) {
 			ProjectionExpression ctx = (ProjectionExpression)context;
-			Type type = ctx.getReceiver().getStaticType().getItemType();
-			if (type instanceof DataType) {
-				return Scopes.scopeFor(typing.allAttributes(((DataType)type).getData()));
+			ListType lt = ctx.getReceiver().getStaticType();
+			if (lt != null) {
+				Type type = ctx.getReceiver().getStaticType().getItemType();
+				if (type instanceof DataType) {
+					return Scopes.scopeFor(typing.allAttributes(((DataType)type).getData()));
+				}
 			}
 			return IScope.NULLSCOPE;
 		} else if (context instanceof Function && reference == NougaPackage.Literals.VARIABLE_REFERENCE__REFERENCE) {
