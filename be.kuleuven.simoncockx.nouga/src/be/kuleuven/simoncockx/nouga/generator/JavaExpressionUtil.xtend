@@ -130,7 +130,7 @@ class JavaExpressionUtil {
 			val basic = t.itemType as DataType;
 			val className = basic.data.toClassName;
 			val getter = e.attribute.toGetterName;
-			if (t.isListType || t.constraint.inf === 0) {
+			if (t.isListType) {
 				val expected = createListType(t.itemType.clone, 0);
 				if (e.attribute.listType.isListType) {
 					'''«lib.flatProject»(«e.receiver.toJavaExpression(expected)», «className»::«getter»)'''
@@ -138,7 +138,12 @@ class JavaExpressionUtil {
 					'''«lib.project»(«e.receiver.toJavaExpression(expected)», «className»::«getter»)'''
 				}
 			} else {
-				'''«e.receiver.toUnsafeJavaExpression».«getter»()'''
+				val ^default = if (e.attribute.listType.isListType) {
+					'''«lib.empty»()'''
+				} else {
+					'''null'''
+				}
+				'''«lib.applyOrDefault»(«e.receiver.toUnsafeJavaExpression», «className»::«getter», «^default»)'''
 			}
 		}
 	}

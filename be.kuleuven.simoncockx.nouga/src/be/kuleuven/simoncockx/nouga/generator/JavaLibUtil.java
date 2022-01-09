@@ -37,6 +37,7 @@ public class JavaLibUtil {
 	public String multiply;
 	public String divide;
 	public String count;
+	public String applyOrDefault;
 	public String project;
 	public String flatProject;
 	public String ifThenElse;

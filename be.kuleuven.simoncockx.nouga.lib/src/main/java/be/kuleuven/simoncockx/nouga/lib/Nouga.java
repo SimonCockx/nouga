@@ -140,6 +140,13 @@ public class Nouga {
 		return e.size();
 	}
 	
+	public static <T, Prop> Prop applyOrDefault(T e, Function<T, Prop> f, Prop default_) {
+		if (e == null) {
+			return default_;
+		} else {
+			return f.apply(e);
+		}
+	}
 	public static <T, Prop> List<? extends Prop> project(List<? extends T> e, Function<T, Prop> f) {
 		return e.stream()
 				.map(elem -> f.apply(elem))
