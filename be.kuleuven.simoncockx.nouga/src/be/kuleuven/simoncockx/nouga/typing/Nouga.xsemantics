@@ -228,6 +228,12 @@ from {
 	}
 }
 
+rule SNothing // SA-Nothing
+	G |- BuiltInType t1 <: DataType t2
+from {
+	t1.type == BuiltInTypeEnum.NOTHING
+}
+
 rule SSuper // SA-Refl, SA-Super
 	G |- DataType t1 <: DataType t2
 from {

@@ -1,4 +1,4 @@
-namespace cdm.product
+namespace contractdsl
 
 // Stub for the `date` type.
 type Date:
@@ -44,8 +44,8 @@ func Const:
     observable Observable (1..1)
   assign-output:
     Observable {
-    	const: empty,
-    	time: empty
+    	time: empty,
+    	const: empty
     }
 
 type Contract:

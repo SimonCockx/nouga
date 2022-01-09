@@ -142,6 +142,64 @@ class TypingTest {
 	}
 	
 	@Test
+	def void test() {
+		val model = '''
+		namespace contractdsl
+		
+		// Stub for the `date` type.
+		type Date:
+		    day int (1..1)
+		    month int (1..1)
+		    year int (1..1)
+		
+		// Stub of the CDM DateDifference.
+		func DateDifference:
+		    inputs:
+				firstDate Date (0..1)
+				secondDate Date (0..1)
+			output:
+				difference int (1..1)
+			assign-output:
+			    42
+		
+		type ConstObservable:
+			val number (1..1)
+		
+		type TimeObservable:
+			time Date (1..1)
+		
+		type Observable:
+			const ConstObservable (0..1)
+			time TimeObservable (0..1)
+		
+		func Observe:
+			inputs:
+				observable Observable (1..1)
+				time Date (1..1)
+			output:
+				result number (0..1)
+			
+			assign-output:
+				if observable->const exists then observable->const->val
+				else if observable->time exists then DateDifference(observable->time->time, time)
+		
+		func Const:
+		  inputs:
+		    constant number (1..1)
+		  output:
+		    observable Observable (1..1)
+		  assign-output:
+		    Observable {
+		    	time: empty,
+		    	const: empty
+		    }
+		'''.parse
+		val expression = (model.elements.last as Function).operation;
+		expression.assertWellTyped;
+		model.assertNoErrors;
+	}
+	
+	@Test
 	def void testTIf() {
 		'if True then [1, 2] else [3.0, 4.0, 5.0, 6.0]'.type.assertListTypeEquals(createListType(number, 2, 4));
 	}
