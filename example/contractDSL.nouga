@@ -1,6 +1,6 @@
 namespace contractdsl
 
-// Stub for the `date` type.
+// Stub for the built-in Rosetta `date` type.
 type Date:
     day int (1..1)
     month int (1..1)
@@ -15,6 +15,11 @@ func DateDifference:
 		difference int (1..1)
 	assign-output:
 	    42
+
+
+// Stub of the CDM UnitType.
+type Currency:
+	kind int (1..1) // 0 = EUR, 1 = USD, ...
 
 type ConstObservable:
 	val number (1..1)
@@ -44,8 +49,8 @@ func Const:
     observable Observable (1..1)
   assign-output:
     Observable {
-    	time: empty,
-    	const: empty
+    	const: ConstObservable { val: constant },
+    	time: empty
     }
 
 type Contract:
@@ -62,53 +67,65 @@ type Contract:
   anytime    Contract_Anytime    (0..1)
 
 type Contract_Zero:
-   unit int (1..1)
 type Contract_Expired:
-   unit int (1..1)
 type Contract_One:
-  currency UnitType (1..1)
+  currency Currency (1..1)
 type Contract_Or:
   left Contract (1..1)
   right Contract (1..1)
 type Contract_Both:
   left Contract (1..1)
   right Contract (1..1)
+type Contract_Give:
+  contract Contract (1..1)
 type Contract_Thereafter:
   earlier Contract (1..1)
   later   Contract (1..1)
-type Contract_Give:
-  contract Contract (1..1)
 type Contract_Truncate:
-  expiryDate date     (1..1)
+  expiryDate Date     (1..1)
   contract   Contract (1..1)
 type Contract_Observe:
-  observable Obs (1..1)
+  observable Observable (1..1)
   contract Contract (1..1)
 type Contract_Get:
   contract Contract (1..1)
 type Contract_Anytime:
   contract Contract (1..1)
 
-/*
+
 func MkZero:
+  inputs:
   output:
     contract Contract (1..1)
-  assign-output contract -> zero -> unit:
-    1 // create the zero contract dummy value
+  assign-output:
+    Contract {
+    	zero: Contract_Zero {},
+    	expired: empty, one: empty, orContract: empty, both: empty, give: empty,
+    	thereafter: empty, truncate: empty, observe: empty, get: empty, anytime: empty
+    }
 
 func MkExpired:
+  inputs:
   output:
     contract Contract (1..1)
-  assign-output contract -> expired -> unit:
-    1 // create the expired contract dummy value
+  assign-output:
+    Contract {
+    	expired: Contract_Expired {},
+    	zero: empty, one: empty, orContract: empty, both: empty, give: empty,
+    	thereafter: empty, truncate: empty, observe: empty, get: empty, anytime: empty
+    }
 
 func MkOne:
   inputs:
-    currency UnitType (1..1)
+    currency Currency (1..1)
   output:
     contract Contract (1..1)
-  assign-output contract -> one -> currency:
-    currency
+  assign-output:
+    Contract {
+    	one: Contract_One { currency: currency },
+    	zero: empty, expired: empty, orContract: empty, both: empty, give: empty,
+    	thereafter: empty, truncate: empty, observe: empty, get: empty, anytime: empty
+    }
 
 func MkOr:
   inputs:
@@ -116,10 +133,12 @@ func MkOr:
     right Contract (1..1)
   output:
     contract Contract (1..1)
-  assign-output contract -> orContract -> left:
-    left
-  assign-output contract -> orContract -> right:
-    right
+  assign-output:
+    Contract {
+    	orContract: Contract_Or { left: left, right: right },
+    	zero: empty, expired: empty, one: empty, both: empty, give: empty,
+    	thereafter: empty, truncate: empty, observe: empty, get: empty, anytime: empty
+    }
 
 func MkBoth:
   inputs:
@@ -127,10 +146,24 @@ func MkBoth:
     right Contract (1..1)
   output:
     contract Contract (1..1)
-  assign-output contract -> both -> left:
-    left
-  assign-output contract -> both -> right:
-    right
+  assign-output:
+    Contract {
+    	both: Contract_Both { left: left, right: right },
+    	zero: empty, expired: empty, one: empty, orContract: empty, give: empty,
+    	thereafter: empty, truncate: empty, observe: empty, get: empty, anytime: empty
+    }
+
+func MkGive:
+  inputs:
+    subContract Contract (1..1)
+  output:
+    contract Contract (1..1)
+  assign-output:
+    Contract {
+    	give: Contract_Give { contract: subContract },
+    	zero: empty, expired: empty, one: empty, orContract: empty, both: empty,
+    	thereafter: empty, truncate: empty, observe: empty, get: empty, anytime: empty
+    }
 
 func MkThereafter:
   inputs:
@@ -138,56 +171,62 @@ func MkThereafter:
     later Contract (1..1)
   output:
     contract Contract (1..1)
-  assign-output contract -> thereafter -> earlier:
-    earlier
-  assign-output contract -> thereafter -> later:
-    later
-
-func MkGive:
-  inputs:
-    subContract Contract (1..1)
-  output:
-    contract Contract (1..1)
-  assign-output contract -> give -> contract:
-    subContract
+  assign-output:
+    Contract {
+    	thereafter: Contract_Thereafter { earlier: earlier, later: later },
+    	zero: empty, expired: empty, one: empty, orContract: empty, both: empty, give: empty,
+    	truncate: empty, observe: empty, get: empty, anytime: empty
+    }
 
 func MkTruncate:
   inputs:
-    truncateTo date      (1..1)
+    truncateTo Date      (1..1)
     subContract Contract (1..1)
   output:
     contract Contract (1..1)
-  assign-output contract -> truncate -> contract:
-    subContract
-  assign-output contract -> truncate -> expiryDate:
-    truncateTo
+  assign-output:
+    Contract {
+    	truncate: Contract_Truncate { expiryDate: truncateTo, contract: subContract },
+    	zero: empty, expired: empty, one: empty, orContract: empty, both: empty, give: empty,
+    	thereafter: empty, observe: empty, get: empty, anytime: empty
+    }
 
 func MkObserve:
   inputs:
-    observable Obs (1..1)
+    observable Observable (1..1)
     subContract Contract (1..1)
   output:
     contract Contract (1..1)
-  assign-output contract -> observe -> contract:
-    subContract
-  assign-output contract -> observe -> observable:
-    observable
+  assign-output:
+    Contract {
+    	observe: Contract_Observe { observable: observable, contract: subContract },
+    	zero: empty, expired: empty, one: empty, orContract: empty, both: empty, give: empty,
+    	thereafter: empty, truncate: empty, get: empty, anytime: empty
+    }
 
 func MkGet:
   inputs:
     subContract Contract (1..1)
   output:
     contract Contract (1..1)
-  assign-output contract -> get -> contract:
-    subContract
+  assign-output:
+    Contract {
+    	get: Contract_Get { contract: subContract },
+    	zero: empty, expired: empty, one: empty, orContract: empty, both: empty, give: empty,
+    	thereafter: empty, truncate: empty, observe: empty, anytime: empty
+    }
 
 func MkAnytime:
   inputs:
     subContract Contract (1..1)
   output:
     contract Contract (1..1)
-  assign-output contract -> anytime -> contract:
-    subContract
+  assign-output:
+    Contract {
+    	anytime: empty,
+    	zero: empty, expired: empty, one: empty, orContract: empty, both: empty, give: empty,
+    	thereafter: empty, truncate: empty, observe: empty, get: empty
+    }
 
 func MkAnd:
   inputs:
@@ -198,6 +237,7 @@ func MkAnd:
   assign-output contract:
     MkThereafter(MkBoth(left,right),MkOr(left,right))
 
+/*
 func ZeroCouponBond:
   inputs:
     maturesOn date    (1..1)  <"Date the bond matures on">

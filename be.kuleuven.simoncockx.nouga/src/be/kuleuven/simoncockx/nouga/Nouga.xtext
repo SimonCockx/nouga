@@ -156,7 +156,7 @@ PrimaryExpression returns Expression:
 ;
 
 InstantiationExpression returns Expression:
-	{InstantiationExpression} type=[Data] '{' (values+=KeyValuePair (',' values+=KeyValuePair)*)? '}'
+	{InstantiationExpression} type=[Data] '{' (values+=KeyValuePair (',' values+=KeyValuePair)*)? ','? '}'
 ;
 
 KeyValuePair:
