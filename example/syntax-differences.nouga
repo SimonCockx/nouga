@@ -23,7 +23,6 @@ func IsOne:
     q -> one only exists
 
 
-
 func RunExample:
   inputs: q Quantity (1..1)
   output: result number (1..1)
