@@ -38,4 +38,4 @@ func IsPrime:
     n int (1..1)
   output: nIsPrime boolean (1..1)
   assign-output:
-    Sieve([0, 1], 2, Range(0, n)) any = n
+    Sieve(empty, 2, Range(0, n)) any = n

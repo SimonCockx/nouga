@@ -9,17 +9,18 @@ type Date:
 // Stub of the CDM DateDifference.
 func DateDifference:
     inputs:
-		firstDate Date (0..1)
+		firstDate Date (0..1) // should be (1..1), but type checker is not smart enough.
 		secondDate Date (0..1)
 	output:
 		difference int (1..1)
 	assign-output:
-	    42
+	    42 // dummy value
 
 
 // Stub of the CDM UnitType.
 type Currency:
-	kind int (1..1) // 0 = EUR, 1 = USD, ...
+type EUR extends Currency:
+type USD extends Currency:
 
 type ConstObservable:
 	val number (1..1)
@@ -36,7 +37,7 @@ func Observe:
 		observable Observable (1..1)
 		time Date (1..1)
 	output:
-		result number (0..1)
+		result number (0..1) // should be (1..1), but type checker is not smart enough.
 	
 	assign-output:
 		if observable->const exists then observable->const->val
@@ -174,8 +175,8 @@ func MkThereafter:
   assign-output:
     Contract {
     	thereafter: Contract_Thereafter { earlier: earlier, later: later },
-    	zero: empty, expired: empty, one: empty, orContract: empty, both: empty, give: empty,
-    	truncate: empty, observe: empty, get: empty, anytime: empty
+    	zero: empty, expired: empty, one: empty, orContract: empty, both: empty,
+    	give: empty, truncate: empty, observe: empty, get: empty, anytime: empty
     }
 
 func MkTruncate:
@@ -187,8 +188,8 @@ func MkTruncate:
   assign-output:
     Contract {
     	truncate: Contract_Truncate { expiryDate: truncateTo, contract: subContract },
-    	zero: empty, expired: empty, one: empty, orContract: empty, both: empty, give: empty,
-    	thereafter: empty, observe: empty, get: empty, anytime: empty
+    	zero: empty, expired: empty, one: empty, orContract: empty, both: empty,
+    	give: empty, thereafter: empty, observe: empty, get: empty, anytime: empty
     }
 
 func MkObserve:
@@ -200,8 +201,8 @@ func MkObserve:
   assign-output:
     Contract {
     	observe: Contract_Observe { observable: observable, contract: subContract },
-    	zero: empty, expired: empty, one: empty, orContract: empty, both: empty, give: empty,
-    	thereafter: empty, truncate: empty, get: empty, anytime: empty
+    	zero: empty, expired: empty, one: empty, orContract: empty, both: empty,
+    	give: empty, thereafter: empty, truncate: empty, get: empty, anytime: empty
     }
 
 func MkGet:
@@ -212,8 +213,8 @@ func MkGet:
   assign-output:
     Contract {
     	get: Contract_Get { contract: subContract },
-    	zero: empty, expired: empty, one: empty, orContract: empty, both: empty, give: empty,
-    	thereafter: empty, truncate: empty, observe: empty, anytime: empty
+    	zero: empty, expired: empty, one: empty, orContract: empty, both: empty,
+    	give: empty, thereafter: empty, truncate: empty, observe: empty, anytime: empty
     }
 
 func MkAnytime:
@@ -223,9 +224,9 @@ func MkAnytime:
     contract Contract (1..1)
   assign-output:
     Contract {
-    	anytime: empty,
-    	zero: empty, expired: empty, one: empty, orContract: empty, both: empty, give: empty,
-    	thereafter: empty, truncate: empty, observe: empty, get: empty
+    	anytime: Contract_Anytime { contract: subContract },
+    	zero: empty, expired: empty, one: empty, orContract: empty, both: empty,
+    	give: empty, thereafter: empty, truncate: empty, observe: empty, get: empty
     }
 
 func MkAnd:
@@ -234,205 +235,43 @@ func MkAnd:
     right Contract (1..1)
   output:
     contract Contract (1..1)
-  assign-output contract:
-    MkThereafter(MkBoth(left,right),MkOr(left,right))
+  assign-output:
+    MkThereafter(MkBoth(left, right), MkOr(left, right))
 
-/*
 func ZeroCouponBond:
   inputs:
-    maturesOn date    (1..1)  <"Date the bond matures on">
-    amount number     (1..1)  <"Amount of the bond is worth">
-    currency UnitType (1..1)  <"Unit the bond is denoted in">
+    maturesOn Date    (1..1)  // Date the bond matures on
+    amount number     (1..1)  // Amount of the bond is worth
+    currency Currency (1..1)  // Unit the bond is denoted in
   output:
     contract Contract (1..1)
-  assign-output contract:
-    MkGet (MkTruncate(maturesOn, MkObserve(Konst(amount),MkOne(currency))))
+  assign-output:
+    MkGet(MkTruncate(maturesOn, MkObserve(Const(amount), MkOne(currency))))
 
 func Perhaps:
   inputs:
-    endDate  date     (1..1)
+    endDate  Date     (1..1)
     contract Contract (1..1)
   output:
     perhaps Contract (1..1)
-  assign-output perhaps:
-    MkTruncate(endDate,MkOr(contract,MkZero()))
+  assign-output:
+    MkTruncate(endDate, MkOr(contract, MkZero()))
 
 func EuropeanOption:
   inputs:
-    endDate  date     (1..1)
+    endDate  Date     (1..1)
     contract Contract (1..1)
   output:
     option Contract (1..1)
-
-  assign-output option:
-    MkGet(Perhaps(endDate,contract))
+  assign-output:
+    MkGet(Perhaps(endDate, contract))
 
 func AmericanOption:
   inputs:
-    startDate date    (1..1)
-    endDate   date    (1..1)
+    startDate Date    (1..1)
+    endDate   Date    (1..1)
     contract Contract (1..1)
   output:
     option Contract (1..1)
-  alias opt: MkAnytime(Perhaps(endDate,contract))
-  assign-output option:
-    MkThereafter(MkGet (MkTruncate(startDate,opt)),opt)
-
-
-// func WeirdCardinality:
-//   inputs:
-//     date1 AdjustableOrRelativeDate (0..*)
-//     date2 AdjustableOrRelativeDate (0..1)
-//   output:
-//     contract Contract (1..1)
-
-//   assign-output contract:
-//     MkTruncate(date2,MkZero()) // This isn't a problem
-//     MkTruncate(date1,MkZero()) // This is a problem
-
-/* Swap the parties of a contract based on the party of a payout. Assuming we are Party1 //
-func PayoutParty1:
-  inputs:
-    payout PayoutBase (1..1)
-    contract Contract (1..1)
-  output:
-    contractOut Contract (1..1)
-  assign-output contractOut:
-    if (payout -> payerReceiver -> payer = CounterpartyRoleEnum -> PARTY_1)
-    or (payout -> payerReceiver -> receiver = CounterpartyRoleEnum -> PARTY_2) then
-      MkGive(contract)
-    else
-      contract
-
-func CashflowPayoutToContract:
-  inputs:
-    cashflow Cashflow (1..1)
-    tradeLot TradeLot (0..*)
-  output:
-    zcb Contract (1..1)
-
-  alias quantity:
-    ResolveQuantity(cashflow -> payoutQuantity -> resolvedQuantity -> address, tradeLot)
-
-  assign-output zcb:
-    PayoutParty1
-    ( cashflow
-    , MkObserve(Konst(quantity -> multiplier),MkOne(quantity -> unitOfAmount -> currency))
-    )
-
-func ResolveQuantity:
-  inputs:
-    address Address (1..1)
-    tradeLot TradeLot (0..*)
-  output:
-    quantity ResolvedQuantity (1..1)
-
-  alias resolvedValue:
-    tradeLot
-    -> map [item -> priceQuantity]
-    -> flatten
-    -> map [item -> quantity]
-    -> flatten
-    -> filter [item -> meta -> location -> only-element = address]
-    -> only-element
-    -> value
-
-  assign-output quantity -> multiplier:
-    resolvedValue -> amount
-
-  assign-output quantity -> unitOfAmount:
-    resolvedValue -> unitOfAmount
-
-func ForeignExchangeToContract:
-  inputs:
-    foreignExchange ForeignExchange (1..1)
-    tradeLot TradeLot (0..*)
-  output:
-    contract Contract (1..1)
-
-  assign-output contract:
-    MkBoth
-      ( CashflowPayoutToContract(foreignExchange -> exchangedCurrency1,tradeLot)
-      , CashflowPayoutToContract(foreignExchange -> exchangedCurrency2,tradeLot)
-      )
-
-func ForwardPayoutToContract:
-  inputs:
-    fx ForwardPayout (1..1)
-    tradeLot TradeLot (0..*)
-  output:
-    contract Contract (1..1)
-  assign-output contract:
-    MkTruncate
-      ( fx -> settlementTerms -> settlementDate -> valueDate
-      , ForeignExchangeToContract
-          ( fx -> underlier -> foreignExchange
-          , tradeLot
-          )
-      )
-
-func OptionPayoutToEuropean:
-  inputs:
-    optionPayout OptionPayout (1..1)
-    tradeLot     TradeLot     (0..*)
-  output:
-    contract Contract (1..1)
-
-  alias europeanExerciseTerms:
-    optionPayout -> exerciseTerms -> optionStyle -> europeanExercise
-  alias adjustedExpirationDate:
-    europeanExerciseTerms -> expirationDate -> only-element -> adjustableDate -> adjustedDate -> value
-
-  condition IsEuropean:
-    europeanExerciseTerms exists
-  condition HasAdjustedDate:
-    adjustedExpirationDate exists
-  assign-output contract:
-    EuropeanOption
-      ( adjustedExpirationDate -> only-element
-        // The cardinality on europeanExerciseTerms -> expirationDate is not (1..1)!
-      , ProductToContract(optionPayout -> underlier, tradeLot)
-      )
-
-func ContractualProductToContract:
-  inputs:
-    contractualProduct ContractualProduct (1..*)
-    tradeLot TradeLot (0..*)
-  output:
-    contract Contract (1..1)
-  alias payout: contractualProduct -> economicTerms -> payout
-  assign-output contract:
-    if payout -> optionPayout exists then
-      payout -> optionPayout -> map [OptionPayoutToEuropean(item,tradeLot)] -> reduce-left c1 c2 [MkBoth(c1,c2)]
-
-    else if payout -> forwardPayout exists then
-      payout -> forwardPayout -> map [ForwardPayoutToContract(item,tradeLot)] -> reduce-left c1 c2 [MkBoth(c1,c2)]
-
-    else /* assume cashflow otherwise //
-      payout -> cashflow -> map [CashflowPayoutToContract(item)] -> reduce-left c1 c2 [MkBoth(c1,c2)]
-
-func ProductToContract:
-  inputs:
-    product  Product  (1..*)
-    tradeLot TradeLot (0..*)
-  output:
-    contract Contract (1..1)
-
-  assign-output contract:
-    if product -> contractualProduct exists then
-      ContractualProductToContract(product -> contractualProduct, tradeLot)
-    else if product -> foreignExchange exists then
-      ForeignExchangeToContract(product -> foreignExchange, tradeLot)
-    else
-      MkZero()
-
-func Main:
-  inputs:
-    meta MetaData (1..1)
-    trade Trade (1..1)
-  output:
-    contract Contract (1..1)
-
- assign-output contract:
-   ProductToContract(trade -> tradableProduct -> product, trade -> tradableProduct -> tradeLot)
-*/
+  assign-output:
+    MkThereafter(MkGet(MkTruncate(startDate, MkAnytime(Perhaps(endDate, contract)))), MkAnytime(Perhaps(endDate, contract)))
