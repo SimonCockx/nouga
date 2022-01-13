@@ -60,7 +60,7 @@ v, & \text{if }\scount(v) = 1 \\
 \emptylist, & \text{otherwise}
 \end{cases}}}
 \\
-\evaldef{E-Equals}{e_1 \<eq> e_2}{\lv{\seq}_(\sexpr|[e_1|]S, \sexpr|[e_2|]S)}
+\evaldef{E-Equals}{e_1 \<eq> e_2}{\lv{\seq}(\sexpr|[e_1|]S, \sexpr|[e_2|]S)}
 \\
 \evaldef{E-NotEquals}{e_1 \<neq> e_2}{\letin{[x_1, \dots, x_m] = \sexpr|[e_1|]S & [y_1, \dots, y_n] = \sexpr|[e_2|]S}{
 \begin{cases}
@@ -115,5 +115,9 @@ v, & \text{if }\scount(v) = 1 \\
 \sexpr|[e_2|]S, & \text{otherwise}
 \end{cases}}}
 \\
-\evaldef{E-Func}{F(e_1, \dots, e_n)}{\letin{a_1\ T_1\ C_1, \dots, a_n\ T_n\ C_n = \inp(F)}{\sexpr|[\op(F)|]\left[\; a_1 \mapsto \sexpr|[e_1|]S, \dots, a_n \mapsto \sexpr|[e_n|]S \;\right]}}
+\evaldef{E-Func}{F(e_1, \dots, e_n)}{\letin{a_1\ T_1\ C_1, \dots, a_n\ T_n\ C_n = \inp(F)}{\sexpr|[\op(F)|]
+\begin{aligned}[t]
+{[}\;& a_1 \mapsto \sexpr|[e_1|]S, \dots,\\
+& a_n \mapsto \sexpr|[e_n|]S \;{]}
+\end{aligned}}}
 \end{align*}

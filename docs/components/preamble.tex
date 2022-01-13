@@ -86,17 +86,18 @@ keywords={-},
 otherkeywords={% Operators
 +, *, /, ->, =, <>
 },
-morekeywords=[2]{boolean,int,number}, % types go here
+morekeywords=[2]{}, % types go here
 morekeywords=[3]{%
 type,extends,func,enum,inputs,output,assign-output,not,or,and,only,single,multiple,exists,is,absent,contains,%
 disjoint,all,any,count,only-element,if,then,else,True,False,empty,%
-any,boolean,string,int,number,nothing,date,dateTime,zonedDateTime,time,%
-true,false,one-of % keywords go here
+any,boolean,string,int,number,nothing,date,dateTime,zonedDateTime,%
+true,false,one-of,match % keywords go here
 },%
 basicstyle={\sffamily},
 keywordstyle=[2]{\itshape}, % style for types
 keywordstyle=[3]{\ttfamily\color{eminence}}, %style for keywords
 keepspaces,
+morecomment=[l]{//},
 mathescape % optional
 }[keywords,comments,strings]%
 
@@ -104,7 +105,7 @@ mathescape % optional
 
 %%%%%%%%% SYNTAX DEFINITIONS %%%%%%%%%%%
 \usepackage[nounderscore]{syntax}
-\setlength{\grammarindent}{4.5em}
+\setlength{\grammarindent}{3em}
 
 \renewcommand{\grammarlabel}[2]{\synt{#1}\hfill #2}
 
@@ -128,8 +129,8 @@ mathescape % optional
 \reservestyle[\lit]{\rosetta}{\mathinner}
 \rosetta{type,extends,func,enum,inputs,output,assign-output,not,or,and,only,single,multiple,exists,is,absent,contains,%
 disjoint,all,any,count,only-element,if,then,else,True,False,empty,%
-any,boolean,string,int,number,nothing,date,dateTime,zonedDateTime,time,%
-true,false,eq[=],neq[<>],+,-,*,/,proj[->],one-of}
+any,boolean,string,int,number,nothing,date,dateTime,zonedDateTime,%
+true,false,eq[=],neq[<>],+,-,*,/,proj[->],one-of,match}
 
 \newcommand{\emptylist}{[\,]}
 
@@ -241,7 +242,7 @@ colback=black!4!white,
 toprule=1.5pt,bottomrule=1.5pt,
 leftrule=0pt,rightrule=0pt,
 left=1pt,right=1pt,
-width=0.85\paperwidth,
+width=1.2\textwidth,
 center,
 #2
 ]
@@ -289,6 +290,7 @@ center,
 
 \lstnewenvironment{jsnippet}[1][]{%
   \endgraf\noindent\ignorespaces\lstset{
+    style=mystyle,
 	  language=java,
 	  numbers=none,
 	  mathescape,
@@ -303,9 +305,25 @@ center,
 \lstnewenvironment{javagen}[3][]{%
   \endgraf\noindent$#2_\java|[#3|] =$
   \endgraf\noindent\ignorespaces\lstset{
+    style=mystyle,
 	  language=java,
 	  numbers=none,
 	  mathescape,
+	  #1
+	}\minipage{\linewidth}
+}
+{%
+  \endminipage\endgraf
+}
+
+\lstnewenvironment{hsnippet}[1][]{%
+  \endgraf\noindent\ignorespaces\lstset{
+    style=mystyle,
+	  language=haskell,
+	  numbers=none,
+	  mathescape,
+	  otherkeywords={},
+	  keywordstyle={\color{eminence}},
 	  #1
 	}\minipage{\linewidth}
 }

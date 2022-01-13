@@ -34,15 +34,15 @@ Typing rules $\Gamma |- e : T\ C$.
 \\
 \ruledef{TA-PlusInt}{\Gamma |- e_1 : \<int>\ (1..1) \\ \Gamma |- e_2 : \<int>\ (1..1)}{\Gamma |- e_1 \<+> e_2 : \<int>\ (1..1)}
 \\
-\ruledef{\emphrule{TA-PlusNumber}}{\Gamma |- e_1 : T_1\ (1..1) \\ \Gamma |- e_2 : T_2\ (1..1) \\ T_1 <: \<number> \\ T_2 <: \<number> \\ T_1 \neq \<int> \lor T_2 \neq \<int>}{\Gamma |- e_1 \<+> e_2 : \<number>\ (1..1)}
+\ruledef{\emphrule{TA-PlusNumber}}{\Gamma |- e_1 : T_1\ (1..1) \\ \Gamma |- e_2 : T_2\ (1..1) \\\\ T_1 <: \<number> \\ T_2 <: \<number> \\ T_1 = \<number> \lor T_2 = \<number>}{\Gamma |- e_1 \<+> e_2 : \<number>\ (1..1)}
 \\
 \ruledef{TA-MultInt}{\Gamma |- e_1 : \<int>\ (1..1) \\ \Gamma |- e_2 : \<int>\ (1..1)}{\Gamma |- e_1 \<*> e_2 : \<int>\ (1..1)}
 \\
-\ruledef{\emphrule{TA-MultNumber}}{\Gamma |- e_1 : T_1\ (1..1) \\ \Gamma |- e_2 : T_2\ (1..1) \\ T_1 <: \<number> \\ T_2 <: \<number> \\ T_1 \neq \<int> \lor T_2 \neq \<int>}{\Gamma |- e_1 \<*> e_2 : \<number>\ (1..1)}
+\ruledef{\emphrule{TA-MultNumber}}{\Gamma |- e_1 : T_1\ (1..1) \\ \Gamma |- e_2 : T_2\ (1..1) \\\\ T_1 <: \<number> \\ T_2 <: \<number> \\ T_1 = \<number> \lor T_2 = \<number>}{\Gamma |- e_1 \<*> e_2 : \<number>\ (1..1)}
 \\
 \ruledef{TA-SubtInt}{\Gamma |- e_1 : \<int>\ (1..1) \\ \Gamma |- e_2 : \<int>\ (1..1)}{\Gamma |- e_1 \<-> e_2 : \<int>\ (1..1)}
 \\
-\ruledef{\emphrule{TA-SubtNumber}}{\Gamma |- e_1 : T_1\ (1..1) \\ \Gamma |- e_2 : T_2\ (1..1) \\ T_1 <: \<number> \\ T_2 <: \<number> \\ T_1 \neq \<int> \lor T_2 \neq \<int>}{\Gamma |- e_1 \<-> e_2 : \<number>\ (1..1)}
+\ruledef{\emphrule{TA-SubtNumber}}{\Gamma |- e_1 : T_1\ (1..1) \\ \Gamma |- e_2 : T_2\ (1..1) \\\\ T_1 <: \<number> \\ T_2 <: \<number> \\ T_1 = \<number> \lor T_2 = \<number>}{\Gamma |- e_1 \<-> e_2 : \<number>\ (1..1)}
 \\
 \ruledef{\emphrule{TA-Division}}{\Gamma |- e_1 : T_1\ (1..1) \\ \Gamma |- e_2 : T_2\ (1..1) \\ T_1 <: \<number> \\ T_2 <: \<number>}{\Gamma |- e_1 \</> e_2 : \<number>\ (1..1)}
 \\
