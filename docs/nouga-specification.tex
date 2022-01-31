@@ -8,6 +8,8 @@
 \usepackage{mathrsfs}
 \usepackage{mathtools}
 
+\input{components/preamble}
+
 % ---Simons shizzle: afblijven!---
 \usepackage[dvipsnames]{xcolor} % maakt het mogelijk zelf kleuren te definiëren
 \definecolor{darkPurple}{RGB}{80,0,80} % definieer donkerpaars
@@ -61,7 +63,7 @@
  vmargin={2.3cm, 3cm}
 }
 
-\input{components/preamble}
+
 
 
 
@@ -81,7 +83,7 @@ Throughout this document, $T$ and $S$ represent basic types and $C$ represents a
 
 \section{Syntax}
 
-\input{components/syntax}
+\subimport{components}{syntax}
 
 Note: Nouga has a couple of differences compared to Rosetta.
 \begin{enumerate}
@@ -95,22 +97,18 @@ Note: Nouga has a couple of differences compared to Rosetta.
 
 \section{Auxiliary definitions}
 
-\input{components/auxiliary}
+\subimport{components}{auxiliary}
 
 \section{Semantics}
 
-Semantic domain: $\sdom$.
-
-Single value: $\ssingledom$
-
 \subsection{Semantics of Types}
-\input{components/semantics-types}
+\subimport{components}{semantics-types}
 
 \subsection{Semantical Algebra}
-\input{components/semantics-algebra}
+\subimport{components}{semantics-algebra}
 
 \subsection{Semantics of Expressions}
-\input{components/semantics-expressions}
+\subimport{components}{semantics-expressions}
 
 Note: equality between two empty lists (i.e. true) is different than the usual equality with null (i.e. always false) in other programming languages (and the official Rosetta documentation).
 
@@ -119,7 +117,7 @@ Note: equality between two empty lists (i.e. true) is different than the usual e
 
 \subsection{Declarative Typing}
 
-\input{components/typing-declarative}
+\subimport{components}{typing-declarative}
 
 Note: for equality, there are two sensible choices as premises. Either $\Gamma |- e_1 : T\ C_1$ and $\Gamma |- e_2 : T\ C_2$ or $\Gamma |- e_1 : T\ C$ and $\Gamma |- e_2 : T\ C$. The second possibility eliminates equality checks that are always false because the operands can never have the same length.
 
@@ -127,10 +125,10 @@ Note: for equality, there are two sensible choices as premises. Either $\Gamma |
 
 These typing rules should be consistent with the declarative version, but they are defined in a way that is more straightforward to implement, because every rule is syntax-directed.
 
-\input{components/typing-algorithmic}
+\subimport{components}{typing-algorithmic}
 
 \section{Code Generation}
 
-\input{components/code-generation-java}
+\subimport{components}{code-generation-java}
 
 \end{document}
